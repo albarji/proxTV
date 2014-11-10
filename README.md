@@ -15,7 +15,7 @@ Index
 5. Examples.
 6. Demos.
 7. Contact.
-8. Acknowledgements
+8. Acknowledgements.
 
 1. Quick start guide
 --------------------
@@ -87,7 +87,6 @@ Note: this toolbox has only been tested under Linux. Installation might require 
 Two main functions conform the proxTV toolbox: TV and TVgen. The first one provides basic options over the Total Variation problem, while the second one allows a more advanced configuration. In general, the TV function should suffice for most uses.
 
 a) TV
-·····
 
 Solves Total Variation proximity operators for n-dimensional signals, applying a TV-Lp norm. The inputs and outputs of this function are:
 
@@ -136,7 +135,6 @@ were each difference among signal entries x_i and x_(i-1) is penalized using a d
 where Wd[i] is the 1-dimensional fiber of weights along the d-th dimension applied to X[i,d]. Weight tensors are provided in TV function as the lambda parameter through a cell array in the form {W1, W2, ..., Wd} (see the examples in the "Examples" section)
 
 b) TVgen
-········
 
 Solves a generalized TV proximity operator for a multidimensional signal, in the form
 
@@ -163,7 +161,6 @@ When possible, TV should be preferred. See the Examples section next for some sp
 -----------
 
 1D examples
-···········
 
 - Filter 1D signal using TV-L1 norm:
     TV(x,lambda)
@@ -178,7 +175,6 @@ When possible, TV should be preferred. See the Examples section next for some sp
     TVgen(X,[lambda1 lambda2],[1 1],[1 2])
     
 2D examples
-··········· 
 
 - Filter 2D signal using TV-L1 norm:
     TV(X,lambda)
@@ -205,7 +201,6 @@ When possible, TV should be preferred. See the Examples section next for some sp
     TV(X, {W1, W2})
     
 3D examples
-··········· 
 
 - Filter 3D signal using TV-L1 norm:
     TV(X,lambda)
@@ -225,6 +220,7 @@ Some demos in the form of Matlab scripts showing how to work with proxTV are inc
 - demo_filter_image: TV-L1 filtering of 2-dimensional image.
 - demo_filter_image_color: TV-L1 filtering of 3-dimensional image (length, width and color).
 - demo_filter_image_threads: multi-thread TV-L1 filtering of 2-dimensional image.
+- demo_filter_image_weighted: weighted TV-L1 filtering of 2-dimensional image.
 
 7. Contact
 ----------
@@ -234,4 +230,7 @@ For any questions and comments, please email alvaro.barbero@uam.es
 8. Acknowledgements
 -------------------
 
-We wish to thank Zico Kolter for pointing out a bug in version 1.0 of this code.
+We wish to thank the following people for helping us in debugging the toolbox:
+
+- Zico Kolter for pointing out a bug in version 1.0 of this code.
+- Sesh Kumar for spotting and finding a bug in our weighted 1D-TV method.
