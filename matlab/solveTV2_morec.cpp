@@ -5,16 +5,15 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
-/* solveTV.cpp
+/* solveTV2_morec.cpp
 
-   Solves 1-dimensional unweighted TV proximity problems by applying the most appropriate algorithm
+   Solves the TV-L2 proximity problem by applying a More-Sorensen algorithm.
 
    Parameters:
      - 0: reference signal y.
      - 1: lambda penalty.
-     - 2: p norm.
      
    Outputs:
      - 0: primal solution x.
@@ -23,22 +22,9 @@
         + [1]: dual gap.
 */
 void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
-    double *x=NULL,*y,*info=NULL;
-    double lambda,p;
+    double *x,*y,*info;
+    double lambda;
     int M,N,nn,i;
-    
-    #define FREE \
-        if(!nlhs) free(x);
-    
-    #define CANCEL(txt) \
-        printf("Error in solveTVp_GP: %s\n",txt); \
-        if(x) free(x); \
-        if(info) free(info); \
-        return;
-    
-    /* Check input correctness */
-    if(nrhs < 3){CANCEL("not enought inputs");}
-    if(!mxIsClass(prhs[0],"double")) {CANCEL("input signal must be in double format")}
 
     /* Create output arrays */
     M = mxGetM(prhs[0]);
@@ -57,14 +43,14 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     /* Retrieve input data */
     y = mxGetPr(prhs[0]);
     lambda = mxGetScalar(prhs[1]);
-    p = mxGetScalar(prhs[2]);
     
-    /* Run general method, which choses best algorithm  */
-    TV(y, lambda, x, info, nn, p, NULL);
+    /* Run Projected Newton */
+    more_TV2(y,lambda,x,info,nn);
     
     /* Free resources */
-    FREE
+    if(!nlhs) free(x);
     
     return;
 }
+
 

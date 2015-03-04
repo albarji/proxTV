@@ -5,11 +5,11 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
-/* solveTV2D_PD.cpp
+/* solveTVgen.cpp
 
-   Solves the 2-dimensial TV proximity problem by applying a Proximal Dykstra method.
+   Solves the general TV proximity problem by applying a Proximal stacking strategy.
 
    Parameters:
      - 0: multidimensional reference signal y.
@@ -83,8 +83,17 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     }
     else info = NULL;
     
-    /* Run algorithm */
-    PD2_TV(y,lambdas,norms,dims,x,info,ns,nds,npen,ncores,maxIters);
+    /* Run algorithm depending on the structure of the data and the requested penalties */
+    
+    // Bidimensional signal with one penalty term across each dimension (full 2-dimensional TV proximity): Douglas-Rachford splitting
+    if ( nds == 2 && dims[0] == 1 && dims[1] == 2 )
+        DR2_TV(ns[0], ns[1], y, lambdas[0], lambdas[1], norms[0], norms[1], x, ncores, maxIters, info);
+    // 2 arbitrary terms: Proximal Dykstra
+    else if( npen == 2 ) 
+        PD2_TV(y,lambdas,norms,dims,x,info,ns,nds,npen,ncores,maxIters);
+    // More terms: Parallel Proximal Dykstra
+    else 
+        PD_TV(y,lambdas,norms,dims,x,info,ns,nds,npen,ncores,maxIters); 
     
     /* Free resources */
     FREE

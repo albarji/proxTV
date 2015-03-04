@@ -5,11 +5,11 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
-/* solveTV2_morec.cpp
+/* solveTV2_PGc.cpp
 
-   Solves the TV-L2 proximity problem by applying a More-Sorensen algorithm.
+   Solves the TV-L2 proximity problem by applying a Projected Gradient algorithm.
 
    Parameters:
      - 0: reference signal y.
@@ -44,8 +44,8 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     y = mxGetPr(prhs[0]);
     lambda = mxGetScalar(prhs[1]);
     
-    /* Run Projected Newton */
-    more_TV2(y,lambda,x,info,nn);
+    /* Run Gradient Newton */
+    PG_TV2(y,lambda,x,info,nn);
     
     /* Free resources */
     if(!nlhs) free(x);

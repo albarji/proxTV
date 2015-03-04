@@ -5,7 +5,7 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
 /* solveTV2DL1W_tautString.cpp
 

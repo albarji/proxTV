@@ -5,7 +5,7 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
 /* solveTVND_PDR.cpp
 

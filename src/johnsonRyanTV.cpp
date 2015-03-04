@@ -1,4 +1,6 @@
-#include <stdlib.h> 
+#include <stdlib.h>
+#include "johnsonRyanTV.h"
+
 using namespace std;
 
 // Dynamic programming algorithm for the 1d fused lasso problem

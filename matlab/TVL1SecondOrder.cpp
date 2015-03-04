@@ -5,15 +5,15 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
-/* TVL1Weighted.cpp
+/* TVL1SecondOrder.cpp
 
-   Matlab interface to TV-L1 proximity solver using Projected Newton.
+   Matlab interface to 2nd order TV-L1 proximity solver using Projected Newton.
 
    Parameters:
      - 0: reference signal y.
-     - 1: lambda weight vector.
+     - 1: lambda weight vector (length n-2)
      
    Outputs:
      - 0: primal solution x.
@@ -61,7 +61,7 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     lambda = mxGetPr(prhs[1]);
     
     /* Run solver */
-    PN_TV1_Weighted(y, lambda, x, info, nn, SIGMA, NULL);
+    PN_TV1_Trend2_Weighted(y, lambda, x, info, nn, SIGMA, NULL);
     
     /* Free resources */
     FREE
