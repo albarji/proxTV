@@ -80,6 +80,8 @@
 #define MAX_ITERS_YANG 35
 
 
+extern "C" {
+
 /*** Function headers ***/
 
 /* General solvers */
@@ -122,5 +124,8 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
 /* General-dimension TV solvers */
 int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double *info,int *ns,int nds,int npen,int ncores,int maxIters);
 int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double *info,int *ns,int nds,int npen,int ncores,int maxIters);
+
+
+}  // extern "C"
 
 #endif

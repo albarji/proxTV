@@ -5,16 +5,17 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
-/* solveTV2D_Yang.cpp
+/* solveTV2D_CondatChambollePock.cpp
 
-   Solves the 2 dimensional TV proximity problem by applying Yang's et al ADMM algorithm.
+   Solves the 2 dimensional TV proximity problem by applying Condat's or Chambolle-Pock splitting algorithm.
 
    Parameters:
      - 0: bidimensional reference signal y.
      - 1: lambda penalty
-     - 2: (optional) maximum number of iterations to run (default: as defined in TVopt.h)
+     - 2: algorithm to use (as defined in TV2Dopt.cpp)
+     - 3: (optional) maximum number of iterations to run (default: as defined in TVopt.h)
      
    Outputs:
      - 0: solution x.
@@ -27,19 +28,19 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     double *x=NULL,*y,*info=NULL,*dims;
     double lambda;
     int *ns=NULL;
-    int nds,N,M,maxIters,i;
+    int nds,N,M,maxIters,alg,i;
     
     #define FREE \
         if(!nlhs) free(x); \
         if(ns) free(ns);
     #define CANCEL(txt) \
-        printf("Error in solveTV2D_Yang: %s\n",txt); \
+        printf("Error in solveTV2D_Condat: %s\n",txt); \
         if(x) free(x); \
         if(info) free(info); \
         return;
         
     /* Check input correctness */
-    if(nrhs < 2){CANCEL("not enought inputs");}
+    if(nrhs < 3){CANCEL("not enought inputs");}
     if(!mxIsClass(prhs[0],"double")) {CANCEL("input signal must be in double format")}
 
     /* Find number of dimensions of the input signal */
@@ -61,7 +62,8 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     
     /* Get rest of inputs */
     lambda = mxGetScalar(prhs[1]);
-    if(nrhs >= 3) maxIters = (int)(mxGetPr(prhs[2]))[0];
+    alg = (int)(mxGetPr(prhs[2]))[0];
+    if(nrhs >= 4) maxIters = (int)(mxGetPr(prhs[3]))[0];
     else maxIters = 0;
 
     /* Create output arrays */
@@ -78,7 +80,7 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     else info = NULL;
     
     /* Run algorithm */
-    Yang2_TV(M, N, y, lambda, x, maxIters, info);
+    CondatChambollePock2_TV(M, N, y, lambda, x, alg, maxIters, info);
     
     /* Free resources */
     FREE

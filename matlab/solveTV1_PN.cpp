@@ -5,11 +5,11 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
-/* solveTV1_tautString.cpp
+/* solveTV1_PN.cpp
 
-   Solves the TV-L1 proximity problem by applying a Taut String algorithm.
+   Solves the TV-L1 proximity problem by applying a Projected Newton algorithm.
 
    Parameters:
      - 0: reference signal y.
@@ -57,8 +57,8 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     y = mxGetPr(prhs[0]);
     lambda = mxGetScalar(prhs[1]);
     
-    /* Run Taut String method  */
-    tautString_TV1(y,lambda,x,nn);
+    /* Run Projected Newton */
+    PN_TV1(y,lambda,x,info,nn,SIGMA,NULL);
     
     /* Free resources */
     FREE

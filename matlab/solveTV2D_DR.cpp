@@ -5,17 +5,20 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
-#include "TVopt.h"
+#include "../src/TVopt.h"
 
-/* solveTV2D_CondatChambollePock.cpp
+/* solveTV2d_DR.cpp
 
-   Solves the 2 dimensional TV proximity problem by applying Condat's or Chambolle-Pock splitting algorithm.
+   Solves the 2 dimensional TV proximity problem by applying a Douglas-Rachford splitting algorithm.
 
    Parameters:
      - 0: bidimensional reference signal y.
-     - 1: lambda penalty
-     - 2: algorithm to use (as defined in TV2Dopt.cpp)
-     - 3: (optional) maximum number of iterations to run (default: as defined in TVopt.h)
+     - 1: lambda penalties over the columns
+     - 2: lambda penalties over the rows
+     - 3: norm to apply over the columns
+     - 4: norm to apply over the rows
+     - 5: (optional) number of cores to use (default: as defined by environment variable OMP_NUM_THREADS)
+     - 6: (optional) maximum number of iterations to run (default: as defined in TVopt.h)
      
    Outputs:
      - 0: solution x.
@@ -26,21 +29,21 @@
 void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     const mwSize *sDims;
     double *x=NULL,*y,*info=NULL,*dims;
-    double lambda;
+    double lambda1, lambda2, norm1, norm2;
     int *ns=NULL;
-    int nds,N,M,maxIters,alg,i;
+    int nds,N,M,ncores,maxIters,i;
     
     #define FREE \
         if(!nlhs) free(x); \
         if(ns) free(ns);
     #define CANCEL(txt) \
-        printf("Error in solveTV2D_Condat: %s\n",txt); \
+        printf("Error in solveTV2D_DR: %s\n",txt); \
         if(x) free(x); \
         if(info) free(info); \
         return;
         
     /* Check input correctness */
-    if(nrhs < 3){CANCEL("not enought inputs");}
+    if(nrhs < 5){CANCEL("not enought inputs");}
     if(!mxIsClass(prhs[0],"double")) {CANCEL("input signal must be in double format")}
 
     /* Find number of dimensions of the input signal */
@@ -61,9 +64,13 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     y = mxGetPr(prhs[0]);
     
     /* Get rest of inputs */
-    lambda = mxGetScalar(prhs[1]);
-    alg = (int)(mxGetPr(prhs[2]))[0];
-    if(nrhs >= 4) maxIters = (int)(mxGetPr(prhs[3]))[0];
+    lambda1 = mxGetScalar(prhs[1]);
+    lambda2 = mxGetScalar(prhs[2]);
+    norm1 = mxGetScalar(prhs[3]);
+    norm2 = mxGetScalar(prhs[4]);
+    if(nrhs >= 6) ncores = (int)(mxGetPr(prhs[5]))[0];
+    else ncores = 1;
+    if(nrhs >= 7) maxIters = (int)(mxGetPr(prhs[6]))[0];
     else maxIters = 0;
 
     /* Create output arrays */
@@ -80,7 +87,7 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     else info = NULL;
     
     /* Run algorithm */
-    CondatChambollePock2_TV(M, N, y, lambda, x, alg, maxIters, info);
+    DR2_TV(M, N, y, lambda1, lambda2, norm1, norm2, x, ncores, maxIters, info);
     
     /* Free resources */
     FREE

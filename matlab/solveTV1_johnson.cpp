@@ -5,11 +5,13 @@
 #include <float.h>
 #include <limits.h>
 #include "mex.h"
+
 #include "TVopt.h"
+#include "johnsonRyanTV.h"
 
-/* solveTV2_PGc.cpp
+/* solveTV1_johnson.cpp
 
-   Solves the TV-L2 proximity problem by applying a Projected Gradient algorithm.
+   Solves the TV-L1 proximity problem by applying Johnson's dynamic programming method.
 
    Parameters:
      - 0: reference signal y.
@@ -17,14 +19,23 @@
      
    Outputs:
      - 0: primal solution x.
-     - 1: array with optimizer information:
-        + [0]: number of iterations run.
-        + [1]: dual gap.
 */
 void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
-    double *x,*y,*info;
-    double lambda;
+    double *x=NULL,*y;
+    float lambda;
     int M,N,nn,i;
+    
+    #define FREE \
+        if(!nlhs) free(x);
+    
+    #define CANCEL(txt) \
+        printf("Error in solveTV1_condat: %s\n",txt); \
+        if(x) free(x); \
+        return;
+    
+    /* Check input correctness */
+    if(nrhs < 2){CANCEL("not enought inputs");}
+    if(!mxIsClass(prhs[0],"double")) {CANCEL("input signal must be in double format")}
 
     /* Create output arrays */
     M = mxGetM(prhs[0]);
@@ -35,22 +46,21 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
         x = mxGetPr(plhs[0]);
     }
     else x = (double*)malloc(sizeof(double)*nn);
-    if(nlhs >= 2){
-        plhs[1] = mxCreateDoubleMatrix(N_INFO,1,mxREAL);
-        info = mxGetPr(plhs[1]);
-    }
 
     /* Retrieve input data */
     y = mxGetPr(prhs[0]);
     lambda = mxGetScalar(prhs[1]);
     
-    /* Run Gradient Newton */
-    PG_TV2(y,lambda,x,info,nn);
+    /* Run Johnson's method  */
+    dp(nn, y, lambda, x);
     
     /* Free resources */
-    if(!nlhs) free(x);
+    FREE
     
     return;
+    
+    #undef FREE
+    #undef CANCEL
 }
 
 
