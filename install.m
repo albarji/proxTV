@@ -141,7 +141,7 @@ function install(nopar)
     % Add relevant proxTV folders to Matlab's path
     here = pwd();
     addpath([here,'/matlab']);
-    addpath([here,'/demos']);
+    addpath([here,'/matlab/demos']);
     savepath();
 
     disp('proxTV successfully installed.');
