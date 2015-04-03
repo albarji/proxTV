@@ -90,7 +90,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
     t[i]=sum;
 
     #ifdef DEBUG
-        fprintf(DEBUG_FILE,"Starting Douglas-Rachford with size=[%d,%d], norms=[%lf,%lf], threads=%d\n",M,N,norm1,norm2,nThreads); fflush(DEBUG_FILE);
+        fprintf(DEBUG_FILE,"Starting Douglas-Rachford with size=[%d,%d], norms=[%lf,%lf], threads=%d\n",M,N,1,1,nThreads); fflush(DEBUG_FILE);
     #endif
 
   int iter = 0;

@@ -40,7 +40,7 @@ Weighted versions of TV can also be solved by using exactly the same interface, 
 If you find this toolbox useful please reference the following papers:
 
     Fast Newton-type Methods for Total Variation Regularization. Álvaro Barbero, Suvrit Sra. ICML 2011 proceedings.
-    Modular proximal optimization for multidimensional total-variation regularization. Álvaro Barbero, Suvrit Sra. Online.
+    Modular proximal optimization for multidimensional total-variation regularization. Álvaro Barbero, Suvrit Sra. http://arxiv.org/abs/1411.0589
     
 whose Bibtex entries are
 
@@ -230,7 +230,8 @@ For any questions and comments, please email alvaro.barbero@uam.es
 8. Acknowledgements
 -------------------
 
-We wish to thank the following people for helping us in debugging the toolbox:
+We wish to thank the following people for helping us in debugging and extending the toolbox:
 
 - Zico Kolter for pointing out a bug in version 1.0 of this code.
 - Sesh Kumar for spotting and finding a bug in our weighted 1D-TV method.
+- Josip Djolonga for implementing Python bindings.
