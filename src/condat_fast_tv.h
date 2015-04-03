@@ -72,7 +72,12 @@ lambda must be nonnegative. lambda=0 is admissible and
 yields output[k]=input[k] for all k. 
 If width<=0, nothing is done. 
 */
+
+extern "C" {
+
 void TV1D_denoise(double* input, double* output, const int width, const double lambda);
+
+}
 
 #endif
 
