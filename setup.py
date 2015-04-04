@@ -27,7 +27,7 @@ class CFFIInstall(install):
 
 setup(
     name="prox_tv",
-    version="0.1",
+    version="3.1",
     packages=['prox_tv'],
     install_requires=[
         'numpy',

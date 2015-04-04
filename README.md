@@ -34,7 +34,7 @@ The library provides efficient solvers for the following Total Variation proximi
 | lp-norm Anisotropic Total Variation on a 2-dimensional signal | ![alt tag](docs/img/TV2Dp.png) |
 | Weighted Anisotropic Total Variation on a 2-dimensional signal | ![alt tag](docs/img/TV2Dw.png) |
 | Anisotropic Total Variation on a 3-dimensional signal | ![alt tag](docs/img/TV3D.png) |
-| Generalized N-dimensional Anisotropic Total Variation | ![alt tag](docs/img/TVND.png)|
+| Generalized N-dimensional Anisotropic Total Variation | ![alt tag](docs/img/TVND.png), with X(di) every possible 1-dimensional slice of X following dimension di.|
 
 ##Referencing
 
@@ -103,7 +103,7 @@ To install proxTV follow the steps:
 
 ###Usage
 
-Two main functions conform the proxTV toolbox: TV and TVgen. The first one provides basic options over the Total Variation problem, while the second one allows a more advanced configuration. In general, the TV function should suffice for most uses.
+Two main functions conform the Matlab interface of proxTV: **TV** and **TVgen**. The first one provides basic options over the Total Variation problem, while the second one allows a more advanced configuration. In general, the TV function should suffice for most uses.
 
 ####TV
 
@@ -136,10 +136,10 @@ For 2-dimensional signals (e.g. images) the problem solved is
 where X(i,:) is i-th row of X and X(:,j) is the j-th column of X. Using p=1 results in an anisotropic denoising filter.
 
 For D-dimensional signals the problem being solved becomes
-
-    min_X 0.5 ||X(:)-Y(:)||^2 + lambda * ( sum_i1 TV(X[1,i1],p) + sum_i2 TV(X[2,i2],p) + ... + sum_iD TV(X[D,iD],D) )
     
-where X[i,d] is the i-th 1-dimensional fiber of X along its d-th dimension.
+![alt tag](docs/img/TVNDuniform.png)
+    
+where X[d,i] is the i-th 1-dimensional fiber of X along its d-th dimension, and TV1D denotes the standard 1-dimensional Total Variation penalty applied over such fiber.
 
 If a vector of weights *w* is provided for the lambda parameter instead of an scalar value, the special weighted version of TV is solved,
 
@@ -158,8 +158,11 @@ Weight matrices are provided in the TV function as the lambda parameter through 
 Solves a generalized TV proximity operator for a multidimensional signal, in the form
     
 ![alt tag](docs/img/TVND.png)
+, with X(di) every possible 1-dimensional slice of X following dimension di.
     
 The inputs and outputs of this function are:
+
+    [x,info] = TVgen(y,lambdas,ds,norms,threads)
 
 Inputs:
 * y: input signal.
@@ -261,7 +264,50 @@ Some demos in the form of Matlab scripts showing how to work with proxTV are inc
 
 ## Python interface
 
-**TODO**
+###Installation
+
+####Prerequisites
+
+To use proxTV within Python the following prerequisites are necessary
+
+- **python2.7**
+- **cffi**: https://cffi.readthedocs.org/en/latest/
+- **numpy**: http://www.numpy.org/
+
+You can install **cffi** through **pip**:
+
+    pip install cffi
+  
+Be aware that other packages might be required to install cffi, such as **python-dev** and **libffi-dev**. For a full list of dependencies please refer to cffi documentation (https://cffi.readthedocs.org/en/latest/).
+
+Additionally, in order to generate the toolbox documentation the following packages are needed as well:
+
+- **sphinxcontrib-napoleon**
+- **sphinx_rtd_theme**
+
+####Installing proxTV Python package
+
+After prerequisites have been satisfied, just run
+
+    python setup.py install
+    
+on the folder where this README file is located. You might need superuser permissions for a correct installation.
+
+####Generating docs
+
+It is highly recommended to compile the doc files as well, for easy reference of the use of the toolbox.To do so run
+
+    make html
+    
+in the docs/ folder. The documentation will be generated in the doc/_build/html/index.html file.
+
+###Usage
+
+Import proxTV Python package as
+
+    import prox_tv as ptv
+    
+Then you can access the following the relevant solvers in the package. The documentation of these functions is maintained in a separate file. Please consult the "Generating docs" section.
 
 ## Contact
 
