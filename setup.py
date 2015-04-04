@@ -27,7 +27,7 @@ class CFFIInstall(install):
 
 setup(
     name="prox_tv",
-    version="0.1",
+    version="3.1",
     packages=['prox_tv'],
     install_requires=[
         'numpy',
@@ -41,7 +41,9 @@ setup(
         'install': CFFIInstall,
     },
     author="Alvaro Barbero, Suvrit Sra",
-    author_email="",
+    author_email="alvaro.barbero@uam.es",
+    url='https://github.com/albarji/proxTV',
+    license='BSD', 
     test_suite="nose.collector",
     zip_safe=False,
 )

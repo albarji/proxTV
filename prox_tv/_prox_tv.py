@@ -65,7 +65,11 @@ _ffi.cdef("""
                                 double*X, short alg, int maxit, double* info);
     int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X,
                  int maxit, double* info);
-
+                 
+    /* General-dimension TV solvers */
+    int PD_TV(double *y, double *lambdas, double *norms, double *dims,
+                double *x, double *info, int *ns, int nds, int npen,
+                int ncores, int maxIters);
 
     /* TV-Lp solvers */
     int GP_TVp(double *y, double lambda, double *x, double *info, int n,
@@ -201,7 +205,7 @@ def tv1w_1d(x, w, method='tautstring', sigma=0.05):
         The solution of the optimization problem.
     """
     assert np.all(w >= 0)
-    assert np.size(x) == np.size(w)
+    assert np.size(x)-1 == np.size(w)
     y = np.zeros(np.size(x))
     if method == 'tautstring':
         _call(_lib.tautString_TV1_Weighted, x, w, y, np.size(x))
@@ -212,7 +216,7 @@ def tv1w_1d(x, w, method='tautstring', sigma=0.05):
     return y
 
 
-def tv2_1d(x, w, method='ms'):
+def tv2_1d(x, w, method='mspg'):
     r"""1D proximal operator for :math:`\ell_2`.
 
     Specifically, this optimizes the following program:
@@ -253,7 +257,7 @@ def tv2_1d(x, w, method='ms'):
     return y
 
 
-def tvp_1d(x, w, p, method='gp', max_iters=1000):
+def tvp_1d(x, w, p, method='gpfw', max_iters=0):
     r"""1D proximal operator for any :math:`\ell_p` norm.
 
     Specifically, this optimizes the following program:
@@ -297,8 +301,7 @@ def tvp_1d(x, w, p, method='gp', max_iters=1000):
     _call(methods[method], x, w, y, info, np.size(x), p, _ffi.NULL)
     return y
 
-
-def tv1_2d(x, w, n_threads=8, max_iters=1000, method='yang'):
+def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
     r"""2D proximal oprator for :math:`\ell_1`.
 
     Specifically, this optimizes the following program:
@@ -318,12 +321,15 @@ def tv1_2d(x, w, n_threads=8, max_iters=1000, method='yang'):
     str : method
         One of the following:
 
+        * ``'dr'`` - Douglas Rachford splitting.
+        * ``'pd'`` - Proximal Dykstra splitting.
         * ``'yang'`` - Yang's algorithm.
         * ``'condat'`` - Condat's gradient.
         * ``'chambolle-pock'`` - Chambolle-Pock's gradient.
 
     n_threads : int
-        Number of threads, used only for Douglas-Rachford.
+        Number of threads, used only for Proximal Dykstra
+            and Douglas-Rachford.
 
     Returns
     -------
@@ -331,12 +337,16 @@ def tv1_2d(x, w, n_threads=8, max_iters=1000, method='yang'):
         The solution of the optimization problem.
     """
     assert w >= 0
-    assert method in ('yang', 'condat', 'chambolle-pock')
+    assert method in ('dr', 'pd', 'yang', 'condat', 'chambolle-pock')
     x = np.asfortranarray(x)
     y = np.asfortranarray(np.zeros(x.shape))
     info = np.zeros(_N_INFO)
     if method == 'yang':
         _call(_lib.Yang2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, info)
+    elif method == 'dr':
+        _call(_lib.DR2_TV, x.shape[0], x.shape[1], x, w, w, 1.0, 1.0, y, n_threads, max_iters, info)
+    elif method == 'pd':
+        _call(_lib.PD2_TV, x, (w, w), (1, 1), (1, 2), y, info, x.shape, 2, 2, n_threads, max_iters)
     else:
         algorithm = 0 if method == 'condat' else 1
         _call(_lib.CondatChambollePock2_TV,
@@ -345,7 +355,7 @@ def tv1_2d(x, w, n_threads=8, max_iters=1000, method='yang'):
     return y
 
 
-def tv1w_2d(x, w_col, w_row, max_iters=1000, n_threads=8):
+def tv1w_2d(x, w_col, w_row, max_iters=0, n_threads=1):
     r"""2D weighted proximal operator for :math:`\ell_1` using DR splitting.
 
     Specifically, this optimizes the following program:
@@ -384,7 +394,7 @@ def tv1w_2d(x, w_col, w_row, max_iters=1000, n_threads=8):
     return y
 
 
-def tvp_2d(x, w_col, w_row, p_col, p_row, n_threads=8, max_iters=1000):
+def tvp_2d(x, w_col, w_row, p_col, p_row, n_threads=1, max_iters=0):
     r"""2D proximal operator for any :math:`\ell_p` norm.
 
     Specifically, this optimizes the following program:
@@ -426,4 +436,66 @@ def tvp_2d(x, w_col, w_row, p_col, p_row, n_threads=8, max_iters=1000):
     _call(_lib.DR2_TV,
           x.shape[0], x.shape[1], x, w_col, w_row, p_col, p_row, y,
           n_threads, max_iters, info)
+    return y
+    
+def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
+    r"""General TV proximal operator for multidimensional signals
+
+    Specifically, this optimizes the following program:
+
+    .. math::
+
+        \min_X \frac{1}{2} ||X-Y||^2_2 + \sum_i w_i \sum_j TV^{1D}(X(d_i)_j,p_i)
+
+    where :math:`X(d_i)_j` every possible 1-dimensional fiber of X following the 
+    dimension d_i, and :math:`\TV^{1D}(z,p)` the 1-dimensional :math:`l_p`-norm total 
+    variation over the given fiber :math:`z`. The user can specify the number
+    :math:`i` of penalty terms.
+
+    Parameters
+    ----------
+    y : numpy array
+        The matrix signal we are approximating.
+    ws : list
+        Weights to apply in each penalty term.
+    ds : list
+        Dimensions over which to apply each penalty term.
+        Must be of equal length to ws.
+    ps : list
+        Norms to apply in each penalty term.
+        Must be of equal length to ws.
+    n_threads : int
+        number of threads to use in the computation
+    max_iters : int
+        maximum number of iterations to run the solver.
+
+    Returns
+    -------
+    numpy array
+        The solution of the optimization problem.
+    """
+    assert len(ws) == len(ds)
+    assert len(ws) == len(ps)
+    assert n_threads >= 1
+    assert max_iters >= 0
+
+    info = np.zeros(_N_INFO)
+    x = np.asfortranarray(x)
+    y = np.zeros(np.shape(x), order='F')
+    
+    # Run algorithm depending on the structure of the data and the requested penalties
+    
+    # Bidimensional signal with one penalty term across each dimension (full 2-dimensional TV proximity): Douglas-Rachford splitting
+    if len(ds) == 2 & ds[0] == 1 & ds[1] == 2:
+        _call(_lib.DR2_TV,
+            x.shape[0], x.shape[1], x, ws[0], ws[1], ps[0], ps[1], y, n_threads, max_iters, info)
+    # 2 arbitrary terms: Proximal Dykstra
+    elif len(ws) == 2:
+        _call(_lib.PD2_TV,
+            x, ws, ps, ds, y, info, x.shape, len(x.shape), 2, n_threads, max_iters)
+    # More terms: Parallel Proximal Dykstra
+    else: 
+        _call(_lib.PD_TV,
+            x, ws, ps, ds, y, info, x.shape, len(x.shape), len(ws), n_threads, max_iters)
+
     return y

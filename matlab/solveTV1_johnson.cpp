@@ -6,8 +6,8 @@
 #include <limits.h>
 #include "mex.h"
 
-#include "TVopt.h"
-#include "johnsonRyanTV.h"
+#include "../src/TVopt.h"
+#include "../src/johnsonRyanTV.h"
 
 /* solveTV1_johnson.cpp
 

@@ -22,25 +22,25 @@
 % Examples:
 %
 %   - Filter 2D signal using TV-L1 norm:
-%        prox_TVgen(X,[lambda lambda],[1 2],[1 1])
+%        TVgen(X,[lambda lambda],[1 2],[1 1])
 %
 %   - Filter 2D signal using TV-L2 norm:
-%        prox_TVgen(X,[lambda lambda],[1 2],[2 2])
+%        TVgen(X,[lambda lambda],[1 2],[2 2])
 %
 %   - Filter 2D signal using TV-L1 norm for the rows, TV-L2 for the columns, and different penalties:
-%        prox_TVgen(X,[lambdaRows lambdaCols],[1 2],[1 2])
+%        TVgen(X,[lambdaRows lambdaCols],[1 2],[1 2])
 %
 %   - Filter 1D signal using both TV-L1 and TV-L2 norms:
-%        prox_TVgen(X,[lambda1 lambda2],[1 1],[1 2])
+%        TVgen(X,[lambda1 lambda2],[1 1],[1 2])
 %
 %   - Filter 3D signal using TV-L1 norm:
-%        prox_TVgen(X,[lambda lambda lambda],[1 2 3],[1 1 1])
+%        TVgen(X,[lambda lambda lambda],[1 2 3],[1 1 1])
 %
 %   - Filter 3D signal using TV-L2 norm, not penalizing over the second dimension:
-%        prox_TVgen(X,[lambda lambda],[1 3],[2 2])
+%        TVgen(X,[lambda lambda],[1 3],[2 2])
 %
 %   - Filter 2D signal using both TV-L1 and TV-L2 norms:
-%        prox_TVgen(X,[lambda1 lambda1 lambda2 lambda2],[1 2 1 2],[1 1 2 2])
+%        TVgen(X,[lambda1 lambda1 lambda2 lambda2],[1 2 1 2],[1 1 2 2])
 %
 %   - ... and so on, any combination of norms and dimensions is possible.
 function [x,info] = TVgen(y,lambdas,ds,norms,threads)
