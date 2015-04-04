@@ -7,16 +7,19 @@ For an up-to-date version, check https://github.com/albarji/proxTV .
 ##Index
 
 1. Introduction
-2. Referencing.
+2. Referencing
 3. Matlab interface
   1. Quickstart
-  2. Installation.
-  3. Usage.
-  4. Examples.
-  5. Demos.
+  2. Installation
+  3. Usage
+  4. Examples
 4. Python interface
-5. Contact.
-6. Acknowledgements.
+  1. Intallation
+  2. Usage
+  3. Examples
+5. Demos
+5. Contact
+6. Acknowledgements
 
 ##Introduction
 
@@ -251,17 +254,6 @@ Filter 3D signal using TV-L2 norm, not penalizing over the second dimension:
 
     TVgen(X,[lambda lambda],[1 3],[2 2])
 
-    
-###Demos
-
-Some demos in the form of Matlab scripts showing how to work with proxTV are included in the subfolder /malab/demos. They are:
-
-- **demo_filter_signal**: TV-L1, TV-L2 and weighted TV-L1 filtering of 1-dimensional signals.
-- **demo_filter_image**: TV-L1 filtering of 2-dimensional image.
-- **demo_filter_image_color**: TV-L1 filtering of 3-dimensional image (length, width and color).
-- **demo_filter_image_threads**: multi-thread TV-L1 filtering of 2-dimensional image.
-- **demo_filter_image_weighted**: weighted TV-L1 filtering of 2-dimensional image.
-
 ## Python interface
 
 ###Installation
@@ -285,6 +277,11 @@ Additionally, in order to generate the toolbox documentation the following packa
 - **sphinxcontrib-napoleon**
 - **sphinx_rtd_theme**
 
+Finally, if you would like to run the provided demos you will also require the following packages:
+
+* **matplotlib**: http://matplotlib.org/
+* **scikit-image**: http://scikit-image.org/
+
 ####Installing proxTV Python package
 
 After prerequisites have been satisfied, just run
@@ -307,7 +304,91 @@ Import proxTV Python package as
 
     import prox_tv as ptv
     
-Then you can access the following the relevant solvers in the package. The documentation of these functions is maintained in a separate file. Please consult the "Generating docs" section.
+or
+
+    from prox_tv import *
+    
+for direct access to all the package routines.
+    
+The documentation of these functions is maintained in a separate file. Please consult the "Generating docs" section.
+
+###Examples
+
+####1D examples
+
+Filter 1D signal using TV-L1 norm:
+
+    tv1_1d(x, w)
+    
+Filter 1D signal using weighted TV-L1 norm (for x vector of length N, weights vector of length N-1)
+
+    tv1w_1d(x, weights)
+    
+Filter 1D signal using TV-L2 norm:
+
+    tv2_1d(x, w)
+    
+Filter 1D signal using both TV-L1 and TV-L2 norms:
+
+    tvgen(X, [w1, w2], [1, 1], [1, 2])
+    
+####2D examples
+
+Filter 2D signal using TV-L1 norm:
+
+    tv1_2d(X, w)
+    
+or
+        
+    tvgen(X, [w, w], [1, 2], [1, 1])
+
+Filter 2D signal using TV-L2 norm:
+
+    tvp_2d(X, w)
+    
+or
+
+    tvgen(X, [w, w], [1, 2], [2, 2])
+    
+Filter 2D signal using 4 parallel threads:
+
+    tv1_2d(X, w, n_threads=4)
+    
+or
+
+    tvgen(X, [w, w], [1, 2], [1, 1], n_threads=4)
+
+Filter 2D signal using TV-L1 norm for the rows, TV-L2 for the columns, and different penalties:
+
+    tvgen(X, [wRows, wCols], [1, 2], [1, 2])
+    
+Filter 2D signal using both TV-L1 and TV-L2 norms:
+
+    tvgen(X, [w1, w1, w2, w2], [1, 2, 1, 2], [1, 1, 2, 2])
+    
+Filter 2D signal using weighted TV-L1 norm (for X image of size MxN, W1 weights of size (M-1)xN, W2 weights of size Mx(N-1))
+
+    tv1w_2d(X, W1, W2)
+    
+####3D examples
+
+Filter 3D signal using TV-L1 norm:
+
+    tvgen(X, [w, w, w], [1, 2, 3], [1, 1, 1])
+
+Filter 3D signal using TV-L2 norm, not penalizing over the second dimension:
+
+    tvgen(X , [w, w], [1, 3], [2, 2])
+    
+##Demos
+
+Some demos in the form of both Matlab and Python scripts showing how to work with proxTV are included in the subfolders /matlab/demos and /prox_tv/demos, respectively. They are:
+
+- **demo_filter_signal**: TV-L1, TV-L2 and weighted TV-L1 filtering of 1-dimensional signals.
+- **demo_filter_image**: TV-L1 filtering of 2-dimensional image.
+- **demo_filter_image_color**: TV-L1 filtering of 3-dimensional image (length, width and color).
+- **demo_filter_image_threads**: multi-thread TV-L1 filtering of 2-dimensional image.
+- **demo_filter_image_weighted**: weighted TV-L1 filtering of 2-dimensional image.
 
 ## Contact
 

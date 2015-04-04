@@ -456,12 +456,12 @@ def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
     ----------
     y : numpy array
         The matrix signal we are approximating.
-    ws : numpy array
+    ws : list
         Weights to apply in each penalty term.
-    ds : numpy array
+    ds : list
         Dimensions over which to apply each penalty term.
         Must be of equal length to ws.
-    ps : numpy array
+    ps : list
         Norms to apply in each penalty term.
         Must be of equal length to ws.
     n_threads : int
@@ -474,8 +474,8 @@ def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
     numpy array
         The solution of the optimization problem.
     """
-    assert ws.shape == ds.shape
-    assert ps.shape == ps.shape
+    assert len(ws) == len(ds)
+    assert len(ws) == len(ps)
     assert n_threads >= 1
     assert max_iters >= 0
 
@@ -486,12 +486,11 @@ def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
     # Run algorithm depending on the structure of the data and the requested penalties
     
     # Bidimensional signal with one penalty term across each dimension (full 2-dimensional TV proximity): Douglas-Rachford splitting
-    nds = ds.size
-    if nds == 2 & ds[0] == 1 & ds[1] == 2:
+    if len(ds) == 2 & ds[0] == 1 & ds[1] == 2:
         _call(_lib.DR2_TV,
             x.shape[0], x.shape[1], x, ws[0], ws[1], ps[0], ps[1], y, n_threads, max_iters, info)
     # 2 arbitrary terms: Proximal Dykstra
-    elif npen == 2:
+    elif len(ws) == 2:
         _call(_lib.PD2_TV,
             x, ws, ps, ds, y, info, x.shape, len(x.shape), 2, n_threads, max_iters)
     # More terms: Parallel Proximal Dykstra
