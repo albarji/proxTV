@@ -51,7 +51,7 @@ whose Bibtex entries are
 
     @inproceedings{conf/icml/Barbero11,
       added-at = {2011-12-16T00:00:00.000+0100},
-      author = {Barbero, Álvaro and Sra, Suvrit},
+      author = {Barbero, \'Alvaro and Sra, Suvrit},
       biburl = {http://www.bibsonomy.org/bibtex/214ce9f5c15d1d462bd264d8af9e4c3c7/dblp},
       booktitle = {ICML},
       crossref = {conf/icml/2011},
