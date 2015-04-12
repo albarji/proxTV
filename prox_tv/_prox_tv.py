@@ -276,8 +276,6 @@ def tvp_1d(x, w, p, method='gpfw', max_iters=0):
         The method to be used, one of the following:
 
          * ``'gp'`` - gradient projection
-         * ``'ogp'`` - optimal gradient projection
-         * ``'fista'`` - use the FISTA algorithm
          * ``'fw'`` - Frank-Wolfe
          * ``'gpfw'`` - hybrid gradient projection + Frank-Wolfe
 
@@ -288,8 +286,6 @@ def tvp_1d(x, w, p, method='gpfw', max_iters=0):
     """
     methods = {
         'gp': _lib.GP_TVp,
-        'ogp': _lib.OGP_TVp,
-        'fista': _lib.FISTA_TVp,
         'fw': _lib.FW_TVp,
         'gpfw': _lib.GPFW_TVp,
     }
