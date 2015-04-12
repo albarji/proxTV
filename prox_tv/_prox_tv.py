@@ -51,6 +51,13 @@ Total Variation problems, recommended only to advanced users.
 
 As the underlying library uses FORTRAN-style matrices (column-order), the given
 matrices will be converted to this format if necessary.
+
+If you find this toolbox useful please reference the following papers:
+
+* Fast Newton-type Methods for Total Variation Regularization. Alvaro Barbero, Suvrit Sra. ICML 2011 proceedings.
+    
+* Modular proximal optimization for multidimensional total-variation regularization. Alvaro Barbero, Suvrit Sra. http://arxiv.org/abs/1411.0589
+
 """
 
 import numpy as np

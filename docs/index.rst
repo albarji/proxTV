@@ -106,4 +106,3 @@ Filter 3D signal using TV-L2 norm, not penalizing over the second dimension::
 
     tvgen(X , [w, w], [1, 3], [2, 2])
     
-
