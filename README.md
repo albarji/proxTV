@@ -280,6 +280,7 @@ Additionally, in order to generate the toolbox documentation the following packa
 Finally, if you would like to run the provided demos you will also require the following packages:
 
 * **matplotlib**: http://matplotlib.org/
+* **scipy**: http://www.scipy.org/
 * **scikit-image**: http://scikit-image.org/
 
 ####Installing proxTV Python package

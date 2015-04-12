@@ -37,6 +37,7 @@ setup(
         'sphinxcontrib-napoleon',
         'sphinx_rtd_theme',
         'matplotlib',
+        'scipy',
         'scikit-image'
     ],
     setup_requires=[
@@ -59,7 +60,8 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Topic :: Scientific/Engineering :: Mathematics',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4'
     ],
     keywords='total variation image processing machine learning',
     test_suite="nose.collector",
