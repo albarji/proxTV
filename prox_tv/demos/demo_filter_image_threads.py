@@ -25,14 +25,14 @@ print('Filtering image with 1 thread...');
 start = time.time()
 F = ptv.tv1_2d(N, lam)
 end = time.time()
-print 'Elapsed time ' + str(end-start)
+print('Elapsed time ' + str(end-start))
 
 # Now filter using several threads
 print('Filtering image with ' + str(threads) + ' threads...');
 start = time.time()
 F = ptv.tv1_2d(N, lam, n_threads=threads)
 end = time.time()
-print 'Elapsed time ' + str(end-start)
+print('Elapsed time ' + str(end-start))
 
 # Plot results
 plt.subplot(1, 3, 1)

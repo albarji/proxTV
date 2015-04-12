@@ -1,0 +1,6 @@
+include README.md
+
+# Header files for compiling C modules
+include src/*.h
+# Python demos
+include prox_tv/demos/*

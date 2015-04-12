@@ -9,7 +9,7 @@ def test_tv1w_1d():
     for _ in range(20):
         dimension = np.random.randint(1e1, 1e3)
         x = 100*np.random.randn(dimension)
-        w = 20*np.random.rand(dimension)
+        w = 20*np.random.rand(dimension-1)
         solutions = [tv1w_1d(x, w, method=method) for method in methods]
         for i in range(len(solutions)-1):
             assert np.allclose(solutions[i], solutions[i+1])
@@ -27,7 +27,7 @@ def test_tv1_1d():
 
 
 def test_tvp_1d():
-    methods = ('gp', 'ogp', 'fista', 'fw', 'gpfw')
+    methods = ('gp', 'fw', 'gpfw')
     for _ in range(20):
         dimension = np.random.randint(1e1, 3e1)
         x = 100*np.random.randn(dimension)

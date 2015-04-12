@@ -23,7 +23,7 @@ print('Filtering signal with TV-L1...')
 start = time.time()
 f = ptv.tv1_1d(n,lam)
 end = time.time()
-print 'Elapsed time ' + str(end-start)
+print('Elapsed time ' + str(end-start))
 
 # Plot results
 plt.subplot(3, 1, 1)
@@ -55,11 +55,11 @@ n = s + 0.5*randn(*shape(s))
 
 # Filter using TV-L2
 lam=100;
-print('Filtering signal with TV-L2...');
+print('Filtering signal with TV-L2...')
 start = time.time()
 f = ptv.tv2_1d(n,lam);
 end = time.time()
-print 'Elapsed time ' + str(end-start)
+print('Elapsed time ' + str(end-start))
 
 # Plot results
 plt.subplot(3, 1, 1)
@@ -96,11 +96,11 @@ n = s + 0.5*randn(*shape(s))
 lam = np.linspace(0,2,N-1)
 
 # Filter using weighted TV-L1
-print('Filtering signal with weighted TV-L1...');
+print('Filtering signal with weighted TV-L1...')
 start = time.time()
 f = ptv.tv1w_1d(n, lam)
 end = time.time()
-print 'Elapsed time ' + str(end-start)
+print('Elapsed time ' + str(end-start))
 
 # Plot results
 plt.subplot(4, 1, 1)

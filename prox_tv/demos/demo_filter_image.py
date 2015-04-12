@@ -18,11 +18,11 @@ N = util.random_noise(X, mode='speckle', var=noiseLevel)
 
 # Filter using 2D TV-L1
 lam=0.15;
-print('Filtering image with 2D TV-L1...');
+print('Filtering image with 2D TV-L1...')
 start = time.time()
 F = ptv.tv1_2d(N, lam)
 end = time.time()
-print 'Elapsed time ' + str(end-start)
+print('Elapsed time ' + str(end-start))
 
 # Plot results
 plt.subplot(1, 3, 1)
