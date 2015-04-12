@@ -1,10 +1,53 @@
-r"""Proximal operators for 1d and 2d total variation problems.
+r"""**proxTV** is a toolbox implementing blazing fast implementations of Total Variation proximity operators.
 
-The functions have the form ``tv<a>[w]_<b>d``, where:
+The library provides efficient solvers for the following Total Variation proximity problems:
 
-    * ``<a>`` : 1 or 2, if the norm is :math:`\ell_1` or :math:`\ell_2`.
+**Standard (l1) Total Variation on a 1-dimensional signal**
+
+    .. figure::  img/TV1.png
+
+**Quadratic (l2) Total Variation on a 1-dimensional signal**
+
+    .. figure::  img/TV2.png
+    
+**lp-norm Total Variation on a 1-dimensional signal**
+
+    .. figure::  img/TVp.png
+    
+**Weighted Total Variation on a 1-dimensional signal**
+
+    .. figure::  img/TV1w.png
+    
+**Anisotropic Total Variation on a 2-dimensional signal**
+
+    .. figure::  img/TV2D.png
+    
+**lp-norm Anisotropic Total Variation on a 2-dimensional signal**
+
+    .. figure::  img/TV2Dp.png
+
+**Weighted Anisotropic Total Variation on a 2-dimensional signal**
+
+    .. figure::  img/TV2Dw.png
+    
+**Anisotropic Total Variation on a 3-dimensional signal**
+
+    .. figure::  img/TV3D.png
+
+**Generalized N-dimensional Anisotropic Total Variation**
+
+    .. figure::  img/TVND.png
+    (with X(di) every possible 1-dimensional slice of X following dimension di)
+    
+    
+As a general rule the functions in this package have the form ``tv<a>[w]_<b>d``, where:
+
+    * ``<a>`` : 1, 2 or p, if the norm is :math:`\ell_1`, :math:`\ell_2` or the general :math:`\ell_p`
     * ``[w]`` : if present, the methods accepts a weighted norm.
     * ``<b>`` : 1 or 2, if the expected signals is 1- or 2-dimensional.
+    
+The only expection is the function **tvgen** that solves generalized 
+Total Variation problems, recommended only to advanced users.
 
 As the underlying library uses FORTRAN-style matrices (column-order), the given
 matrices will be converted to this format if necessary.
@@ -444,7 +487,7 @@ def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
         \min_X \frac{1}{2} ||X-Y||^2_2 + \sum_i w_i \sum_j TV^{1D}(X(d_i)_j,p_i)
 
     where :math:`X(d_i)_j` every possible 1-dimensional fiber of X following the 
-    dimension d_i, and :math:`\TV^{1D}(z,p)` the 1-dimensional :math:`l_p`-norm total 
+    dimension d_i, and :math:`TV^{1D}(z,p)` the 1-dimensional :math:`\ell_p`-norm total 
     variation over the given fiber :math:`z`. The user can specify the number
     :math:`i` of penalty terms.
 

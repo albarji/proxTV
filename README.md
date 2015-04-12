@@ -14,9 +14,9 @@ For an up-to-date version, check https://github.com/albarji/proxTV .
   3. Usage
   4. Examples
 4. Python interface
-  1. Intallation
-  2. Usage
-  3. Examples
+  1. Quickstart
+  2. Installation
+  3. Usage
 5. Demos
 5. Contact
 6. Acknowledgements
@@ -256,13 +256,22 @@ Filter 3D signal using TV-L2 norm, not penalizing over the second dimension:
 
 ## Python interface
 
+### Quickstart
+
+You can install the latest version of proxTV through **pip** running
+
+    pip install prox-tv
+    
+Please note that some prerequisites might not be installed in your system. In case of failure during pip install, refer to the Prerequisites section.
+
+If you want to install from source, please refere to the Installation section.
+
 ###Installation
 
 ####Prerequisites
 
 To use proxTV within Python the following prerequisites are necessary
 
-- **python2.7**
 - **cffi**: https://cffi.readthedocs.org/en/latest/
 - **numpy**: http://www.numpy.org/
 
@@ -283,7 +292,7 @@ Finally, if you would like to run the provided demos you will also require the f
 * **scipy**: http://www.scipy.org/
 * **scikit-image**: http://scikit-image.org/
 
-####Installing proxTV Python package
+####Manually installing proxTV Python package
 
 After prerequisites have been satisfied, just run
 
@@ -293,7 +302,7 @@ on the folder where this README file is located. You might need superuser permis
 
 ####Generating docs
 
-It is highly recommended to compile the doc files as well, for easy reference of the use of the toolbox.To do so run
+Documentation is available only at http://pythonhosted.org/prox_tv/. Nevertheless if you would like to compile the docs yourself you just need to run
 
     make html
     
@@ -311,76 +320,8 @@ or
     
 for direct access to all the package routines.
     
-The documentation of these functions is maintained in a separate file. Please consult the "Generating docs" section.
+The documentation of use of the package functions is maintained online at http://pythonhosted.org/prox_tv/.
 
-###Examples
-
-####1D examples
-
-Filter 1D signal using TV-L1 norm:
-
-    tv1_1d(x, w)
-    
-Filter 1D signal using weighted TV-L1 norm (for x vector of length N, weights vector of length N-1)
-
-    tv1w_1d(x, weights)
-    
-Filter 1D signal using TV-L2 norm:
-
-    tv2_1d(x, w)
-    
-Filter 1D signal using both TV-L1 and TV-L2 norms:
-
-    tvgen(X, [w1, w2], [1, 1], [1, 2])
-    
-####2D examples
-
-Filter 2D signal using TV-L1 norm:
-
-    tv1_2d(X, w)
-    
-or
-        
-    tvgen(X, [w, w], [1, 2], [1, 1])
-
-Filter 2D signal using TV-L2 norm:
-
-    tvp_2d(X, w)
-    
-or
-
-    tvgen(X, [w, w], [1, 2], [2, 2])
-    
-Filter 2D signal using 4 parallel threads:
-
-    tv1_2d(X, w, n_threads=4)
-    
-or
-
-    tvgen(X, [w, w], [1, 2], [1, 1], n_threads=4)
-
-Filter 2D signal using TV-L1 norm for the rows, TV-L2 for the columns, and different penalties:
-
-    tvgen(X, [wRows, wCols], [1, 2], [1, 2])
-    
-Filter 2D signal using both TV-L1 and TV-L2 norms:
-
-    tvgen(X, [w1, w1, w2, w2], [1, 2, 1, 2], [1, 1, 2, 2])
-    
-Filter 2D signal using weighted TV-L1 norm (for X image of size MxN, W1 weights of size (M-1)xN, W2 weights of size Mx(N-1))
-
-    tv1w_2d(X, W1, W2)
-    
-####3D examples
-
-Filter 3D signal using TV-L1 norm:
-
-    tvgen(X, [w, w, w], [1, 2, 3], [1, 1, 1])
-
-Filter 3D signal using TV-L2 norm, not penalizing over the second dimension:
-
-    tvgen(X , [w, w], [1, 3], [2, 2])
-    
 ##Demos
 
 Some demos in the form of both Matlab and Python scripts showing how to work with proxTV are included in the subfolders /matlab/demos and /prox_tv/demos, respectively. They are:
