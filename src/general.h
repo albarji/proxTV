@@ -58,6 +58,8 @@ inline double mxGetInf() { return INFINITY; }
 /* Comparison tolerance */
 #define EPSILON 1e-10
 #define IS_ZERO(x) (x < EPSILON & x > -EPSILON) 
+#define IS_POSITIVE(x) (x > EPSILON)
+#define IS_NEGATIVE(x) (x < -EPSILON)
 
 /* Return Codes */
 #define RC_OK 0 // Solution found at the specified error level
