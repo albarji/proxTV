@@ -14,7 +14,6 @@
 #include <time.h>
 #include "TVopt.h"
 #include "TVmacros.h"
-#include "assert.h"
 
 #define LAPACK_ILP64
 
@@ -508,7 +507,6 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
             lastBreak = mnBreak;
             /* Go back to main loop, starting a new segment */
             /* We do not precompute the first point of the new segment here, as it might be n-1 and this leads to issues */
-            assert(i < n); //FIXME
             mn = y[i] + lambda[i-1] - (i==n-1 ? 0 : lambda[i]);  // When computing the slopes we need to account for the differences in lambdas
             mx = y[i] + lambda[i-1] + (i==n-1 ? 0 : lambda[i]); // Here too
             mxHeight = mnHeight = -lambda[i-1];
