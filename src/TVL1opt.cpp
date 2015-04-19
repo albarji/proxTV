@@ -489,7 +489,7 @@ int tautString_TV1(double *y,double lambda,double *x,int n) {
     
         /* Check for ceiling violation: tube ceiling at current point is below proyection of minorant slope */
         /* Majorant is 0 at this point */   
-        if ( 0 < mnHeight ) {
+        if ( IS_POSITIVE(mnHeight) ) { // 0 < mnHeight
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"ENDING CEILING VIOLATION i = %d, mxVal = %f, mnHeight = %f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,0.0,mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
             #endif
@@ -515,7 +515,7 @@ int tautString_TV1(double *y,double lambda,double *x,int n) {
         
         /* Check for minorant violation: minorant at current point is above proyection of majorant slope */
         /* Minorant is 0 at this point */
-        if ( 0 > mxHeight ) {
+        if ( IS_NEGATIVE(mxHeight) ) { // 0 > mxHeight
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"ENDING FLOOR VIOLATION i = %d, mnVal = %f, mxHeight = %f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,0.0,mxHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
             #endif

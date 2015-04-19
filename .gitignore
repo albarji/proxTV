@@ -1,0 +1,10 @@
+*.pyc
+*.mexa64
+*.o
+*__pycache__*
+build
+README.html
+.Rhistory
+dist
+docs/_build
+prox_tv.egg-info

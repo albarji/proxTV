@@ -376,6 +376,12 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
     #define CANCEL(txt,info) \
         printf("tautString_TV1_Weighted: %s\n",txt); \
         return 0;
+        
+    #ifdef DEBUG
+        fprintf(DEBUG_FILE, "tautString_TV1_Weighted start\n");
+        fprintf(DEBUG_FILE, "y = ["); for(i=0;i<n&&i<DEBUG_N;i++) fprintf(DEBUG_FILE, " %.3f", y[i]); fprintf(DEBUG_FILE, "]\n");
+        fprintf(DEBUG_FILE, "lambda = ["); for(i=0;i<n-1&&i<DEBUG_N;i++) fprintf(DEBUG_FILE, " %.3f", lambda[i]); fprintf(DEBUG_FILE, "]\n");
+    #endif
     
     /* Starting point */
     mnHeight = mxHeight = 0;
@@ -488,9 +494,9 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
     
         /* Check for ceiling violation: tube ceiling at current point is below proyection of minorant slope */
         /* Majorant is 0 at this point */   
-        if ( 0 < mnHeight ) {
+        if ( IS_POSITIVE(mnHeight) ) { // 0 < mnHeight
             #ifdef DEBUG
-                fprintf(DEBUG_FILE,"ENDING CEILING VIOLATION i = %d, mxVal = %f, mnHeight = %f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,0.0,mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
+                fprintf(DEBUG_FILE,"ENDING CEILING VIOLATION i = %d, mxVal = %f, mnHeight = %g, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,0.0,mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
             #endif
             /* Break segment at last minorant breaking point */
             i = mnBreak + 1;
@@ -514,9 +520,9 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
         
         /* Check for minorant violation: minorant at current point is above proyection of majorant slope */
         /* Minorant is 0 at this point */
-        if ( 0 > mxHeight ) {
+        if ( IS_NEGATIVE(mxHeight) ) { // 0 > mxHeight
             #ifdef DEBUG
-                fprintf(DEBUG_FILE,"ENDING FLOOR VIOLATION i = %d, mnVal = %f, mxHeight = %f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,0.0,mxHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
+                fprintf(DEBUG_FILE,"ENDING FLOOR VIOLATION i = %d, mnVal = %f, mxHeight = %g, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,0.0,mxHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
             #endif
             /* If violated, break segment at last majorant breaking point */
             i = mxBreak + 1;
