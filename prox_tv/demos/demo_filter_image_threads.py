@@ -7,8 +7,8 @@ import time
 import skimage as ski
 from skimage import data, io, filters, color, util
 
-# WRITE HERE YOUR NUMBER OF THREADS
-threads = 2
+# WRITE HERE YOUR NUMBER OF THREADS TO TEST
+THREADS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 # Load image
 X = io.imread('QRbig.png')
@@ -19,22 +19,18 @@ X = color.rgb2gray(X)
 noiseLevel = 0.2
 N = util.random_noise(X, mode='gaussian', var=noiseLevel)
 
-# Filter using 1 thread
-lam=50./255.;
-print('Filtering image with 1 thread...');
-start = time.time()
-F = ptv.tv1_2d(N, lam)
-end = time.time()
-print('Elapsed time ' + str(end-start))
+# Iterate over number of threads
+lam=50./255.
+times = []
+for threads in THREADS:
+    print('Filtering image with ' + str(threads) + ' threads...');
+    start = time.time()
+    F = ptv.tv1_2d(N, lam, n_threads=threads)
+    end = time.time()
+    times.append(end-start)
+    print('Elapsed time ' + str(end-start))
 
-# Now filter using several threads
-print('Filtering image with ' + str(threads) + ' threads...');
-start = time.time()
-F = ptv.tv1_2d(N, lam, n_threads=threads)
-end = time.time()
-print('Elapsed time ' + str(end-start))
-
-# Plot results
+# Plot filtering results
 plt.subplot(1, 3, 1)
 io.imshow(X)
 plt.xlabel('Original')
@@ -49,4 +45,12 @@ io.imshow(F)
 plt.xlabel('Filtered')
 
 show()
+
+# Plot timing results
+fig, ax = plt.subplots()
+ax.bar(THREADS, times, color = 'g')
+ax.set_xlabel('Number of threads')
+ax.set_ylabel('Time (s)')
+ax.set_title('Filtering times for increasing threads')
+plt.show()
 
