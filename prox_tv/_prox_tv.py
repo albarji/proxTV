@@ -183,6 +183,43 @@ def _call(fn, *args):
     return fn(*args_m)
 
 
+def force_float_scalar(x):
+    r"""Forces an scalar value into float format
+    
+    Parameters
+    ----------
+    x: scalar value to check
+    
+    Returns
+    -------
+    float
+        Float representation of the provided value
+    """    
+    if not isinstance(x, float):
+        return float(x)
+    else:
+        return x
+        
+        
+def force_float_matrix(x):
+    r"""Forces a numpy matrix into float format
+    
+    Parameters
+    ----------
+    x: numpy array
+        matrix to check
+    
+    Returns
+    -------
+    numpy array
+        Float representation of the provided matrix
+    """    
+    if x.dtype != np.dtype('float64'):
+        return x.astype('float')
+    else:
+        return x
+        
+
 def tv1_1d(x, w, sigma=0.05, method='tautstring'):
     r"""1D proximal operator for :math:`\ell_1`.
 
@@ -194,7 +231,7 @@ def tv1_1d(x, w, sigma=0.05, method='tautstring'):
 
     Parameters
     ----------
-    y : numpy array
+    x : numpy array
         The signal we are approximating.
     w : float
         The non-negative weight in the optimization problem.
@@ -216,6 +253,8 @@ def tv1_1d(x, w, sigma=0.05, method='tautstring'):
     """
     assert method in ('tautstring', 'pn', 'condat', 'dp')
     assert w >= 0
+    w = force_float_scalar(w)
+    x = force_float_matrix(x)
     y = np.zeros(np.size(x))
     if method == 'tautstring':
         _call(_lib.tautString_TV1, x, w, y, np.size(x))
@@ -240,7 +279,7 @@ def tv1w_1d(x, w, method='tautstring', sigma=0.05):
 
     Parameters
     ----------
-    y : numpy array
+    x : numpy array
         The signal we are approximating.
     w : numpy array
         The non-negative weights in the optimization problem.
@@ -256,6 +295,8 @@ def tv1w_1d(x, w, method='tautstring', sigma=0.05):
     """
     assert np.all(w >= 0)
     assert np.size(x)-1 == np.size(w)
+    w = force_float_matrix(w)
+    x = force_float_matrix(x)
     y = np.zeros(np.size(x))
     if method == 'tautstring':
         _call(_lib.tautString_TV1_Weighted, x, w, y, np.size(x))
@@ -277,7 +318,7 @@ def tv2_1d(x, w, method='mspg'):
 
     Parameters
     ----------
-    y : numpy array
+    x : numpy array
         The signal we are approximating.
     w : float
         The non-negative weight in the optimization problem.
@@ -295,6 +336,8 @@ def tv2_1d(x, w, method='mspg'):
     """
     assert w >= 0
     assert method in ('ms', 'pg', 'mspg')
+    w = force_float_scalar(w)
+    x = force_float_matrix(x)
     info = np.zeros(_N_INFO)
     y = np.zeros(np.size(x), order='F')
     if method == 'ms':
@@ -318,7 +361,7 @@ def tvp_1d(x, w, p, method='gpfw', max_iters=0):
 
     Parameters
     ----------
-    y : numpy array
+    x : numpy array
         The signal we are approximating.
     w : float
         The non-negative weight in the optimization problem.
@@ -342,6 +385,9 @@ def tvp_1d(x, w, p, method='gpfw', max_iters=0):
     assert method in methods
     assert w >= 0
     assert p >= 1
+    w = force_float_scalar(w)
+    p = force_float_scalar(p)
+    x = force_float_matrix(x)
     info = np.zeros(_N_INFO)
     y = np.zeros(np.size(x), order='F')
     _call(methods[method], x, w, y, info, np.size(x), p, _ffi.NULL)
@@ -360,7 +406,7 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
 
     Parameters
     ----------
-    y : numpy array
+    x : numpy array
         The signal we are approximating.
     w : float
         The non-negative weight in the optimization problem.
@@ -384,7 +430,8 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
     """
     assert w >= 0
     assert method in ('dr', 'pd', 'yang', 'condat', 'chambolle-pock')
-    x = np.asfortranarray(x)
+    x = np.asfortranarray(x, dtype='float64')
+    w = force_float_scalar(w)
     y = np.asfortranarray(np.zeros(x.shape))
     info = np.zeros(_N_INFO)
     if method == 'yang':
@@ -414,7 +461,7 @@ def tv1w_2d(x, w_col, w_row, max_iters=0, n_threads=1):
 
     Parameters
     ----------
-    y : numpy array
+    x : numpy array
         The MxN matrix we are approximating.
     w_col : numpy array
         The (M-1) x N matrix of column weights :math:`w^c`.
@@ -431,10 +478,10 @@ def tv1w_2d(x, w_col, w_row, max_iters=0, n_threads=1):
     M, N = x.shape
     assert w_col.shape == (M-1, N)
     assert w_row.shape == (M, N-1)
-    x = np.asfortranarray(x)
+    x = np.asfortranarray(x, dtype='float64')
     y = np.zeros(x.shape, order='F')
-    w_col = np.asfortranarray(w_col)
-    w_row = np.asfortranarray(w_row)
+    w_col = np.asfortranarray(w_col, dtype='float64')
+    w_row = np.asfortranarray(w_row, dtype='float64')
     info = np.zeros(_N_INFO)
     _call(_lib.DR2L1W_TV, M, N, x, w_col, w_row, y, n_threads, max_iters, info)
     return y
@@ -477,7 +524,11 @@ def tvp_2d(x, w_col, w_row, p_col, p_row, n_threads=1, max_iters=0):
     assert p_row >= 1
 
     info = np.zeros(_N_INFO)
-    x = np.asfortranarray(x)
+    x = np.asfortranarray(x, dtype='float64')
+    w_col = force_float_scalar(w_col)
+    w_row = force_float_scalar(w_row)
+    p_col = force_float_scalar(p_col)
+    p_row = force_float_scalar(p_row)
     y = np.zeros(np.shape(x), order='F')
     _call(_lib.DR2_TV,
           x.shape[0], x.shape[1], x, w_col, w_row, p_col, p_row, y,
@@ -500,7 +551,7 @@ def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
 
     Parameters
     ----------
-    y : numpy array
+    x : numpy array
         The matrix signal we are approximating.
     ws : list
         Weights to apply in each penalty term.
@@ -526,7 +577,9 @@ def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
     assert max_iters >= 0
 
     info = np.zeros(_N_INFO)
-    x = np.asfortranarray(x)
+    x = np.asfortranarray(x, dtype='float64')
+    ws = force_float_matrix(ws)
+    ps = force_float_matrix(ps)
     y = np.zeros(np.shape(x), order='F')
     
     # Run algorithm depending on the structure of the data and the requested penalties
