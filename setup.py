@@ -27,7 +27,7 @@ class CFFIInstall(install):
 
 setup(
     name="prox_tv",
-    version="3.1.0a2",
+    version="3.1.1",
     description="Toolbox for fast Total Variation proximity operators",
     long_description="proxTV is a toolbox implementing blazing fast implementations of Total Variation proximity operators. While the core algorithms are implemented in C to achieve high efficiency, Matlab and Python interfaces are provided for ease of use. The library provides efficient solvers for a variety of Total Variation proximity problems, with address input signals of any dimensionality (1d, images, video, ...) and different norms to apply in the Total Variation term.",
     packages=['prox_tv'],
@@ -50,12 +50,12 @@ setup(
     package_data={
         'prox_tv': ['src/*.h', 'src/demos/*']
     },
-    author="Alvaro Barbero, Suvrit Sra",
+    author="Alvaro Barbero, Suvrit Sra, Josip Djolonga (python bindings)",
     author_email="alvaro.barbero@uam.es",
     url='https://github.com/albarji/proxTV',
     license='BSD', 
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'Operating System :: POSIX :: Linux',
         'Topic :: Scientific/Engineering :: Mathematics',
