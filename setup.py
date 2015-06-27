@@ -1,6 +1,11 @@
 from setuptools import setup
 from setuptools.command.install import install
 from distutils.command.build import build
+import os
+
+# Force gcc compiler to prevent issues in mac
+os.environ["CC"] = "gcc"
+os.environ["CXX"] = "gcc"
 
 # We need this workaround to solve the problem of importing prox_tv._prox_tv
 # before CFFI is installed. For more details, have a look at:
@@ -27,18 +32,13 @@ class CFFIInstall(install):
 
 setup(
     name="prox_tv",
-    version="3.1.0a2",
+    version="3.1.2a1",
     description="Toolbox for fast Total Variation proximity operators",
     long_description="proxTV is a toolbox implementing blazing fast implementations of Total Variation proximity operators. While the core algorithms are implemented in C to achieve high efficiency, Matlab and Python interfaces are provided for ease of use. The library provides efficient solvers for a variety of Total Variation proximity problems, with address input signals of any dimensionality (1d, images, video, ...) and different norms to apply in the Total Variation term.",
     packages=['prox_tv'],
     install_requires=[
         'numpy',
-        'cffi',
-        'sphinxcontrib-napoleon',
-        'sphinx_rtd_theme',
-        'matplotlib',
-        'scipy',
-        'scikit-image'
+        'cffi'
     ],
     setup_requires=[
         'cffi'
@@ -50,12 +50,12 @@ setup(
     package_data={
         'prox_tv': ['src/*.h', 'src/demos/*']
     },
-    author="Alvaro Barbero, Suvrit Sra",
+    author="Alvaro Barbero, Suvrit Sra, Josip Djolonga (python bindings)",
     author_email="alvaro.barbero@uam.es",
     url='https://github.com/albarji/proxTV',
     license='BSD', 
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'Operating System :: POSIX :: Linux',
         'Topic :: Scientific/Engineering :: Mathematics',
@@ -67,3 +67,4 @@ setup(
     test_suite="nose.collector",
     zip_safe=False,
 )
+

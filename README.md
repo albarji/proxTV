@@ -274,6 +274,7 @@ To use proxTV within Python the following prerequisites are necessary
 
 - **cffi**: https://cffi.readthedocs.org/en/latest/
 - **numpy**: http://www.numpy.org/
+- **LAPACK**: http://www.netlib.org/lapack/
 
 You can install **cffi** through **pip**:
 
@@ -281,12 +282,7 @@ You can install **cffi** through **pip**:
   
 Be aware that other packages might be required to install cffi, such as **python-dev** and **libffi-dev**. For a full list of dependencies please refer to cffi documentation (https://cffi.readthedocs.org/en/latest/).
 
-Additionally, in order to generate the toolbox documentation the following packages are needed as well:
-
-- **sphinxcontrib-napoleon**
-- **sphinx_rtd_theme**
-
-Finally, if you would like to run the provided demos you will also require the following packages:
+Additionally, if you would like to run the provided demos you will also require the following packages:
 
 * **matplotlib**: http://matplotlib.org/
 * **scipy**: http://www.scipy.org/
@@ -302,11 +298,14 @@ on the folder where this README file is located. You might need superuser permis
 
 ####Generating docs
 
-Documentation is available only at http://pythonhosted.org/prox_tv/. Nevertheless if you would like to compile the docs yourself you just need to run
+Documentation is available at http://pythonhosted.org/prox_tv/. Nevertheless if you would like to compile the docs yourself you just need to run
 
     make html
     
-in the docs/ folder. The documentation will be generated in the doc/_build/html/index.html file.
+in the docs/ folder. The documentation will be generated in the doc/_build/html/index.html file. During the generation process the following packages will be needed:
+
+- **sphinxcontrib-napoleon**
+- **sphinx_rtd_theme**
 
 ###Usage
 
