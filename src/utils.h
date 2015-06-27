@@ -40,7 +40,13 @@ typedef struct {
 
 /* Math functions */
 short sign(double s);
+#ifdef min
+    #undef min
+#endif
 double min(double x, double y);
+#ifdef max
+    #undef max
+#endif
 double max(double x, double y);
 void radialProjection(double *x, int n, double norm, double lambda);
 
