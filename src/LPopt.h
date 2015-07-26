@@ -46,6 +46,7 @@ double LPnorm(double *x, int n, double p);
 int PN_LP1(double *y,double lambda,double *x,double *info,int n);
 int PN_LP2(double *y,double lambda,double *x,double *info,int n);
 int PN_LPinf(double *y,double lambda,double *x,double *info,int n,Workspace *ws);
+int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive,double objGap,int maxIters,double* iterGaps,double* iterTimes);
 int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive,double objGap);
 int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive);
 /* Lp-ball projections */

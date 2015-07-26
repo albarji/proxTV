@@ -55,5 +55,6 @@ void freeWorkspaces(Workspace **wa,int p);
 
 /* Other utility functions */
 int compareDoublesReversed(const void *v1, const void *v2);
+long getTime();
 
 #endif

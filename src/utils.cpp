@@ -10,6 +10,7 @@
 #include <math.h>
 #include <float.h>
 #include <limits.h>
+#include <sys/time.h>
 #include "utils.h"
 
 /**
@@ -246,3 +247,14 @@ int compareDoublesReversed(const void *v1, const void *v2){
     else if(d1 > d2) return -1;
     else return 0;
 }
+
+/* Returns the current time in microseconds since the epoch
+    This time is based on wall-clock time */
+long getTime() {
+    /* Get full time specification */
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    /* Transform to microseconds and return */
+    return tv.tv_sec * 1000000 + tv.tv_usec;
+}
+

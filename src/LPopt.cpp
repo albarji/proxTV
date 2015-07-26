@@ -203,18 +203,34 @@ int PN_LPinf(double *y,double lambda,double *x,double *info,int n,Workspace *ws)
         - lambda: penalty parameter.
         - x: array in which to store the solution.
         - info: array in which to store optimizer information.
+            - info[0] number of iterations run
+            - info[1] dual gap
+            - info[2] status code
         - n: length of array y (and x).
         - p: degree of the Lp norm.
         - ws: workspace of allocated memory to use. If NULL, any needed memory is locally managed.
         - positive: 1 if all inputs y >= 0, 0 else.
         - objGap: desired quality of the solution in terms of duality gap.
+        - maxIters: maximum number of iterations to run the method.
+            If 0 or negative, a default value is used.
+        - iterGaps: array in which to store dual gap values at each iteration.
+            The caller must ensure the array is large enough to store the
+            result. If null, no information is returned here.
+        - iterTimes: array in which to store time values at end of each iteration.
+            The caller must ensure the array is large enough to store the
+            result. If null, no information is returned here.
 */
-int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive,double objGap){
+int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive,double objGap,int maxIters,double *iterGaps,double* iterTimes){
     double *g=NULL,*d=NULL,*xnorm=NULL,*auxv=NULL;
     double stop,stop2,q,qInv,nx,f,fupdate,aux,c,den,xp1vGrad,gRd,delta,prevDelta,improve,rhs,grad0,gap,epsilon;
     int *inactive=NULL,*signs=NULL;
     int i,j,iters,recomp,found,nI;
+    long timerInit, timerValue;
     short updateKind,stuck;
+    
+    /* Start timer (if requested) */
+    if ( iterTimes != NULL )
+        timerInit = getTime();
     
     #define CHECK_INACTIVE(x,g,inactive,nI,i) \
         for(i=nI=0 ; i<n ; i++) \
@@ -363,9 +379,13 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     for ( i = 0 ; i < n ; i++ )
         auxv[i] = x[i]-y[i];  /* auxv storing differences x-y*/
         
+    /* Number of iterations to optimize */
+    if ( maxIters <= 0 )
+        maxIters = MAX_ITERS_PNLP;
+        
     /* Projected Newton loop */
     stop = gap = DBL_MAX; iters = 0;
-    for(iters=0 ; stop > STOP_PNLP && iters < MAX_ITERS_PNLP && gap > objGap ; iters++){
+    for(iters=0 ; stop > STOP_PNLP && iters < maxIters && gap > objGap ; iters++){
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, x=[ ",iters);
             for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",x[i]);
@@ -663,6 +683,13 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, stop=%lg, gap=%lg\n",iters,stop,gap);
         #endif
+       
+        /* Store gap for this iteration (if requested) */
+        if ( iterGaps )
+            iterGaps[iters] = gap;
+        /* Store time */
+        if ( iterTimes != NULL )
+            iterTimes[iters] = getTime() - timerInit; 
     }
     
     /* Set almost zero entries to exact zero */
@@ -727,11 +754,36 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         - p: degree of the Lp norm.
         - ws: workspace of allocated memory to use. If NULL, any needed memory is locally managed.
         - positive: 1 if all inputs y >= 0, 0 else.
+        - objGap: desired quality of the solution in terms of duality gap.
         
-    The proximity problem is solved to a default level of accuracy, as given by STOP_GAP_PNLP.
+    The proximity problem is solved to a default level number of itearations.
+*/
+int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive,double objGap) {
+    return PN_LPp(y, lambda, x, info, n, p, ws, positive, objGap, 0, NULL, NULL);
+}
+
+/*  PN_LPp
+
+    Given a reference signal y and a penalty parameter lambda, solves the proximity operator
+    
+        min_x 0.5 ||x-y||^2 + lambda ||x||_p ,
+        
+    for the Lp norm. To do so a Projected Newton algorithm is used.
+    
+    Inputs:
+        - y: reference signal.
+        - lambda: penalty parameter.
+        - x: array in which to store the solution.
+        - info: array in which to store optimizer information.
+        - n: length of array y (and x).
+        - p: degree of the Lp norm.
+        - ws: workspace of allocated memory to use. If NULL, any needed memory is locally managed.
+        - positive: 1 if all inputs y >= 0, 0 else.
+        
+    The proximity problem is solved to a default level of accuracy, as given by STOP_GAP_PNLP, as well as to a default number of iterations.
 */
 int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive) {
-    return PN_LPp(y, lambda, x, info, n, p, ws, positive, STOP_GAP_PNLP);
+    return PN_LPp(y, lambda, x, info, n, p, ws, positive, STOP_GAP_PNLP, 0, NULL, NULL);
 }
 
 /** PN_LPpGap
