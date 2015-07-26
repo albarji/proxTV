@@ -45,9 +45,10 @@ function install(nopar)
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Yang.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2DL1W.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV3D_Yang.cpp "*.o"
-        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o" %FIXME: add to rest of options
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVp_GPFW.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV.cpp "*.o"
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveLp_PN.cpp "*.o"
     elseif nopar == 1
         disp('WARNING: parallelization disabled');
         % Compile C modules
@@ -77,6 +78,7 @@ function install(nopar)
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTVND_PDR.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTVp_GPFW.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV.cpp "*.o"
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveLp_PN.cpp "*.o"
     elseif nopar == 2
         disp('Installing multisrc mwlpack version');
         % Compile C modules
@@ -106,6 +108,7 @@ function install(nopar)
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVp_GPFW.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV.cpp "*.o"
+        mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveLp_PN.cpp "*.o"
     else
         disp('WARNING: Installing in debug mode');
         % Compile C modules
@@ -135,6 +138,7 @@ function install(nopar)
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVp_GPFW.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV.cpp "*.o"
+        mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveLp_PN.cpp "*.o"
     end
     cd ..
 
