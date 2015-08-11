@@ -271,6 +271,10 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             info[INFO_GAP] = 0;
             info[INFO_ITERS] = 0;
         }
+        if ( iterGaps )
+            iterGaps[0] = 0;
+        if ( iterTimes )
+            iterTimes[0] = getTime() - timerInit;
         FREE
         return 1;
     }
@@ -333,6 +337,11 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         memcpy(x, xnorm, sizeof(double)*n);
         stop = stop2;
     }
+    /* Note starting values */
+    if ( iterGaps )
+        iterGaps[0] = stop;
+    if ( iterTimes )
+        iterTimes[0] = getTime() - timerInit;
     /* If dual gap is good enough, we are finished */
     if ( stop < objGap ) {
         FREE
@@ -686,10 +695,10 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
        
         /* Store gap for this iteration (if requested) */
         if ( iterGaps )
-            iterGaps[iters] = gap;
+            iterGaps[iters+1] = gap;
         /* Store time */
         if ( iterTimes != NULL )
-            iterTimes[iters] = getTime() - timerInit; 
+            iterTimes[iters+1] = getTime() - timerInit; 
     }
     
     /* Set almost zero entries to exact zero */

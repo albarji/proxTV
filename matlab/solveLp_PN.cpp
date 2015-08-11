@@ -73,11 +73,11 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     }
     else info = NULL;
     if(nlhs >= 3 && maxIters > 0){
-        plhs[2] = mxCreateDoubleMatrix(maxIters,1,mxREAL);
+        plhs[2] = mxCreateDoubleMatrix(maxIters+1,1,mxREAL);
         gaps = mxGetPr(plhs[2]);
     }
     if(nlhs >= 4 && maxIters > 0){
-        plhs[3] = mxCreateDoubleMatrix(maxIters,1,mxREAL);
+        plhs[3] = mxCreateDoubleMatrix(maxIters+1,1,mxREAL);
         times = mxGetPr(plhs[3]);
     }
     
