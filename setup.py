@@ -1,29 +1,5 @@
 from setuptools import setup
-from setuptools.command.install import install
-from distutils.command.build import build
 
-# We need this workaround to solve the problem of importing prox_tv._prox_tv
-# before CFFI is installed. For more details, have a look at:
-#   https://caremad.io/2014/11/distributing-a-cffi-project/
-
-
-def get_ext_modules():
-    from prox_tv._prox_tv import _ffi
-    return [
-        _ffi.verifier.get_extension(),
-    ]
-
-
-class CFFIBuild(build):
-    def finalize_options(self):
-        self.distribution.ext_modules = get_ext_modules()
-        build.finalize_options(self)
-
-
-class CFFIInstall(install):
-    def finalize_options(self):
-        self.distribution.ext_modules = get_ext_modules()
-        install.finalize_options(self)
 
 setup(
     name="prox_tv",
@@ -33,27 +9,19 @@ setup(
     packages=['prox_tv'],
     install_requires=[
         'numpy',
-        'cffi',
-        'sphinxcontrib-napoleon',
-        'sphinx_rtd_theme',
-        'matplotlib',
-        'scipy',
-        'scikit-image'
+        'cffi>=1.0.0',
     ],
     setup_requires=[
-        'cffi'
+        'cffi>=1.0.0',
     ],
-    cmdclass={
-        'build': CFFIBuild,
-        'install': CFFIInstall,
-    },
     package_data={
-        'prox_tv': ['src/*.h', 'src/demos/*']
+        'prox_tv': ['src/demos/*']
     },
+    cffi_modules=['prox_tv/prox_tv_build.py:ffi'],
     author="Alvaro Barbero, Suvrit Sra, Josip Djolonga (python bindings)",
     author_email="alvaro.barbero@uam.es",
     url='https://github.com/albarji/proxTV',
-    license='BSD', 
+    license='BSD',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
@@ -65,5 +33,4 @@ setup(
     ],
     keywords='total variation image processing machine learning',
     test_suite="nose.collector",
-    zip_safe=False,
 )

@@ -1,6 +1,8 @@
 *.pyc
 *.mexa64
 *.o
+*.so
+*.swp
 *__pycache__*
 build
 README.html
@@ -8,3 +10,4 @@ README.html
 dist
 docs/_build
 prox_tv.egg-info
+.tox/*
