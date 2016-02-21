@@ -1,5 +1,6 @@
 import os
 import os.path
+from sys import platform as _platform
 
 from cffi import FFI
 
@@ -74,6 +75,19 @@ sources = [os.path.join('src', fname) for fname in (
     'TVL2opt.cpp', 'TVLPopt.cpp', 'TVNDopt.cpp', 'utils.cpp'
 )]
 
+extra_compile_args = []
+extra_link_args = []
+if _platform == 'darwin':
+    # if openblas was installed by homerew is present use this for lapacke.h
+    if os.path.exists('/usr/local/opt/openblas/include'):
+        extra_compile_args.append('-I/usr/local/opt/openblas/include')
+else:
+    # OSX clang does not (yet) support openmp, so don't add it to compile
+    # args
+    extra_compile_args.append('-fopenmp')
+    extra_link_args.append('-fopenmp')
+
+
 ffi.set_source(
     '_prox_tv',
     """
@@ -95,8 +109,8 @@ ffi.set_source(
     """,
     sources=sources,
     define_macros=[('NOMATLAB', 1)],
-    extra_compile_args=['-fopenmp'],
-    extra_link_args=['-fopenmp'],
+    extra_compile_args=extra_compile_args,
+    extra_link_args=extra_link_args,
     libraries=['lapack']
 )
 
