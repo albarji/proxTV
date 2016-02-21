@@ -343,3 +343,4 @@ We wish to thank the following people for helping us in debugging and extending 
 - **Zico Kolter** for pointing out a bug in our Projected Newton method.
 - **Sesh Kumar** for spotting and correcting a bug in our weighted 1D-TV method.
 - **Josip Djolonga** for implementing the Python bindings.
+- **Fabian Pedregosa** for improving MacOS support.
