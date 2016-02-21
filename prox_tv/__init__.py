@@ -108,6 +108,10 @@ def force_float_matrix(x):
     numpy array
         Float representation of the provided matrix
     """
+    # Check input is numpy array
+    if not isinstance(x, np.ndarray):
+        raise TypeError("Input must be a numpy matrix")
+    # Enforce float type
     if x.dtype != np.dtype('float64'):
         return x.astype('float')
     else:
