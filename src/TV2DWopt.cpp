@@ -47,7 +47,6 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
 {
 
   int i;
-  double *ytr = NULL;
   double *t = NULL;
   double *tb = NULL;
   Workspace **ws = NULL;

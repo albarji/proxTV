@@ -211,10 +211,10 @@ int PN_LPinf(double *y,double lambda,double *x,double *info,int n,Workspace *ws)
 */
 int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive,double objGap){
     double *g=NULL,*d=NULL,*xnorm=NULL,*auxv=NULL;
-    double stop,stop2,q,qInv,nx,f,fupdate,aux,c,den,xp1vGrad,gRd,delta,prevDelta,improve,rhs,grad0,gap,epsilon;
+    double stop,stop2,q,nx,f,fupdate,aux,c,den,xp1vGrad,gRd,delta,prevDelta,improve,rhs,grad0,gap,epsilon;
     int *inactive=NULL,*signs=NULL;
     int i,j,iters,recomp,found,nI;
-    short updateKind,stuck;
+    short updateKind;
     
     #define CHECK_INACTIVE(x,g,inactive,nI,i) \
         for(i=nI=0 ; i<n ; i++) \
@@ -242,7 +242,6 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     
     /* Compute dual norm q */
     q = 1/(1-1/p);
-    qInv = -1/q;
     
     /* Special case where the solution is the trivial x = 0 */
     /* This is bound to happen if ||y||_q <= lambda */
@@ -341,7 +340,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     epsilon = EPSILON_PNLP;
     
     #ifdef DEBUG
-        fprintf(DEBUG_FILE,"p=%lf, q=%lf, qInv=%lf\n",p,q,qInv);
+        fprintf(DEBUG_FILE,"p=%lf, q=%lf, qInv=%lf\n",p,q,-1/q);
         fprintf(DEBUG_FILE,"lambda=%lf\n",lambda);
         fprintf(DEBUG_FILE,"epsilon=%lg\n",epsilon);
         fprintf(DEBUG_FILE,"y=[ ",iters);
@@ -887,7 +886,7 @@ int LP1_project(double *y,double lambda,double *x,int n,Workspace *ws){
         - ws: workspace of allocated memory to use. If NULL, any needed memory is locally managed.
 */
 int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws){
-    double q,norm,scale;
+    double q;
     int *s=NULL;
     int i;
     
@@ -970,11 +969,10 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
             for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",x[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-    
-    /* Compute norm of solution */
-    norm = LPnorm(x,n,p);
 
     #ifdef DEBUG
+        /* Compute norm of solution */
+        norm = LPnorm(x,n,p);
         fprintf(DEBUG_FILE,"(LPp_project) p=%lf norm=%lf\n",p,norm);
     #endif
     

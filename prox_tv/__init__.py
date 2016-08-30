@@ -118,7 +118,7 @@ def force_float_matrix(x):
         return x
 
 
-def tv1_1d(x, w, sigma=0.05, method='tautstring'):
+def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
     r"""1D proximal operator for :math:`\ell_1`.
 
     Specifically, this optimizes the following program:
@@ -136,7 +136,8 @@ def tv1_1d(x, w, sigma=0.05, method='tautstring'):
     method : str
         The algorithm to be used, one of:
 
-        * ``'tautstring'``
+        * ``'classictautstring'`` - classic Taut String method
+        * ``'linearizedtautstring'`` - linearized Taut String method
         * ``'pn'`` - projected Newton.
         * ``'condat'`` - Condat's segment construction method.
         * ``'dp'`` - Johnson's dynamic programming algorithm.
@@ -149,13 +150,15 @@ def tv1_1d(x, w, sigma=0.05, method='tautstring'):
     numpy array
         The solution of the optimization problem.
     """
-    assert method in ('tautstring', 'pn', 'condat', 'dp')
+    assert method in ('classictautstring', 'linearizedtautstring', 'pn', 'condat', 'dp')
     assert w >= 0
     w = force_float_scalar(w)
     x = force_float_matrix(x)
     y = np.zeros(np.size(x))
-    if method == 'tautstring':
-        _call(lib.tautString_TV1, x, w, y, np.size(x))
+    if method == 'classictautstring': 
+        _call(lib.classicTautString_TV1, x, np.size(x), w, y)        
+    elif method == 'linearizedtautstring':
+        _call(lib.linearizedTautString_TV1, x, w, y, np.size(x))
     elif method == 'pn':
         info = np.zeros(_N_INFO)  # Holds [num of iterations, gap]
         _call(lib.PN_TV1, x, w, y, info, np.size(x), sigma, ffi.NULL)

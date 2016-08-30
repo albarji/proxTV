@@ -38,7 +38,7 @@ def test_tv1w_1d_uniform_weights_small_input():
 
 
 def test_tv1_1d():
-    methods = ('tautstring', 'pn', 'condat', 'dp')
+    methods = ('classictautstring', 'linearizedtautstring', 'pn', 'condat', 'dp')
     for _ in range(20):
         dimension = np.random.randint(1e1, 3e1)
         x = 100*np.random.randn(dimension)

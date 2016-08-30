@@ -11,7 +11,7 @@ ffi.cdef("""
         ...;
     } Workspace;
 
-    // Condat's implementatino.
+    // Condat's implementation.
     void TV1D_denoise(double* input, double* output, const int width,
                       const double lambda);
     // Ryan's implementation of Johnson's algorithm
@@ -19,9 +19,9 @@ ffi.cdef("""
 
     /* TV-L1 solvers */
 
-    int tautString_TV1(double *y, double lambda, double *x,int n);
-    int PN_TV1(double *y, double lambda, double *x, double *info, int n,
-               double sigma, Workspace *ws);
+    int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Workspace *ws);
+    int linearizedTautString_TV1(double *y,double lambda,double *x,int n);
+    int classicTautString_TV1(double *signal, int n, double lam, double *prox);
 
     /* Weighted TV-L1 solvers */
     int PN_TV1_Weighted(double* Y, double* W, double* X, double* info, int n,
@@ -71,8 +71,8 @@ ffi.cdef("""
 
 sources = [os.path.join('src', fname) for fname in (
     'condat_fast_tv.cpp', 'johnsonRyanTV.cpp', 'LPopt.cpp', 'TV2Dopt.cpp',
-    'TV2DWopt.cpp', 'TVgenopt.cpp', 'TVL1opt.cpp', 'TVL1Wopt.cpp',
-    'TVL2opt.cpp', 'TVLPopt.cpp', 'TVNDopt.cpp', 'utils.cpp'
+    'TV2DWopt.cpp', 'TVgenopt.cpp', 'TVL1opt.cpp', 'TVL1opt_tautstring.cpp',
+    'TVL1Wopt.cpp', 'TVL2opt.cpp', 'TVLPopt.cpp', 'TVNDopt.cpp', 'utils.cpp'
 )]
 
 extra_compile_args = []
@@ -87,27 +87,30 @@ else:
     extra_compile_args.append('-fopenmp')
     extra_link_args.append('-fopenmp')
 
+extra_compile_args.append('-I'+os.path.join('src'))
 
 ffi.set_source(
     '_prox_tv',
     """
-    typedef struct {
-        /* Size of memory vectors */
-        int n;
-        /* Generic memory which can be used by 1D algorithms */
-        double **d;
-        int maxd, nd;
-        int **i;
-        int maxi, ni;
-        /* Memory for inputs and outputs */
-        double *in,*out;
-        /* Warm restart variables */
-        short warm;
-        double *warmDual;
-        double warmLambda;
-    } Workspace;
+    #include "TVopt.h"
     """,
+#    typedef struct {
+#        /* Size of memory vectors */
+#        int n;
+#        /* Generic memory which can be used by 1D algorithms */
+#        double **d;
+#        int maxd, nd;
+#        int **i;
+#        int maxi, ni;
+#        /* Memory for inputs and outputs */
+#        double *in,*out;
+#        /* Warm restart variables */
+#        short warm;
+#        double *warmDual;
+#        double warmLambda;
+#    } Workspace;
     sources=sources,
+    source_extension='.cpp',
     define_macros=[('NOMATLAB', 1)],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,

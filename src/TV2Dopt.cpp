@@ -433,7 +433,7 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
 void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W, double norm, Workspace **ws) {
     #pragma omp parallel shared(M,N,input,output,W,norm,ws) default(none) 
     {
-        int i,j;
+        int j;
         // Get thread number
         int id = omp_get_thread_num();
         // Get corresponding workspace
@@ -699,7 +699,8 @@ int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*
     
     // Free memory and return
     FREE
-    
+    return 1;
+
     #undef FREE
     #undef CANCEL
 }
@@ -815,6 +816,7 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
     
     // Free memory and return
     FREE
+    return 1;
     
     #undef FREE
     #undef CANCEL

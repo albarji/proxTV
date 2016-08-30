@@ -16,6 +16,7 @@
 #include "LPopt.h"
 #include "utils.h"
 #include "condat_fast_tv.h"
+#include "johnsonRyanTV.h"
 
 #ifndef _TVOPT_H
 #define _TVOPT_H
@@ -89,7 +90,8 @@ int TV(double *y,double lambda,double *x,double *info,int n,double p,Workspace *
 
 /* TV-L1 solvers */
 int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Workspace *ws);
-int tautString_TV1(double *y,double lambda,double *x,int n);
+int linearizedTautString_TV1(double *y,double lambda,double *x,int n);
+int classicTautString_TV1(double *signal, int n, double lam, double *prox);
 
 /* Weighted TV-L1 solvers */
 int PN_TV1_Weighted(double* Y, double* W, double* X, double* info, int n, double sigma, Workspace* ws);
