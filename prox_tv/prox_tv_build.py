@@ -22,6 +22,7 @@ ffi.cdef("""
     int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Workspace *ws);
     int linearizedTautString_TV1(double *y,double lambda,double *x,int n);
     int classicTautString_TV1(double *signal, int n, double lam, double *prox);
+    void hybridTautString_TV1(double *y, int n, double lambda, double *x);
 
     /* Weighted TV-L1 solvers */
     int PN_TV1_Weighted(double* Y, double* W, double* X, double* info, int n,
@@ -72,7 +73,8 @@ ffi.cdef("""
 sources = [os.path.join('src', fname) for fname in (
     'condat_fast_tv.cpp', 'johnsonRyanTV.cpp', 'LPopt.cpp', 'TV2Dopt.cpp',
     'TV2DWopt.cpp', 'TVgenopt.cpp', 'TVL1opt.cpp', 'TVL1opt_tautstring.cpp',
-    'TVL1Wopt.cpp', 'TVL2opt.cpp', 'TVLPopt.cpp', 'TVNDopt.cpp', 'utils.cpp'
+    'TVL1opt_hybridtautstring.cpp', 'TVL1Wopt.cpp', 'TVL2opt.cpp', 
+    'TVLPopt.cpp', 'TVNDopt.cpp', 'utils.cpp'
 )]
 
 extra_compile_args = []

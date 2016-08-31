@@ -138,6 +138,7 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
 
         * ``'classictautstring'`` - classic Taut String method
         * ``'linearizedtautstring'`` - linearized Taut String method
+        * ``'hybridtautstring'`` - hybrid classic+linear Taut String method
         * ``'pn'`` - projected Newton.
         * ``'condat'`` - Condat's segment construction method.
         * ``'dp'`` - Johnson's dynamic programming algorithm.
@@ -150,7 +151,8 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
     numpy array
         The solution of the optimization problem.
     """
-    assert method in ('classictautstring', 'linearizedtautstring', 'pn', 'condat', 'dp')
+    assert method in ('classictautstring', 'linearizedtautstring', 
+                      'hybridtautstring', 'pn', 'condat', 'dp')
     assert w >= 0
     w = force_float_scalar(w)
     x = force_float_matrix(x)
@@ -159,6 +161,8 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
         _call(lib.classicTautString_TV1, x, np.size(x), w, y)        
     elif method == 'linearizedtautstring':
         _call(lib.linearizedTautString_TV1, x, w, y, np.size(x))
+    elif method == 'hybridtautstring':
+        _call(lib.hybridTautString_TV1, x, np.size(x), w, y)    
     elif method == 'pn':
         info = np.zeros(_N_INFO)  # Holds [num of iterations, gap]
         _call(lib.PN_TV1, x, w, y, info, np.size(x), sigma, ffi.NULL)

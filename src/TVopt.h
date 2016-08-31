@@ -92,6 +92,8 @@ int TV(double *y,double lambda,double *x,double *info,int n,double p,Workspace *
 int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Workspace *ws);
 int linearizedTautString_TV1(double *y,double lambda,double *x,int n);
 int classicTautString_TV1(double *signal, int n, double lam, double *prox);
+void hybridTautString_TV1(double *y, int n, double lambda, double *x);
+int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox, double offset); //Inner method
 
 /* Weighted TV-L1 solvers */
 int PN_TV1_Weighted(double* Y, double* W, double* X, double* info, int n, double sigma, Workspace* ws);
