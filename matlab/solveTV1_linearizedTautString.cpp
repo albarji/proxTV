@@ -7,9 +7,10 @@
 #include "mex.h"
 #include "../src/TVopt.h"
 
-/* solveTV1_tautString.cpp
+/* solveTV1_linearizedTautString.cpp
 
-   Solves the TV-L1 proximity problem by applying a Taut String algorithm.
+   Solves the TV-L1 proximity problem by applying a linearized Taut String 
+   algorithm.
 
    Parameters:
      - 0: reference signal y.
@@ -58,7 +59,7 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
     lambda = mxGetScalar(prhs[1]);
     
     /* Run Taut String method  */
-    tautString_TV1(y,lambda,x,nn);
+    linearizedTautString_TV1(y,lambda,x,nn);
     
     /* Free resources */
     FREE
