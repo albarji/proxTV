@@ -31,6 +31,7 @@ function install(nopar)
 
         % Compile mex -v interfaces
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_condat.cpp "*.o"
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_condattautstring.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_johnson.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_PN.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_linearizedTautString.cpp "*.o"
@@ -62,6 +63,7 @@ function install(nopar)
             
         % Compile mex -v interfaces
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_condat.cpp "*.o"
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_condattautstring.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_johnson.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_PN.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_linearizedTautString.cpp "*.o"
@@ -93,6 +95,7 @@ function install(nopar)
 
         % Compile mex -v interfaces
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_condat.cpp "*.o"
+        mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_condattautstring.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_johnson.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_PN.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_linearizedTautString.cpp "*.o"
@@ -124,6 +127,7 @@ function install(nopar)
         
         % Compile mex -v interfaces
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_condat.cpp "*.o"
+        mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_condattautstring.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_johnson.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_PN.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_linearizedTautString.cpp "*.o"

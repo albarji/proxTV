@@ -62,6 +62,8 @@
 #include <stdlib.h>
 #include "condat_fast_tv.h"
 
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define floattype double
 
 
 /* 
@@ -116,5 +118,96 @@ void TV1D_denoise(double* input, double* output, const int width, const double l
 			}
 		}
 	}
+}
+
+/* 
+This function implements 1D total variation denoising by
+the taut string algorithm. It was adapted from the Matlab 
+code written by Lutz Duembgen, which can be found at 
+http://www.imsv.unibe.ch/content/staff/personalhomepages/
+duembgen/software/multiscale_densities/index_eng.html
+Note: numerical blow-up if floattype=float for N>=10^6
+because the algorithm is based on the running sum of the 
+signal values.
+*/
+void TV1D_denoise_tautstring(double* input, double* output, int width, const double lambda) {
+	width++;
+	int* index_low=(int*)calloc(width,sizeof(int));
+	floattype* slope_low=(floattype*)calloc(width,sizeof(floattype));
+	int* index_up=(int*)calloc(width,sizeof(int));
+	floattype* slope_up=(floattype*)calloc(width,sizeof(floattype));
+	int* index=(int*)calloc(width,sizeof(int));
+	floattype* z=(floattype*)calloc(width,sizeof(floattype));
+	floattype* y_low=(floattype*)malloc(width*sizeof(floattype));
+	floattype* y_up=(floattype*)malloc(width*sizeof(floattype));
+	int s_low=0;
+	int c_low=0;
+	int s_up=0;
+	int c_up=0;
+	int c=0;
+	int i=2;
+	y_low[0]=y_up[0]=0;
+	y_low[1]=input[0]-lambda;
+	y_up[1]=input[0]+lambda;
+	for (;i<width;i++) {
+		y_low[i]=y_low[i-1]+input[i-1];
+		y_up[i]=y_up[i-1]+input[i-1];
+	}
+	y_low[width-1]+=lambda;
+	y_up[width-1]-=lambda;
+	slope_low[0] = INFINITY;
+	slope_up[0] = -INFINITY;
+	z[0]=y_low[0];
+	for (i=1;i<width;i++) {
+		index_low[++c_low] = index_up[++c_up] = i;
+		slope_low[c_low] = y_low[i]-y_low[i-1];
+		while ((c_low > s_low+1) && (slope_low[MAX(s_low,c_low-1)]<=slope_low[c_low])) {
+			index_low[--c_low] = i;
+			if (c_low > s_low+1) 
+				slope_low[c_low] = (y_low[i]-y_low[index_low[c_low-1]]) /
+					(i-index_low[c_low-1]);
+			else
+				slope_low[c_low] = (y_low[i]-z[c]) / (i-index[c]);
+		}
+		slope_up[c_up] = y_up[i]-y_up[i-1];
+		while ((c_up > s_up+1) && (slope_up[MAX(c_up-1,s_up)]>=slope_up[c_up])) {
+			index_up[--c_up] = i;
+			if (c_up > s_up+1)
+				slope_up[c_up] = (y_up[i]-y_up[index_up[c_up-1]]) /
+					(i-index_up[c_up-1]);
+			else
+				slope_up[c_up] = (y_up[i]-z[c]) / (i-index[c]);
+		}
+		while ((c_low==s_low+1) && (c_up>s_up+1) && (slope_low[c_low]>=slope_up[s_up+1])) {
+			index[++c] = index_up[++s_up];
+			z[c] = y_up[index[c]];
+			index_low[s_low] = index[c];
+			slope_low[c_low] = (y_low[i]-z[c]) / (i-index[c]);
+		}
+		while ((c_up==s_up+1) && (c_low>s_low+1) && (slope_up[c_up]<=slope_low[s_low+1])) {
+			index[++c] = index_low[++s_low];
+			z[c] = y_low[index[c]];
+			index_up[s_up] = index[c];
+			slope_up[c_up] = (y_up[i]-z[c]) / (i-index[c]);
+		}
+	}
+	for (i=1;i<=c_low-s_low;i++) 
+		z[c+i]=y_low[index[c+i]=index_low[s_low+i]];
+	c = c + c_low-s_low;
+	int j=0;
+	float a;
+	i=1;
+	while (i<=c) {
+		a = (z[i]-z[i-1]) / (index[i]-index[i-1]);
+		while (j<index[i]) {
+			output[j] = a;
+			j++;
+		}
+		i++;
+	}
+	free(index_low); free(slope_low);
+	free(index_up);  free(slope_up);
+	free(index);     free(z);
+	free(y_low);     free(y_up);
 }
 

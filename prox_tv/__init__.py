@@ -142,6 +142,8 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
         * ``'pn'`` - projected Newton.
         * ``'condat'`` - Condat's segment construction method.
         * ``'dp'`` - Johnson's dynamic programming algorithm.
+        * ``'condattautstring'`` - Condat's implementation of classic taut
+            string method.
 
     sigma : float
         Tolerance for sufficient descent (used only if ``method='pn'``).
@@ -152,7 +154,8 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
         The solution of the optimization problem.
     """
     assert method in ('classictautstring', 'linearizedtautstring', 
-                      'hybridtautstring', 'pn', 'condat', 'dp')
+                      'hybridtautstring', 'pn', 'condat', 'dp',
+                      'condattautstring')
     assert w >= 0
     w = force_float_scalar(w)
     x = force_float_matrix(x)
@@ -168,6 +171,8 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
         _call(lib.PN_TV1, x, w, y, info, np.size(x), sigma, ffi.NULL)
     elif method == 'condat':
         _call(lib.TV1D_denoise, x, y, np.size(x), w)
+    elif method == 'condattautstring':
+        _call(lib.TV1D_denoise_tautstring, x, y, np.size(x), w)
     else:
         _call(lib.dp, np.size(x), x, w, y)
     return y

@@ -14,6 +14,8 @@ ffi.cdef("""
     // Condat's implementation.
     void TV1D_denoise(double* input, double* output, const int width,
                       const double lambda);
+    void TV1D_denoise_tautstring(double* input, double* output, int width, 
+                                 const double lambda);
     // Ryan's implementation of Johnson's algorithm
     void dp(int n, double *y, double lam, double *beta);
 
@@ -96,21 +98,6 @@ ffi.set_source(
     """
     #include "TVopt.h"
     """,
-#    typedef struct {
-#        /* Size of memory vectors */
-#        int n;
-#        /* Generic memory which can be used by 1D algorithms */
-#        double **d;
-#        int maxd, nd;
-#        int **i;
-#        int maxi, ni;
-#        /* Memory for inputs and outputs */
-#        double *in,*out;
-#        /* Warm restart variables */
-#        short warm;
-#        double *warmDual;
-#        double warmLambda;
-#    } Workspace;
     sources=sources,
     source_extension='.cpp',
     define_macros=[('NOMATLAB', 1)],
