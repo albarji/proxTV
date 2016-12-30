@@ -73,7 +73,7 @@ def test_tv2_1d():
 
 
 def test_tv1_2d():
-    methods = ('yang', 'condat', 'chambolle-pock')
+    methods = ('yang', 'condat', 'chambolle-pock', 'pd', 'dr')
     for _ in range(20):
         rows = np.random.randint(1e1, 3e1)
         cols = np.random.randint(1e1, 3e1)
