@@ -301,26 +301,53 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 }
 
 /* DR2_TV
- *
- * This code puts in vector s the solution w for the problem
- * min_w gam(f_1(w)+f_2(w)) + 0.5*norm(w)^2 -u^w, where
- * f_1 and f_2 are cut functions (i.e., TV terms) over cols and rows of 'y'
- * Thus, in other words, it solves a rewritten version of a 2D-TV-Lp!
- *
- * Inputs:
- * int M -- num of rows in input matrix (unary)
- * int N -- num of cols in input matrix
- * double* unary -- input matrix / image
- * double W1    -- regularization weight along cols
- * double W2    -- regularization weight along rows
- * double norm1 -- TV norm to use along cols
- * double norm2 -- TV norm to use along rows
- * int nThreads  -- num of threads to use for parallel processing
- *
- * Outputs:
- *   s -- array containing primal solution (pre-alloced space assumed)
- */
 
+    Applies a variant of the Douglas Rachford algorithm, a.k.a. Alternating
+    Reflections method, to solve the 2D TV proximity problem.
+
+    To do so the 2D TV proximity problem 
+
+        min_x 0.5 ||x-y||^2 + TV_cols(x) + TV_rows(x)
+
+    is rewritten as the equivalent problem.
+
+        min_x 0.5 ||x||^2 + TV_cols(x) + TV_rows*(x)
+
+    where TV_rows*(x) = TV_rows(x) + x^T y. This problem takes the
+    form of the minimization of two Lovasz extensions, which in turn
+    can be shown to be solvable by the following best approximation problem:
+
+        min_{y1,y2} ||y_1 - y_2|| s.t. y_1 \in B_{-rows*}, y_2 \in B_{cols}
+
+    where B are the base polytopes of the corresponding Lovasz extensions.
+    Projection onto these polytopes can be computed easily through prox
+    operators of 1D TV, as it can be shown that
+
+        proj[B_{cols}](z) = z - prox_cols(z)
+        proj[B_{-rows*}](y) = z + prox_row(-z+y)
+
+    The method thus alternates reflections based on these projections to
+    solve the problem.
+
+     Inputs
+         int M -- num of rows in input matrix (unary)
+         int N -- num of cols in input matrix
+         double* unary -- input matrix / image
+         double W1    -- regularization weight along cols
+         double W2    -- regularization weight along rows
+         double norm1 -- TV norm to use along cols
+         double norm2 -- TV norm to use along rows
+         int nThreads  -- num of threads to use for parallel processing
+ 
+     Outputs:
+         s -- array containing primal solution (pre-alloced space assumed)
+
+    References
+        - Jegelka, Bach, Sra - Reflection methods for user-friendly
+            submodular optimization
+        - Bach - Learning with Submodular Functions: A Convex Optimization 
+            Perspective
+ */
 int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2, 
   double norm1, double norm2, double*s, int nThreads, int maxit, double* info)
 {
@@ -343,8 +370,6 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
       if(info) info[INFO_RC] = RC_ERROR;\
       return 0;
 
-  //printMatrix(M, N, unary, "unary");
-
   if (nThreads < 1) nThreads = 1;
   omp_set_num_threads(nThreads);
   maxDim = (M > N) ? M : N;
@@ -360,7 +385,7 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
   /* Set number of iterations */
   if(maxit <= 0) maxit = MAX_ITERS_DR;
 
-  // t = ones(size(unary)) * mean(unary(:));
+  // Normalize input to start DR: t = ones(size(unary)) * mean(unary(:));
   double sum=0;
   for (i=0; i < M*N; i++)
     sum += unary[i];
@@ -376,34 +401,32 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
   /* MAIN LOOP */
   while ( iter < maxit ) {
     iter++;
-    // reflect for B_vertical
-    //s = 2*dualprojLines(t, u1, W1) - t;
     #ifdef DEBUG
-        fprintf(DEBUG_FILE,"Dual projection along columns\n"); fflush(DEBUG_FILE);
+        fprintf(DEBUG_FILE,"Reflection along columns\n"); fflush(DEBUG_FILE);
     #endif
-    // Projection (prox) step
+    // Projection for B_{cols}
     DR_columnsPass(M, N, t, s, W1, norm1, ws);
-    // Reflection
+    // Reflection for B_{cols}
     for (i=0; i < M*N; i++) s[i] = 2*s[i] - t[i];
     
-    // reflect for -B_horizontal 
-    // t = 2*( -dualprojLines(-s', u2', W2')) - s';
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"Dual projection along rows\n"); fflush(DEBUG_FILE);
     #endif
-    // Projection (prox) step, taking into account displacemente from reference unary signal
+    // Projection for B_{-rows*}
     DR_rowsPass(M, N, s, tb, unary, W2, norm2, ws);
-    // Reflection
-    for (i=0; i < M*N; i++) tb[i] = -2*tb[i] - s[i];
+    // Reflection for B_{-rows*}
+    for (i=0; i < M*N; i++) tb[i] = 2*tb[i] - s[i];
 
-    // Combiner step
+    // Combiner step to get t_{i+1} = 0.5 [R[B_{-rows*}] R[B_{cols}] + I] t_i
     for (i=0; i < M*N; i++) t[i] = 0.5*(t[i]+tb[i]);
   }
   
   // DR is divergent, but with an additional projection we can recover valid solutions
+  // Projection for B_{cols}
   DR_columnsPass(M, N, t, s, W1, norm1, ws);
+  // Projection for B_{-rows*}
   DR_rowsPass(M, N, s, tb, unary, W2, norm2, ws);
-  for (i = 0; i < M*N; i++) s[i] = - s[i] - tb[i];
+  for (i = 0; i < M*N; i++) s[i] = tb[i] - s[i];
   
     /* Gather output information */
     if(info){
@@ -420,7 +443,9 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
 }
 
 /** 
-    Performs the columns proximity step in the DR algorithm.
+    Projection agains the base polyhedron of the columns in the DR algorithm.
+
+    proj[B_{cols}](z) = z - prox_cols(z)
 
     @param M number of rows in input signal
     @param N number of columns in input signal
@@ -455,7 +480,10 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W,
 }
 
 /** 
-    Performs the rows proximity step in the DR algorithm.
+    Projection agains the base polyhedron of the (modified) rows in the 
+    DR algorithm.
+
+    proj[B_{-rows*}](z) = z + prox_row(-z+y)
 
     @param M number of rows in input signal
     @param N number of columns in input signal
@@ -488,13 +516,17 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
             DR_proxDiff(N, wsi->in, wsi->out, W, norm, wsi);
             // Save output, recovering displacement from reference signal
             for ( idx = j, i = 0 ; i < N ; i++, idx+=M )
-                output[idx] = wsi->out[i] - ref[idx];
+                output[idx] = ref[idx] - wsi->out[i];
         }
     }
 }
 
 /**
- Applies the TV proximity operator to the given 1D input and returns the difference between input and output of prox.
+ Applies the TV proximity operator to the given 1D input and returns the 
+difference between input and output of prox.
+
+ This is equivalent to computing projection against the base polytope of
+ the corresponding TV function.
  
  @param n length of input signal
  @param input signal

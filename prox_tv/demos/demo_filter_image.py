@@ -1,14 +1,14 @@
 ### Example script showing how to perform a 2D Total-Variation filtering with proxTV
 import prox_tv as ptv
-import numpy as np
-from pylab import *
 import matplotlib.pyplot as plt
 import time
 import skimage as ski
-from skimage import data, io, filters, color, util
+from skimage import io, color, util
+import os
 
 # Load image
-X = io.imread('colors.png')
+here = os.path.dirname(os.path.abspath(__file__))
+X = io.imread(here + '/colors.png')
 X = ski.img_as_float(X)
 X = color.rgb2gray(X)
 
