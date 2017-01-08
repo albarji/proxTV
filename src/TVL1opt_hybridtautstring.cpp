@@ -24,20 +24,15 @@
         - currentstep: value in the input up to a solution has been found
         - offset: y offset of the current point with respect to the tube center
 
-    The method retuns 0 if no switch was performed, 1 if it was.
-    If the switch was performed, the prox array returns the full
+    The macro has no effect if no switch was performed. If it was,
+    forces immediate return of the method, and the prox array contains the full
     solution to the problem. 
 */
-inline int attemptswitch(int backtracks, double maxbacktracks, double *signal, 
-        int n, double lam, double *prox, int currentstep, double offset) {
-    // Last point needs special treatment, so it's better to not switch
-    if (backtracks > maxbacktracks && currentstep + 1 < n) {
-        // Switch to convex-concave method
-        classicTautString_TV1_offset(signal+currentstep, n-currentstep, lam, prox+currentstep, offset);
-        return 1;
-    } else
-        return 0;
-}
+#define ATTEMPTSWITCH(backtracks, maxbacktracks, signal, n, lam, prox, currentstep, offset) \
+    if (backtracks > maxbacktracks && currentstep + 1 < n) { \
+        classicTautString_TV1_offset(signal+currentstep, n-currentstep, lam, prox+currentstep, offset); \
+        return; \
+    }
 
 /*
     Solves the Total-Variation l1 problem through a hybrid method
@@ -52,7 +47,7 @@ inline int attemptswitch(int backtracks, double maxbacktracks, double *signal,
         - n: length of signal
         - lambda: strength of l1 regularization
         - x: array in which to store solution
-        - backtracksexp: maximum number of backtrack steps, defined by as an 
+        - backtracksexp: maximum number of backtrack steps, defined as an 
         exponent over the number of elements in the signal. Maximum number 
         is 2 as the worst case for Condat's method is O(n^2)
         
@@ -97,14 +92,12 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
             /* Majorant is r + lambda (except for last point), which is computed on the fly */   
             if ( lambda < mnHeight ) {
                 /* Break segment at last minorant breaking point */
-                backtracks += i - lastBreak;
                 i = mnBreak + 1;
                 /* Build valid segment up to this point using the minorant slope */
                 for ( j = lastBreak+1 ; j <= mnBreak ; j++ )
                     x[j] = mn;
                 /* Test if we must switch to convex-concave method */
-                if (attemptswitch(backtracks, maxbacktracks, y, n, lambda, x, i, -lambda))
-                    return;
+                ATTEMPTSWITCH(backtracks, maxbacktracks, y, n, lambda, x, i, -lambda)
                 /* Start new segment after the break */
                 lastBreak = mnBreak;
                 /* Build first point of new segment, which can be done in closed form */
@@ -113,7 +106,7 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 mxHeight = lambda;
                 mnHeight = minuslambda;
                 mnBreak = mxBreak = i;
-                i++;
+                i++; backtracks++;
                 continue;
             }
             
@@ -125,14 +118,12 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
             /* Minorant is r - lambda (except for last point), which is computed on the fly */
             if ( minuslambda > mxHeight ) {
                 /* If violated, break segment at last majorant breaking point */
-                backtracks += i - lastBreak;
                 i = mxBreak + 1;
                 /* Build valid segment up to this point using the majorant slope */
                 for ( j = lastBreak+1 ; j <= mxBreak ; j++ )
                     x[j] = mx;
                 /* Test if we must switch to convex-concave method */
-                if (attemptswitch(backtracks, maxbacktracks, y, n, lambda, x, i, lambda))
-                    return;
+                ATTEMPTSWITCH(backtracks, maxbacktracks, y, n, lambda, x, i, lambda)
                 /* Start new segment after the break*/
                 lastBreak = mxBreak;
                 /* Build first point of new segment, which can be done in closed form */
@@ -141,7 +132,7 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 mxHeight = lambda;
                 mnHeight = minuslambda;
                 mnBreak = mxBreak = i;
-                i++;
+                i++; backtracks++;
                 continue;
             }
             
@@ -168,7 +159,7 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
             }
             
             /* At this point: no violations, so keep up building current segment */
-            i++;
+            i++; backtracks++;
         }
         
         /* Special case i == n-1 (last point) */
@@ -184,14 +175,12 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
         /* Majorant is 0 at this point */   
         if ( IS_POSITIVE(mnHeight) ) { // 0 < mnHeight
             /* Break segment at last minorant breaking point */
-            backtracks += i - lastBreak;
             i = mnBreak + 1;
             /* Build valid segment up to this point using the minorant slope */
             for ( j = lastBreak+1 ; j <= mnBreak ; j++ )
                 x[j] = mn;
             /* Test if we must switch to convex-concave method */
-            if (attemptswitch(backtracks, maxbacktracks, y, n, lambda, x, i, -lambda))
-                return;
+            ATTEMPTSWITCH(backtracks, maxbacktracks, y, n, lambda, x, i, -lambda)
             /* Start new segment after the break */
             lastBreak = mnBreak;
             /* Go back to main loop, starting a new segment */
@@ -211,14 +200,12 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
         /* Minorant is 0 at this point */
         if ( IS_NEGATIVE(mxHeight) ) { // 0 > mxHeight
             /* If violated, break segment at last majorant breaking point */
-            backtracks += i - lastBreak;
             i = mxBreak + 1;
             /* Build valid segment up to this point using the majorant slope */
             for ( j = lastBreak+1 ; j <= mxBreak ; j++ )
                 x[j] = mx;
             /* Test if we must switch to convex-concave method */
-            if (attemptswitch(backtracks, maxbacktracks, y, n, lambda, x, i, lambda))
-                return;
+            ATTEMPTSWITCH(backtracks, maxbacktracks, y, n, lambda, x, i, lambda)
             /* Start new segment after the break*/
             lastBreak = mxBreak;
             /* Go back to main loop, starting a new segment */

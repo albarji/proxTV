@@ -118,7 +118,7 @@ def force_float_matrix(x):
         return x
 
 
-def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
+def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='linearizedtautstring'):
     r"""1D proximal operator for :math:`\ell_1`.
 
     Specifically, this optimizes the following program:
@@ -147,6 +147,9 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
 
     sigma : float
         Tolerance for sufficient descent (used only if ``method='pn'``).
+        
+    maxbacktracks: float
+        Backtrack steps before switching (used only if ``method='hybridtautstring'``)
 
     Returns
     -------
@@ -165,7 +168,11 @@ def tv1_1d(x, w, sigma=0.05, method='linearizedtautstring'):
     elif method == 'linearizedtautstring':
         _call(lib.linearizedTautString_TV1, x, w, y, np.size(x))
     elif method == 'hybridtautstring':
-        _call(lib.hybridTautString_TV1, x, np.size(x), w, y)    
+        if maxbacktracks is None:
+            _call(lib.hybridTautString_TV1, x, np.size(x), w, y)    
+        else:
+            _call(lib.hybridTautString_TV1_custom, x, np.size(x), w, y, 
+                  maxbacktracks)    
     elif method == 'pn':
         info = np.zeros(_N_INFO)  # Holds [num of iterations, gap]
         _call(lib.PN_TV1, x, w, y, info, np.size(x), sigma, ffi.NULL)
