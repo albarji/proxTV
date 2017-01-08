@@ -27,6 +27,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
 /* Internal definitions */
 #define ALG_CONDAT 0
 #define ALG_CHAMBOLLE_POCK 1
+#define ALG_CHAMBOLLE_POCK_ACC 2
 
 /*  PD2_TV
 
@@ -558,8 +559,12 @@ void DR_proxDiff(size_t n, double* input, double* output, double W, double norm,
         Condat: Xt = X - TAU * (X - Y) - TAU * ( ([zeros(1,N);U1] - [U1;zeros(1,N)]) + ([zeros(M,1),U2] - [U2,zeros(M,1)] ));
         Chamboll-Pock: Xt = 1/(1+TAU) * (X + TAU * Y - TAU * ( ([zeros(1,N);U1] - [U1;zeros(1,N)]) + ([zeros(M,1),U2] - [U2,zeros(M,1)] )));
     
-    Algorithm's optimization parameters are tuned in accordance to the values used in Toolbox Sparse Optmization by Gabriel Peyre, where
-    an implementation of Chambolle-Pock based on ADMM is provided (http://www.mathworks.com/matlabcentral/fileexchange/16204-toolbox-sparse-optmization). The rules for choosing the values seem to make use of the fact that the norm of the linear operator in 2D-TV is 8, and so:
+    Algorithm's optimization parameters are tuned in accordance to the values used 
+    in Toolbox Sparse Optmization by Gabriel Peyre, where an implementation of 
+    Chambolle-Pock based on ADMM is provided 
+    (http://www.mathworks.com/matlabcentral fileexchange/16204-toolbox-sparse-optmization).
+    The rules for choosing the values seem to make use of the fact that the norm of the 
+    linear operator in 2D-TV is 8, and so:
 
         theta = 1  (makes the algorithm analogous to ADMM)    
         sigma = 10;    (no explanation for this, but works well)
@@ -580,7 +585,7 @@ void DR_proxDiff(size_t n, double* input, double* output, double W, double norm,
         info -- information structure about optimization
 */
 int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*X, short alg, int maxit, double* info) {
-    double sigma, tau, normalizer, tmp;
+    double sigma, tau, theta, gamma, normalizer, tmp;
     double *U1 = NULL, *U2 = NULL, *Xt = NULL, *Z = NULL;
     int i, j;
     
@@ -597,12 +602,20 @@ int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*
         return 0;
         
     // Check algorithm choice
-    if ( alg != ALG_CONDAT && alg != ALG_CHAMBOLLE_POCK )
+    if ( alg != ALG_CONDAT && alg != ALG_CHAMBOLLE_POCK && alg != ALG_CHAMBOLLE_POCK_ACC)
         {CANCEL("Algorithm parameter has an invalid value",info)}
     
     // Compute values for optimization parameters
-    sigma = 10;
-    tau = .9/(sigma*8);
+    if ( alg == ALG_CHAMBOLLE_POCK_ACC ) {
+        sigma = 10;
+        tau = .9/(sigma*8);
+        gamma = 1./lambda;
+        theta = 1.;
+    } else {
+        sigma = 10;
+        tau = .9/(sigma*8);
+        theta = 1.;
+    }
     
     // Alloc memory
     U1 = (double*)malloc(sizeof(double)*(M-1)*N);
@@ -670,7 +683,7 @@ int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*
                 Xt[i] = X[i] - tau * (X[i] - Y[i] + Xt[i]);
                 
         // Chambolle-Pock's method: use proximal operator
-        } else if ( alg == ALG_CHAMBOLLE_POCK ) {
+        } else if ( alg == ALG_CHAMBOLLE_POCK ||  alg == ALG_CHAMBOLLE_POCK_ACC ) {
             // Proximal step: Xt = 1/(1+TAU) * (X + TAU * Y - TAU * ( ([zeros(1,N);U1] - [U1;zeros(1,N)]) + ([zeros(M,1),U2] - [U2,zeros(M,1)] )));
             
             // 1/(1+TAU) * (X + TAU * Y - TAU * (result_so_far))
@@ -679,9 +692,16 @@ int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*
                 Xt[i] = tmp * (X[i] + tau * (Y[i] - Xt[i]));            
         }
                 
-        // Combiner step: Z = 2*Xt - X; X = Xt;
+        // Combiner step: Z = Xt + \theta (Xt - X);
         for ( i = 0 ; i < M*N ; i++ )
-            Z[i] = 2*Xt[i] - X[i];
+            Z[i] = Xt[i] + theta * (Xt[i] - X[i]);
+	    // Update algorithm parameters (only in accelerated Chambolle-Pock)
+	    if ( alg == ALG_CHAMBOLLE_POCK_ACC ) {
+            tau *= theta;
+            sigma /= theta;
+            theta = 1. / sqrt(1 + 2 * gamma * tau); // 1/sqrt(1 + 2*gamma*tau)
+	    }
+
         // Compute stopping tolerance before copying X
         stop = 0; normalizer = 0;
         for ( i = 0 ; i < M*N ; i++ ) {
@@ -690,6 +710,8 @@ int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*
             stop += tmp*tmp;
         }
         stop = sqrt(stop/normalizer);
+
+        // Store solution at current step: X = Xt;
         memcpy(X, Xt, sizeof(double) * M * N);
         
         // Proximal (projection) for rows: linf_proj(U1 + SIGMA * (Z(2:end,:) - Z(1:end-1,:)), lambda);
