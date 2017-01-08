@@ -85,7 +85,8 @@ def test_tv1_2d():
         w_cols = w * np.ones((rows-1, cols))
         w_rows = w * np.ones((rows, cols-1))
         solutions.append(tv1w_2d(x, w_cols, w_rows, max_iters=5000))
-        for i in range(1, len(solutions)):
+        for i in range(0, len(solutions)):
+            print('Method', methods[i % len(methods)], 'solution is', solutions[i])
             assert np.allclose(solutions[i], solutions[0], atol=1e-3)
 
 
