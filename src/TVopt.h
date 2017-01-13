@@ -95,11 +95,13 @@ int classicTautString_TV1(double *signal, int n, double lam, double *prox);
 void hybridTautString_TV1(double *y, int n, double lambda, double *x);
 void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, double backtracksexp);
 int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox, double offset); //Inner method
+void SolveTVConvexQuadratic_a1_nw(int n, double* b, double w, double* solution);
 
 /* Weighted TV-L1 solvers */
 int PN_TV1_Weighted(double* Y, double* W, double* X, double* info, int n, double sigma, Workspace* ws);
 int tautString_TV1_Weighted(double *y,double* lambda,double *x,int n);
 int PN_TV1_Trend2_Weighted(double* Y, double* W, double* X, double* info, int n, double sigma, Workspace* ws);
+void SolveTVConvexQuadratic_a1(int n, double* b, double* w, double* solution);
 
 /* TV-L2 solvers */
 int more_TV2(double *y,double lambda,double *x,double *info,int n);

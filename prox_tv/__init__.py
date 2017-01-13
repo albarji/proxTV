@@ -144,6 +144,7 @@ def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='linearizedtautstring'):
         * ``'dp'`` - Johnson's dynamic programming algorithm.
         * ``'condattautstring'`` - Condat's implementation of classic taut
             string method.
+        * ``'kolgomorov'`` - Kolmogorov et al's message passing method.
 
     sigma : float
         Tolerance for sufficient descent (used only if ``method='pn'``).
@@ -158,7 +159,7 @@ def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='linearizedtautstring'):
     """
     assert method in ('classictautstring', 'linearizedtautstring', 
                       'hybridtautstring', 'pn', 'condat', 'dp',
-                      'condattautstring')
+                      'condattautstring', 'kolmogorov')
     assert w >= 0
     w = force_float_scalar(w)
     x = force_float_matrix(x)
@@ -180,6 +181,8 @@ def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='linearizedtautstring'):
         _call(lib.TV1D_denoise, x, y, np.size(x), w)
     elif method == 'condattautstring':
         _call(lib.TV1D_denoise_tautstring, x, y, np.size(x), w)
+    elif method == 'kolmogorov':
+        _call(lib.SolveTVConvexQuadratic_a1_nw, np.size(x), x, w, y)
     else:
         _call(lib.dp, np.size(x), x, w, y)
     return y

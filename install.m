@@ -27,7 +27,8 @@ function install(nopar)
             ../src/TVL2opt.cpp ../src/TVLPopt.cpp ../src/TV2Dopt.cpp ...
             ../src/TV2DWopt.cpp ../src/TVNDopt.cpp ../src/LPopt.cpp ...
             ../src/utils.cpp ../src/condat_fast_tv.cpp ../src/johnsonRyanTV.cpp ...
-            ../src/TVL1opt_tautstring.cpp ../src/TVL1opt_hybridtautstring.cpp
+            ../src/TVL1opt_tautstring.cpp ../src/TVL1opt_hybridtautstring.cpp ...
+            ../src/TVL1opt_kolmogorov.cpp
 
         % Compile mex -v interfaces
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_condat.cpp "*.o"
@@ -37,6 +38,7 @@ function install(nopar)
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_linearizedTautString.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_classicTautString.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_hybridTautString.cpp "*.o"
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_kolmogorov.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" TVL1Weighted.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" TVL1Weighted_tautString.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2_morec.cpp "*.o"
@@ -69,6 +71,7 @@ function install(nopar)
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_linearizedTautString.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_classicTautString.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_hybridTautString.cpp "*.o"
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV1_kolmogorov "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 TVL1Weighted.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 TVL1Weighted_tautString.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV2_morec.cpp "*.o"
@@ -101,6 +104,7 @@ function install(nopar)
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_linearizedTautString.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_classicTautString.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_hybridTautString.cpp "*.o"
+        mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_kolmogorov "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" TVL1Weighted.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" TVL1Weighted_tautString.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2_morec.cpp "*.o"
@@ -133,6 +137,7 @@ function install(nopar)
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_linearizedTautString.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_classicTautString.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_hybridTautString.cpp "*.o"
+        mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV1_kolmogorov "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" TVL1Weighted.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" TVL1Weighted_tautString.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2_morec.cpp "*.o"
