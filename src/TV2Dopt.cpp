@@ -821,3 +821,148 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
     #undef FREE
     #undef CANCEL
 }
+
+/*  Kolmogorov2_TV
+
+    Application of Kolmogorov et al's proximal algorithm for 2D TV-L1.
+    
+        min_X 0.5 ||X-Y||^2 + TV_cols(X) + TV_rows(X)
+        
+    This method uses an ADMM-like splitting to deal with rows and columns separately,
+    getting the problem
+
+        min_X max_U X·U + TV_rows(X) + 0.5 ||X-Y||^2 - TV_cols*(U)
+
+    where TV_cols* is the Fenchel dual of TV_cols, which is dealt with using Moreau's
+    identity.
+    
+    Inputs:
+        int M -- num of rows in input matrix Y
+        int N -- num of cols in input matrix Y
+        double* Y -- input matrix / image
+        double lambda    -- regularization weight
+        int maxit -- maximum number of iterations to run
+        
+    Outputs:
+        X -- array containing primal solution (pre-alloced space assumed)
+        info -- information structure about optimization
+
+    References:
+        Kolmogorov et al - Total variation on a Tree [Page 19]
+*/
+int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, double* info) {
+    double sigma, tau, theta, tmp, normalizer;
+    double *U = NULL, *Xprev = NULL, *row=NULL, *rowout=NULL, *TMP=NULL;
+    int i, j;
+    size_t NM = N*M;
+    
+    #define FREE \
+        if(U) free(U); \
+        if(Xprev) free(Xprev); \
+        if(row) free(row); \
+        if(rowout) free(rowout); \
+        if(TMP) free(TMP);
+    
+    #define CANCEL(txt,info) \
+        printf("Kolmogorov2_TV: %s\n",txt); \
+        FREE \
+        if(info) info[INFO_RC] = RC_ERROR;\
+        return 0;
+    
+    // Compute values for optimization parameters //TODO: optimized values??
+    //sigma = 10;
+    sigma = 1;
+    //tau = .9/(sigma*8);
+    tau = 1;
+    theta = 1.;
+    
+    // Alloc memory
+    U = (double*)malloc(sizeof(double)*M*N);
+    Xprev = (double*)malloc(sizeof(double)*M*N);
+    TMP = (double*)malloc(sizeof(double)*M*N);
+    row = (double*)malloc(sizeof(double)*N);
+    rowout = (double*)malloc(sizeof(double)*N);
+    if ( !U || !Xprev || !row || !rowout || !TMP )
+        {CANCEL("insufficient memory",info)}
+    
+    // Initialize values
+    
+    // X = Xprev = U = Y
+    memcpy(X, Y, sizeof(double)*NM);
+    memcpy(Xprev, Y, sizeof(double)*NM);
+    memcpy(U, Y, sizeof(double)*NM);
+    
+    // Set iterations
+    if ( maxit <= 0 )
+        maxit = MAX_ITERS_KOLMOGOROV;
+    
+    // Main loop
+    int it; double stop = DBL_MAX;
+
+    for ( it = 1 ; stop > STOP_KOLMOGOROV && it <= maxit ; it++ ) {
+        #ifdef DEBUG
+            fprintf(DEBUG_FILE,"Kolmogorov iteration %d\n",it); fflush(DEBUG_FILE);
+        #endif
+
+        // Columns step (dual U update)
+
+        // Input to dual prox solver: z = U + sigma*(X + theta *(X-Xprev)); input = sigma^-1*z
+        for ( i = 0 ; i < NM ; i++ ) {
+            TMP[i] = U[i] + sigma * (X[i] + theta * (X[i] - Xprev[i]));
+            TMP[i] /= sigma;
+        }
+        // Dual prox for cols
+        for ( j = 0 ; j < NM ; j+=M ) {
+            // Normal prox
+            TV(TMP+j, lambda/sigma, U+j, NULL, M, 1, NULL);
+            // Moreau's identity
+            for ( i = 0 ; i < M ; i++ )
+                (U+j)[i] = sigma*((TMP+j)[i] - (U+j)[i]); 
+        }
+
+        // Save current X
+        memcpy(Xprev, X, sizeof(double)*NM);
+
+        // Rows step (primal X update)
+        
+        // Input to prox solver: z = X - tau * U; input = (1-tau^-1)^-1*(y+tau^-1*z)
+        for ( i = 0 ; i < NM ; i++ ) {
+            TMP[i] = X[i] - tau * U[i];
+            TMP[i] = 1/(1+1/tau) * (Y[i] + 1/tau * TMP[i]);
+        }
+        // Prox operator for rows
+        for ( i = 0 ; i < M ; i++ ) {
+            // Copy input
+            for ( j = 0 ; j < N ; j++ )
+                row[j] = TMP[j*M+i];
+            // Prox operator
+            TV(row, lambda/(1.+1./tau), rowout, NULL, N, 1, NULL);
+            // Recover output
+            for ( j = 0 ; j < N ; j++ )
+                X[j*M+i] = rowout[j];
+        }
+        
+        // Compute stopping tolerance
+        stop = 0; normalizer = 0;
+        for ( i = 0 ; i < NM ; i++ ) {
+            normalizer += X[i] * X[i];
+            tmp = Xprev[i] - X[i];
+            stop += tmp*tmp;
+        }
+        stop = sqrt(stop/normalizer);
+    }
+    
+    // Gather output information
+    if(info){
+        info[INFO_ITERS] = it;
+        info[INFO_RC] = RC_OK;
+    }
+    
+    // Free memory and return
+    FREE
+    return 1;
+
+    #undef FREE
+    #undef CANCEL
+}
+

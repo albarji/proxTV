@@ -339,6 +339,7 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
         * ``'yang'`` - Yang's algorithm.
         * ``'condat'`` - Condat's gradient.
         * ``'chambolle-pock'`` - Chambolle-Pock's gradient.
+        * ``'kolmogorov'`` - Kolmogorov's splitting.
 
     n_threads : int
         Number of threads, used only for Proximal Dykstra
@@ -350,7 +351,8 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
         The solution of the optimization problem.
     """
     assert w >= 0
-    assert method in ('dr', 'pd', 'yang', 'condat', 'chambolle-pock')
+    assert method in ('dr', 'pd', 'yang', 'condat', 'chambolle-pock', 
+                      'kolmogorov')
     x = np.asfortranarray(x, dtype='float64')
     w = force_float_scalar(w)
     y = np.asfortranarray(np.zeros(x.shape))
@@ -363,6 +365,9 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
     elif method == 'pd':
         _call(lib.PD2_TV, x, (w, w), (1, 1), (1, 2), y, info, x.shape, 2, 2,
               n_threads, max_iters)
+    elif method == 'kolmogorov':
+        _call(lib.Kolmogorov2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, 
+              info)
     else:
         algorithm = 0 if method == 'condat' else 1
         _call(lib.CondatChambollePock2_TV,

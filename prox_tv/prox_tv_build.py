@@ -56,6 +56,8 @@ ffi.cdef("""
                                 double*X, short alg, int maxit, double* info);
     int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X,
                  int maxit, double* info);
+    int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, 
+                 int maxit, double* info);
 
     /* General-dimension TV solvers */
     int PD_TV(double *y, double *lambdas, double *norms, double *dims,

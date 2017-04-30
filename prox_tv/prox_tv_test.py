@@ -74,7 +74,8 @@ def test_tv2_1d():
 
 
 def test_tv1_2d():
-    methods = ('yang', 'condat', 'chambolle-pock')
+    """Tests that all 2D-TV methods produce equivalent results"""
+    methods = ('yang', 'condat', 'chambolle-pock', 'kolmogorov')
     for _ in range(20):
         rows = np.random.randint(1e1, 3e1)
         cols = np.random.randint(1e1, 3e1)
@@ -82,13 +83,33 @@ def test_tv1_2d():
         w = 20*np.random.rand()
         solutions = [tv1_2d(x, w, method=method, max_iters=5000)
                      for method in methods]
-        solutions.append([tvp_2d(x, w, w, 1, 1, max_iters=5000)])
+        for i in range(1, len(solutions)):
+            print(methods[i], ":", solutions[i])
+            assert np.allclose(solutions[i], solutions[0], atol=1e-3)
+            
+def test_tv1_tvp_2d():
+    """Tests that 2D-TVp == 2D-TV1 when p=1"""
+    for _ in range(20):
+        rows = np.random.randint(1e1, 3e1)
+        cols = np.random.randint(1e1, 3e1)
+        x = 100*np.random.randn(rows, cols)
+        w = 20*np.random.rand()
+        solution1 = tv1_2d(x, w, max_iters=5000)
+        solutionp = tvp_2d(x, w, w, 1, 1, max_iters=5000)
+        assert np.allclose(solution1, solutionp, atol=1e-3)
+        
+def test_tv1_tv1w_2d():
+    """Tests that 2D-TV1w == 2D-TV1 for unit weights"""
+    for _ in range(20):
+        rows = np.random.randint(1e1, 3e1)
+        cols = np.random.randint(1e1, 3e1)
+        x = 100*np.random.randn(rows, cols)
+        w = 20*np.random.rand()
         w_cols = w * np.ones((rows-1, cols))
         w_rows = w * np.ones((rows, cols-1))
-        solutions.append(tv1w_2d(x, w_cols, w_rows, max_iters=5000))
-        for i in range(1, len(solutions)):
-            assert np.allclose(solutions[i], solutions[0], atol=1e-3)
-
+        solution1 = tv1_2d(x, w, max_iters=5000)
+        solutionp = tv1w_2d(x, w_cols, w_rows, max_iters=5000)
+        assert np.allclose(solution1, solutionp, atol=1e-3)
 
 def test_tv1w_2d_uniform_weights():
     for _ in range(20):
@@ -101,7 +122,6 @@ def test_tv1w_2d_uniform_weights():
         solw = tv1w_2d(x, w_rows, w_cols, max_iters=5000)
         solw1 = tv1_2d(x, w1, max_iters=5000)
         assert np.allclose(solw, solw1, atol=1e-3)
-        
 
 def test_tv1w_2d_uniform_weights_small_input():
     for _ in range(1000):
@@ -114,8 +134,7 @@ def test_tv1w_2d_uniform_weights_small_input():
         solw = tv1w_2d(x, w_rows, w_cols, max_iters=5000)
         solw1 = tv1_2d(x, w1, max_iters=5000)
         assert np.allclose(solw, solw1, atol=1e-3)
-        
-        
+
 def test_tv1w_2d_emengd():
     r"""Issue reported by emengd
     
