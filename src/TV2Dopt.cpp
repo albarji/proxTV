@@ -869,12 +869,10 @@ int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int ma
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
     
-    // Compute values for optimization parameters //TODO: optimized values??
-    //sigma = 10;
-    sigma = 1;
-    //tau = .9/(sigma*8);
-    tau = 1;
+    // Initial stepsize values
     theta = 1.;
+    tau = 1. / 2.;
+    sigma = 1.;
     
     // Alloc memory
     U = (double*)malloc(sizeof(double)*M*N);
@@ -941,6 +939,11 @@ int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int ma
             for ( j = 0 ; j < N ; j++ )
                 X[j*M+i] = rowout[j];
         }
+
+        // Update stepsizes
+        theta = 1. / sqrt(1 + 1*tau);
+        tau *= theta;
+        sigma /= theta;
         
         // Compute stopping tolerance
         stop = 0; normalizer = 0;
