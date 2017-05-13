@@ -39,7 +39,7 @@ int TV(double *y,double lambda,double *x,double *info,int n,double p,Workspace *
         
     // Invoke appropriate method
     if(p == 1) {
-        linearizedTautString_TV1(y, lambda, x, n);
+        hybridTautString_TV1(y, n, lambda, x);
         if ( info ) {
             info[INFO_RC] = RC_OK;
             info[INFO_ITERS] = 0;

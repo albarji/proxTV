@@ -118,7 +118,7 @@ def force_float_matrix(x):
         return x
 
 
-def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='linearizedtautstring'):
+def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='hybridtautstring'):
     r"""1D proximal operator for :math:`\ell_1`.
 
     Specifically, this optimizes the following program:

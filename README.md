@@ -1,10 +1,10 @@
-#proxTV
+# proxTV
 
 Matlab and Python toolbox for fast Total Variation proximity operators.
 
 For an up-to-date version, check https://github.com/albarji/proxTV .
 
-##Index
+## Index
 
 1. Introduction
 2. Referencing
@@ -21,7 +21,7 @@ For an up-to-date version, check https://github.com/albarji/proxTV .
 5. Contact
 6. Acknowledgements
 
-##Introduction
+## Introduction
 
 **proxTV** is a toolbox implementing blazing fast implementations of Total Variation proximity operators. While the core algorithms are implemented in C to achieve high efficiency, Matlab and Python interfaces are provided for ease of use.
 
@@ -39,7 +39,7 @@ The library provides efficient solvers for the following Total Variation proximi
 | Anisotropic Total Variation on a 3-dimensional signal | ![alt tag](docs/img/TV3D.png) |
 | Generalized N-dimensional Anisotropic Total Variation | ![alt tag](docs/img/TVND.png), with X(di) every possible 1-dimensional slice of X following dimension di.|
 
-##Referencing
+## Referencing
 
 If you find this toolbox useful please reference the following papers:
 
@@ -74,9 +74,9 @@ whose Bibtex entries are
       Url                      = {http://arxiv.org/abs/1411.0589}
     }
 
-##Matlab interface
+## Matlab interface
 
-###Quick start guide
+### Quick start guide
 
 To install proxTV just type "install" at the Matlab prompt once located at proxTV folder. If any problem arises please refer to the "Installation" section in this file.
 
@@ -92,7 +92,7 @@ To solve TV for a general TV-Lp norm just add the value of p as a third argument
     
 Weighted versions of TV can also be solved by using exactly the same interface, but providing a vector of lambda weights instead of a scalar. For multidimensional signals the relevant weights are provided as a cell array; the "Usage" section for more detailts on this and more advanced uses of toolbox.
 
-###Installation
+### Installation
 
 To install proxTV follow the steps:
 
@@ -104,11 +104,11 @@ To install proxTV follow the steps:
 
 *Note*: this interface has only been tested under Linux. Installation might require LAPACK (http://www.netlib.org/lapack/) and BLAS (http://www.netlib.org/blas/) libraries.
 
-###Usage
+### Usage
 
 Two main functions conform the Matlab interface of proxTV: **TV** and **TVgen**. The first one provides basic options over the Total Variation problem, while the second one allows a more advanced configuration. In general, the TV function should suffice for most uses.
 
-####TV
+#### TV
 
 Solves Total Variation proximity operators for n-dimensional signals, applying a TV-Lp norm. The inputs and outputs of this function are:
 
@@ -156,7 +156,7 @@ In the case of 2D signals the weighted problem is
     
 Weight matrices are provided in the TV function as the lambda parameter through a cell array in the form {w, v} (see the examples in the "Examples" section)
 
-####TVgen
+#### TVgen
 
 Solves a generalized TV proximity operator for a multidimensional signal, in the form
     
@@ -182,9 +182,9 @@ Outputs:
        
 When possible, TV should be preferred. See the Examples section next for some specific examples on using this function.
 
-###Examples
+### Examples
 
-####1D examples
+#### 1D examples
 
 Filter 1D signal using TV-L1 norm:
 
@@ -202,7 +202,7 @@ Filter 1D signal using both TV-L1 and TV-L2 norms:
 
     TVgen(X,[lambda1 lambda2],[1 1],[1 2])
     
-####2D examples
+#### 2D examples
 
 Filter 2D signal using TV-L1 norm:
 
@@ -240,7 +240,7 @@ Filter 2D signal using weighted TV-L1 norm (for X image of size MxN, W1 weights 
 
     TV(X, {W1, W2})
     
-####3D examples
+#### 3D examples
 
 Filter 3D signal using TV-L1 norm:
 
@@ -266,9 +266,9 @@ Please note that some prerequisites might not be installed in your system. In ca
 
 If you want to install from source, please refere to the Installation section.
 
-###Installation
+### Installation
 
-####Prerequisites
+#### Prerequisites
 
 To use proxTV within Python the following prerequisites are necessary
 
@@ -288,7 +288,7 @@ Additionally, if you would like to run the provided demos you will also require 
 * **scipy**: http://www.scipy.org/
 * **scikit-image**: http://scikit-image.org/
 
-####Manually installing proxTV Python package
+#### Manually installing proxTV Python package
 
 After prerequisites have been satisfied, just run
 
@@ -296,7 +296,7 @@ After prerequisites have been satisfied, just run
     
 on the folder where this README file is located. You might need superuser permissions for a correct installation.
 
-####Generating docs
+#### Generating docs
 
 Documentation is available at http://pythonhosted.org/prox_tv/. Nevertheless if you would like to compile the docs yourself you just need to run
 
@@ -307,7 +307,7 @@ in the docs/ folder. The documentation will be generated in the doc/_build/html/
 - **sphinxcontrib-napoleon**
 - **sphinx_rtd_theme**
 
-###Usage
+### Usage
 
 Import proxTV Python package as
 
@@ -321,7 +321,7 @@ for direct access to all the package routines.
     
 The documentation of use of the package functions is maintained online at http://pythonhosted.org/prox_tv/.
 
-##Demos
+## Demos
 
 Some demos in the form of both Matlab and Python scripts showing how to work with proxTV are included in the subfolders /matlab/demos and /prox_tv/demos, respectively. They are:
 
@@ -343,3 +343,4 @@ We wish to thank the following people for helping us in debugging and extending 
 - **Sesh Kumar** for spotting and correcting a bug in our weighted 1D-TV method.
 - **Josip Djolonga** for implementing the Python bindings.
 - **Fabian Pedregosa** for improving MacOS support.
+
