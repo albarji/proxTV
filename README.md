@@ -15,10 +15,10 @@ Some examples of applications using **proxTV**:
    <td><img src="docs/img/signalFilteringWeighted.png" width="300"/></td>
  </tr>
  <tr>
-   <td colspan="3"><img src="docs/img/denoising.png" width="600"/></td>
+   <td colspan="3"><div align="center"><img src="docs/img/denoising.png" width="600"/></div></td>
  </tr>
  <tr>
-   <td colspan="3"><img src="docs/img/deconvolution.png" width="600"/></td>
+   <td colspan="3"><div align="center"><img src="docs/img/deconvolution.png" width="600"/></div></td>
  </tr>
 </table>
 
