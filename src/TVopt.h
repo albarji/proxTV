@@ -16,6 +16,7 @@
 #include "LPopt.h"
 #include "utils.h"
 #include "condat_fast_tv.h"
+#include "johnsonRyanTV.h"
 
 #ifndef _TVOPT_H
 #define _TVOPT_H
@@ -74,6 +75,10 @@
 #define MAX_ITERS_CONDAT 2500 //1000
 /* Stopping tolerance in Condat's method */
 #define STOP_CONDAT 0 //1e-6
+/* Maximum number of iterations in Kolmogorov's method */
+#define MAX_ITERS_KOLMOGOROV 2500
+/* Stopping tolerance in Kolmogorov's method */
+#define STOP_KOLMOGOROV 0 //1e-6
 /* Douglas Rachford parameters */
 #define MAX_ITERS_DR 35
 /* Maximum number of iterations in Yang's method */
@@ -89,12 +94,18 @@ int TV(double *y,double lambda,double *x,double *info,int n,double p,Workspace *
 
 /* TV-L1 solvers */
 int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Workspace *ws);
-int tautString_TV1(double *y,double lambda,double *x,int n);
+int linearizedTautString_TV1(double *y,double lambda,double *x,int n);
+int classicTautString_TV1(double *signal, int n, double lam, double *prox);
+void hybridTautString_TV1(double *y, int n, double lambda, double *x);
+void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, double backtracksexp);
+int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox, double offset); //Inner method
+void SolveTVConvexQuadratic_a1_nw(int n, double* b, double w, double* solution);
 
 /* Weighted TV-L1 solvers */
 int PN_TV1_Weighted(double* Y, double* W, double* X, double* info, int n, double sigma, Workspace* ws);
 int tautString_TV1_Weighted(double *y,double* lambda,double *x,int n);
 int PN_TV1_Trend2_Weighted(double* Y, double* W, double* X, double* info, int n, double sigma, Workspace* ws);
+void SolveTVConvexQuadratic_a1(int n, double* b, double* w, double* solution);
 
 /* TV-L2 solvers */
 int more_TV2(double *y,double lambda,double *x,double *info,int n);
@@ -117,6 +128,7 @@ int proxDykstraTV2DWeighted(double* y, double* W, double* x,int* ns, int nds, do
 int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2, double norm1, double norm2, double*s, int nThreads, int maxit, double* info);
 int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*X, short alg, int maxit, double* info);
 int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, double* info);
+int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, double* info);
 
 /* 3-dimensional TV solvers */
 int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, int maxit, double* info);

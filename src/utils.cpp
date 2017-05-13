@@ -78,7 +78,6 @@ void radialProjection(double *x, int n, double norm, double lambda) {
 */
 Workspace* newWorkspace(int n) {
     Workspace *ws;
-    int i;
     
     #define CANCEL \
         freeWorkspace(ws); \

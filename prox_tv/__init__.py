@@ -118,7 +118,7 @@ def force_float_matrix(x):
         return x
 
 
-def tv1_1d(x, w, sigma=0.05, method='tautstring'):
+def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='linearizedtautstring'):
     r"""1D proximal operator for :math:`\ell_1`.
 
     Specifically, this optimizes the following program:
@@ -136,31 +136,53 @@ def tv1_1d(x, w, sigma=0.05, method='tautstring'):
     method : str
         The algorithm to be used, one of:
 
-        * ``'tautstring'``
+        * ``'classictautstring'`` - classic Taut String method
+        * ``'linearizedtautstring'`` - linearized Taut String method
+        * ``'hybridtautstring'`` - hybrid classic+linear Taut String method
         * ``'pn'`` - projected Newton.
         * ``'condat'`` - Condat's segment construction method.
         * ``'dp'`` - Johnson's dynamic programming algorithm.
+        * ``'condattautstring'`` - Condat's implementation of classic taut
+            string method.
+        * ``'kolgomorov'`` - Kolmogorov et al's message passing method.
 
     sigma : float
         Tolerance for sufficient descent (used only if ``method='pn'``).
+        
+    maxbacktracks: float
+        Backtrack steps before switching (used only if ``method='hybridtautstring'``)
 
     Returns
     -------
     numpy array
         The solution of the optimization problem.
     """
-    assert method in ('tautstring', 'pn', 'condat', 'dp')
+    assert method in ('classictautstring', 'linearizedtautstring', 
+                      'hybridtautstring', 'pn', 'condat', 'dp',
+                      'condattautstring', 'kolmogorov')
     assert w >= 0
     w = force_float_scalar(w)
     x = force_float_matrix(x)
     y = np.zeros(np.size(x))
-    if method == 'tautstring':
-        _call(lib.tautString_TV1, x, w, y, np.size(x))
+    if method == 'classictautstring': 
+        _call(lib.classicTautString_TV1, x, np.size(x), w, y)        
+    elif method == 'linearizedtautstring':
+        _call(lib.linearizedTautString_TV1, x, w, y, np.size(x))
+    elif method == 'hybridtautstring':
+        if maxbacktracks is None:
+            _call(lib.hybridTautString_TV1, x, np.size(x), w, y)    
+        else:
+            _call(lib.hybridTautString_TV1_custom, x, np.size(x), w, y, 
+                  maxbacktracks)    
     elif method == 'pn':
         info = np.zeros(_N_INFO)  # Holds [num of iterations, gap]
         _call(lib.PN_TV1, x, w, y, info, np.size(x), sigma, ffi.NULL)
     elif method == 'condat':
         _call(lib.TV1D_denoise, x, y, np.size(x), w)
+    elif method == 'condattautstring':
+        _call(lib.TV1D_denoise_tautstring, x, y, np.size(x), w)
+    elif method == 'kolmogorov':
+        _call(lib.SolveTVConvexQuadratic_a1_nw, np.size(x), x, w, y)
     else:
         _call(lib.dp, np.size(x), x, w, y)
     return y
@@ -314,10 +336,10 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
 
         * ``'dr'`` - Douglas Rachford splitting.
         * ``'pd'`` - Proximal Dykstra splitting.
-        * ``'yang'`` - Yang's splitting (ADMM).
-        * ``'condat'`` - Condat's splitting.
-        * ``'chambolle-pock'`` - Chambolle-Pock's splitting.
-        * ``'chambolle-pock-acc'`` - (accelerated) Chambolle-Pock's splitting.
+        * ``'yang'`` - Yang's algorithm.
+        * ``'condat'`` - Condat's gradient.
+        * ``'chambolle-pock'`` - Chambolle-Pock's gradient.
+        * ``'kolmogorov'`` - Kolmogorov's splitting.
 
     n_threads : int
         Number of threads, used only for Proximal Dykstra
@@ -330,7 +352,7 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
     """
     assert w >= 0
     assert method in ('dr', 'pd', 'yang', 'condat', 'chambolle-pock', 
-                      'chambolle-pock-acc')
+                      'kolmogorov')
     x = np.asfortranarray(x, dtype='float64')
     w = force_float_scalar(w)
     y = np.asfortranarray(np.zeros(x.shape))
@@ -343,6 +365,9 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
     elif method == 'pd':
         _call(lib.PD2_TV, x, (w, w), (1, 1), (1, 2), y, info, x.shape, 2, 2,
               n_threads, max_iters)
+    elif method == 'kolmogorov':
+        _call(lib.Kolmogorov2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, 
+              info)
     else:
         variants = {
             'condat' : 0,

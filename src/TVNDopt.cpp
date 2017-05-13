@@ -522,8 +522,8 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         double with value of the generalized TV norm.
 */
 double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nds,int npen,int ncores){
-    long n,k,nBytes,idx1,idx2;
-    int i,j,d,maxDim,iters,nThreads;
+    long n,k,idx1,idx2;
+    int i,j,d,maxDim,nThreads;
     double totalVal;
     long *incs=NULL,*nSlices=NULL;
     Workspace **ws=NULL;
@@ -551,9 +551,9 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
         n *= ns[i];
         if(ns[i] > maxDim) maxDim = ns[i];
     }
-    nBytes = sizeof(double)*n;
     
     #ifdef DEBUG
+        long nBytes = sizeof(double)*n;
         fprintf(DEBUG_FILE,"ns: ");
         for(i=0;i<nds;i++)
             fprintf(DEBUG_FILE,"%d ",ns[i]);

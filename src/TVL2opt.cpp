@@ -34,7 +34,7 @@
 */
 int more_TV2(double *y,double lambda,double *x,double *info,int n){
     int nn=n-1,i;
-    double stop,tmp,tmp2,lam,pNorm,qNorm,pNormSq,dist;
+    double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy,*alpha,*beta,*minus,*p,*aux;
     lapack_int one=1,rc,nnp=nn;
     
@@ -189,7 +189,7 @@ int more_TV2(double *y,double lambda,double *x,double *info,int n){
 */
 int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *ws){
     int nn=n-1,i,iters;
-    double stop,tmp,tmp2,lam,pNorm,qNorm,pNormSq,dist;
+    double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy,*alpha,*beta,*minus,*p,*aux;
     lapack_int one=1,rc,nnp=nn;
     
@@ -445,9 +445,8 @@ int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *w
 */
 int PG_TV2(double *y,double lambda,double *x,double *info,int n){
     int nn=n-1,i;
-    double stop,tmp,tmp2,lam,pNorm,qNorm,pNormSq,dist;
+    double stop,tmp;
     double *p,*aux;
-    lapack_int one=1,rc,nnp=nn;
     
     /* Macros */
             

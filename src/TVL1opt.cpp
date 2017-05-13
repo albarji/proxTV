@@ -340,13 +340,15 @@ int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Wor
     #undef CANCEL
 }
 
-/*  tautString_TV1
+/*  linearizedTautString_TV1
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
     
         min_x 0.5 ||x-y||^2 + lambda sum_i |x_i - x_(i-1)| .
         
-    To do so a Taut String algorithm is used to solve its equivalent problem.
+    To do so a Linearized Taut String algorithm is used to solve its equivalent problem.
+
+    This solver is equivalent to Condat's method.
     
     Inputs:
         - y: reference signal.
@@ -354,7 +356,7 @@ int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Wor
         - x: array in which to store the solution.
         - n: length of array y (and x).
 */
-int tautString_TV1(double *y,double lambda,double *x,int n) {
+int linearizedTautString_TV1(double *y,double lambda,double *x,int n) {
     /* Minorant and minorant slopes */
     double mn, mx;
     /* Relative height of majorant and minorant slopes at the current points w.r.t. the tube center */
@@ -371,7 +373,7 @@ int tautString_TV1(double *y,double lambda,double *x,int n) {
     const double minuslambda2 = 2*minuslambda;
         
     #define CANCEL(txt,info) \
-        printf("tautString_TV1: %s\n",txt); \
+        printf("linearizedTautString_TV1: %s\n",txt); \
         return 0;
     
     /* Starting point */
