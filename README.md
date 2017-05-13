@@ -6,6 +6,12 @@
 
 **proxTV** is a toolbox implementing blazing fast implementations of Total Variation proximity operators, which form the basic building blocks for applications such as image denoising, image deconvolution, image inpainting, video denoising, or fused lasso models, to name a few. While the core algorithms are implemented in C to achieve top efficiency, Matlab and Python interfaces are provided for ease of use.
 
+Some examples of applications using **proxTV**:
+
+| Piece-wise constant signal approximation | ![alt tag](docs/img/signalFiltering.png)
+| Signal smoothing | ![alt tag](docs/img/signalFilteringL2.png)
+| Weighted piece-wise constant signal aproximation | ![alt tag](docs/img/signalFilteringWeighted.png)
+
 The library provides efficient solvers for the following Total Variation proximity problems:
 
 | Problem | Formulation |
