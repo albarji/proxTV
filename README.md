@@ -8,9 +8,13 @@
 
 Some examples of applications using **proxTV**:
 
-| Piece-wise constant signal approximation | ![alt tag](docs/img/signalFiltering.png)
-| Signal smoothing | ![alt tag](docs/img/signalFilteringL2.png)
-| Weighted piece-wise constant signal aproximation | ![alt tag](docs/img/signalFilteringWeighted.png)
+<table>
+ <tr>
+   <td>![alt tag](docs/img/signalFiltering.png)</td>
+   <td>![alt tag](docs/img/signalFilteringL2.png)</td>
+   <td>![alt tag](docs/img/signalFilteringWeighted.png)</td>
+ </tr>
+</table>
 
 The library provides efficient solvers for the following Total Variation proximity problems:
 
