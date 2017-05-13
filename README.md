@@ -15,6 +15,8 @@ Some examples of applications using **proxTV**:
    <td><img src="docs/img/signalFilteringWeighted.png" width="300"/></td>
  </tr>
 </table>
+<img src="docs/img/denoising.png" width="900"/>
+<img src="docs/img/deconvolution.png" width="900"/>
 
 More technically, the library provides efficient solvers for the following Total Variation proximity problems:
 
