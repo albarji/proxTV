@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/img/proxTV.png" height="350"><br>
+  <img src="docs/img/proxTV.png" height="300"><br>
 </div>
 
 -----------------
