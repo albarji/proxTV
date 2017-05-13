@@ -1,5 +1,3 @@
-# proxTV
-
 <div align="center">
   <img src="docs/img/proxTV.png" height="350"><br>
 </div>
