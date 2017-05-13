@@ -8,15 +8,15 @@
 
 Some examples of applications using **proxTV**:
 
-<table>
+<table border="0">
  <tr>
-   <td>![alt tag](docs/img/signalFiltering.png)</td>
-   <td>![alt tag](docs/img/signalFilteringL2.png)</td>
-   <td>![alt tag](docs/img/signalFilteringWeighted.png)</td>
+   <td><img src="docs/img/signalFiltering.png" width="300"/></td>
+   <td><img src="docs/img/signalFilteringL2.png" width="300"/></td>
+   <td><img src="docs/img/signalFilteringWeighted.png" width="300"/></td>
  </tr>
 </table>
 
-The library provides efficient solvers for the following Total Variation proximity problems:
+More technically, the library provides efficient solvers for the following Total Variation proximity problems:
 
 | Problem | Formulation |
 | ------- | ----------- |
