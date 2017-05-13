@@ -369,7 +369,12 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
         _call(lib.Kolmogorov2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, 
               info)
     else:
-        algorithm = 0 if method == 'condat' else 1
+        variants = {
+            'condat' : 0,
+            'chambolle-pock' : 1,
+            'chambolle-pock-acc' : 2
+        }
+        algorithm = variants[method]
         _call(lib.CondatChambollePock2_TV,
               x.shape[0], x.shape[1], x, w, y, algorithm, max_iters, info)
 
