@@ -1,7 +1,6 @@
 ### Example script showing how to perform a Total-Variation filtering with proxTV
 import prox_tv as ptv
 import numpy as np
-from pylab import *
 import matplotlib.pyplot as plt
 import time
 
@@ -15,7 +14,7 @@ s[N/2:3*N/4] = -1
 s[3*N/4:-N/8] = 2
 
 # Introduce noise
-n = s + 0.5*randn(*shape(s))
+n = s + 0.5*np.random.rand(*np.shape(s))
 
 # Filter using TV-L1
 lam=20
@@ -30,17 +29,17 @@ plt.subplot(3, 1, 1)
 plt.title('TVL1 filtering')
 plt.plot(s)
 plt.ylabel('Original')
-grid(True)
+plt.grid(True)
 
 plt.subplot(3, 1, 2)
 plt.plot(n)
 plt.ylabel('Noisy')
-grid(True)
+plt.grid(True)
 
 plt.subplot(3, 1, 3)
 plt.plot(f)
 plt.ylabel('Filtered')
-grid(True)
+plt.grid(True)
 
 plt.show()
 
@@ -48,10 +47,10 @@ plt.show()
 
 # Generate sinusoidal signal
 N = 1000
-s = sin(np.arange(1,N+1)/10.0) + sin(np.arange(1,N+1)/100.0)
+s = np.sin(np.arange(1,N+1)/10.0) + np.sin(np.arange(1,N+1)/100.0)
 
 # Introduce noise
-n = s + 0.5*randn(*shape(s))
+n = s + 0.5*np.random.randn(*np.shape(s))
 
 # Filter using TV-L2
 lam=100;
@@ -66,17 +65,17 @@ plt.subplot(3, 1, 1)
 plt.title('TVL2 filtering')
 plt.plot(s)
 plt.ylabel('Original')
-grid(True)
+plt.grid(True)
 
 plt.subplot(3, 1, 2)
 plt.plot(n)
 plt.ylabel('Noisy')
-grid(True)
+plt.grid(True)
 
 plt.subplot(3, 1, 3)
 plt.plot(f)
 plt.ylabel('Filtered')
-grid(True)
+plt.grid(True)
 
 plt.show()
 
@@ -90,7 +89,7 @@ s[N/2:3*N/4] = -1;
 s[3*N/4:-N/8] = 2;
 
 # Introduce noise
-n = s + 0.5*randn(*shape(s))
+n = s + 0.5*np.random.randn(*np.shape(s))
 
 # Generate weights
 lam = np.linspace(0,2,N-1)
@@ -107,22 +106,22 @@ plt.subplot(4, 1, 1)
 plt.title('Weighted TVL1 filtering')
 plt.plot(s)
 plt.ylabel('Original')
-grid(True)
+plt.grid(True)
 
 plt.subplot(4, 1, 2)
 plt.plot(n)
 plt.ylabel('Noisy')
-grid(True)
+plt.grid(True)
 
 plt.subplot(4, 1, 3)
 plt.plot(f)
 plt.ylabel('Filtered')
-grid(True)
+plt.grid(True)
 
 plt.subplot(4, 1, 4)
 plt.fill_between(np.arange(1,N), 0, lam)
 plt.ylabel('Weights')
-grid(True)
+plt.grid(True)
 
 plt.show()
 
