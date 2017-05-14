@@ -28,8 +28,13 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Topic :: Scientific/Engineering :: Mathematics',
         'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4'
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6'
     ],
     keywords='total variation image processing machine learning',
     test_suite="nose.collector",
