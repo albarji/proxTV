@@ -8,19 +8,11 @@
 
 Some examples of applications using **proxTV**:
 
-<table border="0">
- <tr>
-   <td><img src="docs/img/signalFiltering.png" width="300"/></td>
-   <td><img src="docs/img/signalFilteringL2.png" width="300"/></td>
-   <td><img src="docs/img/signalFilteringWeighted.png" width="300"/></td>
- </tr>
- <tr>
-   <td colspan="3"><div align="center"><img src="docs/img/denoising.png" width="600"/></div></td>
- </tr>
- <tr>
-   <td colspan="3"><div align="center"><img src="docs/img/deconvolution.png" width="600"/></div></td>
- </tr>
-</table>
+<div align="center">
+  <img src="docs/img/proxTVgallery.png" width="600"><br>
+</div>
+
+and others, such as Fused Lasso signal filtering, Fused Lasso classification and regression, lp-norm signal filtering, weighted image denosing, video denosing, tensor denoising, ...
 
 More technically, the library provides efficient solvers for the following Total Variation proximity problems:
 
