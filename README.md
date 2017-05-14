@@ -9,7 +9,7 @@
 Some examples of applications using **proxTV**:
 
 <div align="center">
-  <img src="docs/img/proxTVgallery.png" width="600"><br>
+  <img src="docs/img/proxTVgallery.png" width="900"><br>
 </div>
 
 and others, such as Fused Lasso signal filtering, Fused Lasso classification and regression, lp-norm signal filtering, weighted image denosing, video denosing, tensor denoising, ...
