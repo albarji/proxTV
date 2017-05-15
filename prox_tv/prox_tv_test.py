@@ -14,28 +14,21 @@ def test_tv1w_1d():
         for i in range(len(solutions)-1):
             assert np.allclose(solutions[i], solutions[i+1])
             
-            
 def test_tv1w_1d_uniform_weights():
-    for _ in range(20):
-        dimension = np.random.randint(1e1, 1e3)
-        x = 100*np.random.randn(dimension)
-        w1 = np.random.rand()
-        w = np.ones(dimension-1) * w1 
-        solw = tv1w_1d(x, w)
-        sol = tv1_1d(x, w1)
-        assert np.allclose(solw, sol)
-        
-        
-def test_tv1w_1d_uniform_weights_small_input():
-    for _ in range(1000):
-        dimension = np.random.randint(2, 4)
-        x = 100*np.random.randn(dimension)
-        w1 = np.random.rand()
-        w = np.ones(dimension-1) * w1 
-        solw = tv1w_1d(x, w)
-        sol = tv1_1d(x, w1)
-        assert np.allclose(solw, sol)
+    _test_tv1w_1d_uniform_weights(1e1, 1e4)
 
+def test_tv1w_1d_uniform_weights_small_input():
+    _test_tv1w_1d_uniform_weights(2, 4)
+
+def _test_tv1w_1d_uniform_weights(min, max):
+    for _ in range(1000):
+        dimension = np.random.randint(min, max)
+        x = 100*np.random.randn(dimension)
+        w1 = np.random.rand()
+        w = np.ones(dimension-1) * w1 
+        solw = tv1w_1d(x, w)
+        sol = tv1_1d(x, w1)
+        assert np.allclose(solw, sol)
 
 def test_tv1_1d():
     methods = ('classictautstring', 'linearizedtautstring', 'hybridtautstring',

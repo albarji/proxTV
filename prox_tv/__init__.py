@@ -118,7 +118,7 @@ def force_float_matrix(x):
         return x
 
 
-def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='hybridtautstring'):
+def tv1_1d(x, w, method='hybridtautstring', sigma=0.05, maxbacktracks=None):
     r"""1D proximal operator for :math:`\ell_1`.
 
     Specifically, this optimizes the following program:
@@ -157,36 +157,60 @@ def tv1_1d(x, w, sigma=0.05, maxbacktracks=None, method='hybridtautstring'):
     numpy array
         The solution of the optimization problem.
     """
-    assert method in ('classictautstring', 'linearizedtautstring', 
-                      'hybridtautstring', 'pn', 'condat', 'dp',
-                      'condattautstring', 'kolmogorov')
+    METHODS = {
+        'classictautstring' : _classictautstring_TV1,
+        'linearizedtautstring' : _linearizedtautstring_TV1,
+        'hybridtautstring' : _hybridtautstring_TV1,
+        'pn' : _pn_TV1,
+        'condat' : _condat_TV1,
+        'dp' : _dp_TV1,
+        'condattautstring' : _condattautstring_TV1,
+        'kolmogorov' : _kolmogorov_TV1
+    }
+    assert method in METHODS
     assert w >= 0
     w = force_float_scalar(w)
     x = force_float_matrix(x)
     y = np.zeros(np.size(x))
-    if method == 'classictautstring': 
-        _call(lib.classicTautString_TV1, x, np.size(x), w, y)        
-    elif method == 'linearizedtautstring':
-        _call(lib.linearizedTautString_TV1, x, w, y, np.size(x))
-    elif method == 'hybridtautstring':
-        if maxbacktracks is None:
-            _call(lib.hybridTautString_TV1, x, np.size(x), w, y)    
-        else:
-            _call(lib.hybridTautString_TV1_custom, x, np.size(x), w, y, 
-                  maxbacktracks)    
-    elif method == 'pn':
-        info = np.zeros(_N_INFO)  # Holds [num of iterations, gap]
-        _call(lib.PN_TV1, x, w, y, info, np.size(x), sigma, ffi.NULL)
-    elif method == 'condat':
-        _call(lib.TV1D_denoise, x, y, np.size(x), w)
-    elif method == 'condattautstring':
-        _call(lib.TV1D_denoise_tautstring, x, y, np.size(x), w)
-    elif method == 'kolmogorov':
-        _call(lib.SolveTVConvexQuadratic_a1_nw, np.size(x), x, w, y)
-    else:
-        _call(lib.dp, np.size(x), x, w, y)
+    METHODS[method](x, w, y, sigma=sigma, maxbacktracks=maxbacktracks)
     return y
 
+def _classictautstring_TV1(x, w, y, **kwargs):
+    """Classic taut string method for TV1 proximity"""
+    _call(lib.classicTautString_TV1, x, np.size(x), w, y)
+
+def _linearizedtautstring_TV1(x, w, y, **kwargs):
+    """Linearized taut string method for TV1 proximity"""
+    _call(lib.linearizedTautString_TV1, x, w, y, np.size(x))
+
+def _hybridtautstring_TV1(x, w, y, **kwargs):
+    """Hybrid taut string method for TV1 proximity"""
+    if kwargs['maxbacktracks'] is None:
+        _call(lib.hybridTautString_TV1, x, np.size(x), w, y)    
+    else:
+        _call(lib.hybridTautString_TV1_custom, x, np.size(x), w, y, 
+              kwargs['maxbacktracks']) 
+
+def _pn_TV1(x, w, y, **kwargs):
+    """Projected Newton method for TV1 proximity"""
+    info = np.zeros(_N_INFO)  # Holds [num of iterations, gap]
+    _call(lib.PN_TV1, x, w, y, info, np.size(x), kwargs['sigma'], ffi.NULL)
+
+def _condat_TV1(x, w, y, **kwargs):
+    """Condat's method for TV1 proximity"""
+    _call(lib.TV1D_denoise, x, y, np.size(x), w)
+
+def _condattautstring_TV1(x, w, y, **kwargs):
+    """Condat's implementation of the taut string method for TV1 proximity"""
+    _call(lib.TV1D_denoise_tautstring, x, y, np.size(x), w)
+
+def _kolmogorov_TV1(x, w, y, **kwargs):
+    """Kolmogorov's method for TV1 proximity"""
+    _call(lib.SolveTVConvexQuadratic_a1_nw, np.size(x), x, w, y)
+
+def _dp_TV1(x, w, y, **kwargs):
+    """Johnson's dynamic programming method for TV1 proximity"""
+    _call(lib.dp, np.size(x), x, w, y)
 
 def tv1w_1d(x, w, method='tautstring', sigma=0.05):
     r"""Weighted 1D proximal operator for :math:`\ell_1`.
@@ -254,21 +278,32 @@ def tv2_1d(x, w, method='mspg'):
     numpy array
         The solution of the optimization problem.
     """
+    METHODS = {
+        'ms' : _ms_tv2,
+        'pg' : _pg_tv2,
+        'mspg': _mspg_tv2
+    }
     assert w >= 0
-    assert method in ('ms', 'pg', 'mspg')
+    assert method in METHODS
+
     w = force_float_scalar(w)
     x = force_float_matrix(x)
     info = np.zeros(_N_INFO)
     y = np.zeros(np.size(x), order='F')
-    if method == 'ms':
-        _call(lib.more_TV2, x, w, y, info, np.size(x))
-    elif method == 'pg':
-        _call(lib.PG_TV2, x, w, y, info, np.size(x))
-    elif method == 'mspg':
-        info = np.zeros(_N_INFO)
-        _call(lib.morePG_TV2, x, w, y, info, np.size(x), ffi.NULL)
+    METHODS[method](x, w, y, info)
     return y
 
+def _ms_tv2(x, w, y, info):
+    """More-Sorensen method for TV2 proximity"""
+    _call(lib.more_TV2, x, w, y, info, np.size(x))
+
+def _pg_tv2(x, w, y, info):
+    """Projected Gradient method for TV2 proximity"""
+    _call(lib.PG_TV2, x, w, y, info, np.size(x))
+
+def _mspg_tv2(x, w, y, info):
+    """More-Sorensen + Projected Gradient hybrid method for TV2 proximity"""
+    _call(lib.morePG_TV2, x, w, y, info, np.size(x), ffi.NULL)
 
 def tvp_1d(x, w, p, method='gpfw', max_iters=0):
     r"""1D proximal operator for any :math:`\ell_p` norm.
@@ -350,36 +385,59 @@ def tv1_2d(x, w, n_threads=1, max_iters=0, method='dr'):
     numpy array
         The solution of the optimization problem.
     """
+    METHODS = {
+        'yang' : _yang_tv2d,
+        'dr' : _dr_tv2d,
+        'pd' : _pd_tv2d,
+        'kolmogorov' : _kolmogorov_tv2d,
+        'condat': _condat_tv2d,
+        'chambolle-pock':  _chambollepock_tv2d,
+        'chambolle-pock-acc': _chambollepockacc_tv2d,
+    }
     assert w >= 0
-    assert method in ('dr', 'pd', 'yang', 'condat', 'chambolle-pock', 
-                      'kolmogorov')
+    assert method in METHODS
     x = np.asfortranarray(x, dtype='float64')
     w = force_float_scalar(w)
     y = np.asfortranarray(np.zeros(x.shape))
     info = np.zeros(_N_INFO)
-    if method == 'yang':
-        _call(lib.Yang2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, info)
-    elif method == 'dr':
-        _call(lib.DR2_TV, x.shape[0], x.shape[1], x, w, w, 1.0, 1.0, y,
-              n_threads, max_iters, info)
-    elif method == 'pd':
-        _call(lib.PD2_TV, x, (w, w), (1, 1), (1, 2), y, info, x.shape, 2, 2,
-              n_threads, max_iters)
-    elif method == 'kolmogorov':
-        _call(lib.Kolmogorov2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, 
-              info)
-    else:
-        variants = {
-            'condat' : 0,
-            'chambolle-pock' : 1,
-            'chambolle-pock-acc' : 2
-        }
-        algorithm = variants[method]
-        _call(lib.CondatChambollePock2_TV,
-              x.shape[0], x.shape[1], x, w, y, algorithm, max_iters, info)
-
+    METHODS[method](x, w, y, max_iters, info, n_threads=n_threads)
     return y
 
+def _yang_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Yang's method for 2D TV proximity"""
+    _call(lib.Yang2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, info)
+
+def _dr_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Douglas Rachford parallel projections method for 2D TV proximity"""
+    _call(lib.DR2_TV, x.shape[0], x.shape[1], x, w, w, 1.0, 1.0, y,
+              kwargs['n_threads'], max_iters, info)
+
+def _pd_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Proximal dykstra method for 2D TV proximity"""
+    _call(lib.PD2_TV, x, (w, w), (1, 1), (1, 2), y, info, x.shape, 2, 2,
+              kwargs['n_threads'], max_iters)
+
+def _kolmogorov_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Kolmogorov's method for 2D TV proximity"""
+    _call(lib.Kolmogorov2_TV, x.shape[0], x.shape[1], x, w, y, max_iters, 
+              info)
+
+def _condat_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Condat's method for 2D TV proximity"""
+    _condatchambollepock_tv2d(x, w, y, max_iters, info, algorithm=0)
+
+def _chambollepock_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Chambolle and Pock's method for 2D TV proximity"""
+    _condatchambollepock_tv2d(x, w, y, max_iters, info, algorithm=1)
+
+def _chambollepockacc_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Accelerated Chambolle and Pock's method for 2D TV proximity"""
+    _condatchambollepock_tv2d(x, w, y, max_iters, info, algorithm=2)
+
+def _condatchambollepock_tv2d(x, w, y, max_iters, info, **kwargs):
+    """Wrapper function for general implementaton of Chambolle-Pock + Condat"""
+    _call(lib.CondatChambollePock2_TV, x.shape[0], x.shape[1], x, w, y, 
+          kwargs['algorithm'], max_iters, info)
 
 def tv1w_2d(x, w_col, w_row, max_iters=0, n_threads=1):
     r"""2D weighted proximal operator for :math:`\ell_1` using DR splitting.
