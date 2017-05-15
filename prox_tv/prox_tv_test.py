@@ -80,14 +80,17 @@ def test_tv2_1d():
         for i in range(len(solutions)-1):
             assert np.allclose(solutions[i], solutions[i+1], atol=1e-3)
 
+def _generate2D():
+    """Generates a 2D array for the test"""
+    rows = np.random.randint(1e1, 3e1)
+    cols = np.random.randint(1e1, 3e1)
+    return 100*np.random.randn(rows, cols) 
 
 def test_tv1_2d():
     """Tests that all 2D-TV methods produce equivalent results"""
     methods = ('yang', 'condat', 'chambolle-pock', 'kolmogorov')
     for _ in range(20):
-        rows = np.random.randint(1e1, 3e1)
-        cols = np.random.randint(1e1, 3e1)
-        x = 100*np.random.randn(rows, cols)
+        x = _generate2D()
         w = 20*np.random.rand()
         solutions = [tv1_2d(x, w, method=method, max_iters=5000)
                      for method in methods]
@@ -98,9 +101,7 @@ def test_tv1_2d():
 def test_tv1_tvp_2d():
     """Tests that 2D-TVp == 2D-TV1 when p=1"""
     for _ in range(20):
-        rows = np.random.randint(1e1, 3e1)
-        cols = np.random.randint(1e1, 3e1)
-        x = 100*np.random.randn(rows, cols)
+        x = _generate2D()
         w = 20*np.random.rand()
         solution1 = tv1_2d(x, w, max_iters=5000)
         solutionp = tvp_2d(x, w, w, 1, 1, max_iters=5000)
@@ -109,9 +110,9 @@ def test_tv1_tvp_2d():
 def test_tv1_tv1w_2d():
     """Tests that 2D-TV1w == 2D-TV1 for unit weights"""
     for _ in range(20):
-        rows = np.random.randint(1e1, 3e1)
-        cols = np.random.randint(1e1, 3e1)
-        x = 100*np.random.randn(rows, cols)
+        x = _generate2D()
+        rows = len(x)
+        cols = len(x[0])
         w = 20*np.random.rand()
         w_cols = w * np.ones((rows-1, cols))
         w_rows = w * np.ones((rows, cols-1))
@@ -121,9 +122,9 @@ def test_tv1_tv1w_2d():
 
 def test_tv1w_2d_uniform_weights():
     for _ in range(20):
-        rows = np.random.randint(1e1, 3e1)
-        cols = np.random.randint(1e1, 3e1)
-        x = 100*np.random.randn(rows, cols)
+        x = _generate2D()
+        rows = len(x)
+        cols = len(x[0])
         w1 = np.random.rand()
         w_rows = np.ones([rows-1, cols]) * w1 
         w_cols = np.ones([rows, cols-1]) * w1 

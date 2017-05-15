@@ -49,10 +49,10 @@ function install(nopar)
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_PD.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_CondatChambollePock.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Yang.cpp "*.o"
-        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Kolmogorov.cpp "*.o" %TODO: add to rest of options
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Kolmogorov.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2DL1W.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV3D_Yang.cpp "*.o"
-        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o" %FIXME: add to rest of options
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVp_GPFW.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV.cpp "*.o"
     elseif nopar == 1
@@ -83,6 +83,7 @@ function install(nopar)
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV2D_PD.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV2D_CondatChambollePock.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV2D_Yang.cpp "*.o"
+        mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV2D_Kolmogorov.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV2DL1W.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTV3D_Yang.cpp "*.o"
         mex -v -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-O3 solveTVND_PDR.cpp "*.o"
@@ -116,6 +117,7 @@ function install(nopar)
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_PD.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_CondatChambollePock.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Yang.cpp "*.o"
+        mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Kolmogorov.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2DL1W.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV3D_Yang.cpp "*.o"
         mex -v -cxx -lmwlapack -lm CXXOPTIMFLAGS=-O3 CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o"
@@ -149,6 +151,7 @@ function install(nopar)
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_PD.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_CondatChambollePock.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Yang.cpp "*.o"
+        mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2D_Kolmogorov.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV2DL1W.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTV3D_Yang.cpp "*.o"
         mex -v -DDEBUG -cxx -lblas -llapack -lm CXXOPTIMFLAGS=-g CXXFLAGS="\$CXXFLAGS -fopenmp" LDFLAGS="\$LDFLAGS -fopenmp" solveTVND_PDR.cpp "*.o"

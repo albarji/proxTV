@@ -1,11 +1,10 @@
 ### Example script showing how to perform a weighted 2D Total-Variation filtering with proxTV
 import prox_tv as ptv
 import numpy as np
-from pylab import *
 import matplotlib.pyplot as plt
 import time
 import skimage as ski
-from skimage import data, io, filters, color, util
+from skimage import io, color, util
 
 # Load image
 X = io.imread('colors.png')
@@ -56,9 +55,9 @@ plt.subplot(3, 4, 7); io.imshow(W2); plt.title('Weights along rows');
 plt.subplot(3, 4, 11); io.imshow(FW); plt.title('Filter result');
 
 # Grid regions
-W1=cos(0.05*np.cumsum(np.ones((X.shape[0]-1, X.shape[1])), 1))
+W1=np.cos(0.05*np.cumsum(np.ones((X.shape[0]-1, X.shape[1])), 1))
 W1[W1 < 0] = 0
-W2=sin(0.05*np.cumsum(np.ones((X.shape[0], X.shape[1]-1)), 0))
+W2=np.sin(0.05*np.cumsum(np.ones((X.shape[0], X.shape[1]-1)), 0))
 W2[W2 < 0] = 0;
 print('Solving 2D weighted TV...')
 start = time.time()
