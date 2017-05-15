@@ -1,7 +1,7 @@
 import numpy as np
 
 from prox_tv import tv1_1d, tv1w_1d, tv2_1d, tv1_2d, tvp_1d, \
-                    tv1w_2d, tvp_2d
+                    tv1w_2d, tvp_2d, tvgen
 
 
 def test_tv1w_1d():
@@ -31,16 +31,29 @@ def _test_tv1w_1d_uniform_weights(min, max):
         assert np.allclose(solw, sol)
 
 def test_tv1_1d():
-    methods = ('classictautstring', 'linearizedtautstring', 'hybridtautstring',
-               'pn', 'condat', 'dp', 'condattautstring', 'kolmogorov')
+    """Tests 1-dimensional TV methods"""
     for _ in range(20):
         dimension = np.random.randint(1e1, 3e1)
         x = 100*np.random.randn(dimension)
         w = 20*np.random.rand()
-        solutions = [tv1_1d(x, w, method=method) for method in methods]
-        for i in range(1, len(solutions)):
-            assert np.allclose(solutions[0], solutions[i], atol=1e-3)
+        _test_tv1_methods(x, w)
 
+def test_tv1_1d_int():
+    """Tests 1-dimensional TV methods for integer inputs"""
+    for _ in range(20):
+        dimension = np.random.randint(1e1, 3e1)
+        x = (100*np.random.randn(dimension)).astype('int')
+        w = 20*np.random.rand()
+        _test_tv1_methods(x, w)
+
+def _test_tv1_methods(x, w):
+    """For given input signal and weight, all TV1 methods must be similar"""
+    methods = ('classictautstring', 'linearizedtautstring', 'hybridtautstring',
+               'pn', 'condat', 'dp', 'condattautstring', 'kolmogorov')
+    solutions = [tv1_1d(x, w, method=method) for method in methods]
+    solutions.append(tv1_1d(x, w, method='hybridtautstring', maxbacktracks=1.2))
+    for i in range(1, len(solutions)):
+        assert np.allclose(solutions[0], solutions[i], atol=1e-3)
 
 def test_tvp_1d():
     """Test that all 1D-lp-TV methods produce equivalent results"""
@@ -81,7 +94,7 @@ def _generate2D():
 
 def test_tv1_2d():
     """Tests that all 2D-TV methods produce equivalent results"""
-    methods = ('yang', 'condat', 'chambolle-pock', 'kolmogorov')
+    methods = ('yang', 'condat', 'chambolle-pock', 'kolmogorov', 'pd', 'dr')
     for _ in range(20):
         x = _generate2D()
         w = 20*np.random.rand()
@@ -147,4 +160,47 @@ def test_tv1w_2d_emengd():
                    np.array([[1,1],[1,1],[1,1]]), max_iters=100)
     sol2 = tv1_2d(a, 1)
     assert np.allclose(sol1, sol2, atol=1e-3)
-    
+
+def test_tvgen_1d():
+    """Tests that the general solver returns correct 1d solutions"""
+    for _ in range(20):
+        dimension = np.random.randint(1e1, 3e1)
+        x = 100*np.random.randn(dimension)
+        w = 20*np.random.rand()
+        specific = tv1_1d(x, w)
+        general = tvgen(x, [w], [1], [1])
+        assert np.allclose(specific, general, atol=1e-3)
+
+def test_tvgen_2d():
+    """Tests that the general solver returns correct 2d solutions"""
+    for _ in range(20):
+        x = _generate2D()
+        w = 20*np.random.rand()
+        specific = tv1_2d(x, w, max_iters=1000)
+        general = tvgen(x, [w, w], [1, 2], [1, 1], max_iters=1000)
+        assert np.allclose(specific, general, atol=1e-2)
+
+def test_tvgen_nd():
+    """Test that the general solver does not crash for high-d tensors"""
+    for _ in range(20):
+        dims = np.random.randint(3, 5)
+        shape = np.random.randint(2, 10, size=dims)
+        x = np.random.randn(*shape)
+        w = np.random.randn(dims)
+        tvgen(x, w, list(range(1,dims+1)), np.ones(dims))
+
+def test_tvgen_multireg():
+    """Test applying several regularizers on same dimension"""
+    for _ in range(20):
+        x = _generate2D()
+        w = 20*np.random.rand()
+        specific = tv1_2d(x, w, max_iters=1000)
+        general = tvgen(
+                x,
+                [w/2., w/2., w/3., w/3., w/3.],
+                [1, 1, 2, 2, 2],
+                [1, 1, 1, 1, 1],
+                max_iters=1000
+        )
+        print("Max diff: " + str((specific-general).max()))
+        assert np.allclose(specific, general, atol=1e-2)

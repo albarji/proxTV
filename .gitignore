@@ -11,3 +11,4 @@ dist
 docs/_build
 prox_tv.egg-info
 .tox/*
+.coverage
