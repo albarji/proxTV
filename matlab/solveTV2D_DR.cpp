@@ -40,6 +40,7 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]) {
         printf("Error in solveTV2D_DR: %s\n",txt); \
         if(x) free(x); \
         if(info) free(info); \
+        if(ns) free(ns); \
         return;
         
     /* Check input correctness */

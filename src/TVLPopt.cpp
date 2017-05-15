@@ -581,7 +581,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
         - p: degree of the TV norm.
 */
 int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws){
-    double *w=NULL,*aux=NULL,*aux2=NULL,*g;
+    double *w=NULL,*aux=NULL,*aux2=NULL,*z=NULL,*wpre=NULL,*g;
     double q,tmp,stop,dual,bestdual,lambdaMax,lambdaIni,lambdaCurrent,mu,musqrt,beta;
     int iter,stuck,nn,i,lambdaStep;
     Workspace *wsinner=NULL;
@@ -598,6 +598,8 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
             if(aux) free(aux); \
             if(aux2) free(aux2); \
         } \
+        if(z) free(z); \
+        if(wpre) free(wpre); \
         freeWorkspace(wsinner);
         
     #define CANCEL(txt,info) \
@@ -717,8 +719,8 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
     for(i=0;i<nn;i++) w[i] = aux[i];
     
     /* Alloc auxiliary memory */
-    double *z = (double*)malloc(sizeof(double)*nn);
-    double *wpre = (double*)malloc(sizeof(double)*nn);
+    z = (double*)malloc(sizeof(double)*nn);
+    wpre = (double*)malloc(sizeof(double)*nn);
     for (i=0;i<nn;i++) z[i] = w[i];
 
     double fistaStep = 1, fistaStepPrev;
@@ -838,7 +840,6 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
     
     /* Free resources and return */
     FREE
-    free(z); free(wpre); // Free auxiliary memory
     return 1;   
     
     #undef L
