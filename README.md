@@ -4,6 +4,7 @@
 
 -----------------
 [![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)
+[![Coverage Status](https://coveralls.io/repos/github/albarji/proxTV/badge.svg?branch=master)](https://coveralls.io/github/albarji/proxTV?branch=master)
 [![Code Climate](https://codeclimate.com/github/albarji/proxTV.svg)](https://codeclimate.com/github/albarji/proxTV)
 [![Python versions](https://img.shields.io/pypi/pyversions/prox_tv.svg)](https://pypi.python.org/pypi/prox_tv)
 
