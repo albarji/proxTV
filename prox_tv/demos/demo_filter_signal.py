@@ -4,14 +4,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
+def _blockysignal():
+    """Generates a blocky signal for the demo"""
+    N = 1000
+    s = np.zeros((N,1))
+    s[int(N/4):int(N/2)] = 1
+    s[int(N/2):int(3*N/4)] = -1
+    s[int(3*N/4):int(-N/8)] = 2
+    return s
+
 ### TV-L1 filtering
 
 # Generate impulse (blocky) signal
-N = 1000
-s = np.zeros((N,1))
-s[N/4:N/2] = 1
-s[N/2:3*N/4] = -1
-s[3*N/4:-N/8] = 2
+s = _blockysignal()
 
 # Introduce noise
 n = s + 0.5*np.random.rand(*np.shape(s))
@@ -82,11 +87,7 @@ plt.show()
 ### Weighted TV-L1 filtering
 
 # Generate impulse (blocky) signal
-N = 1000
-s = np.zeros((N,1))
-s[N/4:N/2] = 1;
-s[N/2:3*N/4] = -1;
-s[3*N/4:-N/8] = 2;
+s = _blockysignal()
 
 # Introduce noise
 n = s + 0.5*np.random.randn(*np.shape(s))
