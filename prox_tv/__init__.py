@@ -110,7 +110,10 @@ def force_float_matrix(x):
     """
     # Check input is numpy array
     if not isinstance(x, np.ndarray):
-        raise TypeError("Input must be a numpy matrix")
+        try:
+            x = np.array(x)
+        except Exception:
+            raise TypeError("Input must be a numpy matrix or compatible object")
     # Enforce float type
     if x.dtype != np.dtype('float64'):
         return x.astype('float')
@@ -545,12 +548,12 @@ def tvgen(x, ws, ds, ps, n_threads=1, max_iters=0):
     ----------
     x : numpy array
         The matrix signal we are approximating.
-    ws : list
+    ws : iterable
         Weights to apply in each penalty term.
-    ds : list
+    ds : iterable
         Dimensions over which to apply each penalty term.
         Must be of equal length to ws.
-    ps : list
+    ps : iterable
         Norms to apply in each penalty term.
         Must be of equal length to ws.
     n_threads : int
