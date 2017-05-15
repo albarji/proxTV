@@ -190,7 +190,7 @@ int more_TV2(double *y,double lambda,double *x,double *info,int n){
 int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *ws){
     int nn=n-1,i,iters;
     double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
-    double *Dy,*alpha,*beta,*minus,*p,*aux;
+    double *Dy=NULL,*alpha=NULL,*beta=NULL,*minus=NULL,*p,*aux;
     lapack_int one=1,rc,nnp=nn;
     
     /* Macros */
