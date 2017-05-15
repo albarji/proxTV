@@ -4,7 +4,9 @@
 
 -----------------
 [![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)
-[![Build Status](https://codeclimate.com/github/albarji/proxTV.png)](https://codeclimate.com/github/albarji/proxTV)
+[![Code Climate](https://codeclimate.com/github/albarji/proxTV.svg)](https://codeclimate.com/github/albarji/proxTV)
+[![Python versions](https://img.shields.io/pypi/pyversions/prox_tv.svg)](https://pypi.python.org/pypi/prox_tv)
+
 
 **proxTV** is a toolbox implementing blazing fast implementations of Total Variation proximity operators, which form the basic building blocks for applications such as image denoising, image deconvolution, image inpainting, video denoising, or fused lasso models, to name a few. While the core algorithms are implemented in C to achieve top efficiency, Matlab and Python interfaces are provided for ease of use.
 
