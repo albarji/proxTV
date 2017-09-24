@@ -36,6 +36,33 @@ More technically, the library provides efficient solvers for the following Total
 | Anisotropic Total Variation on a 3-dimensional signal (video denoising) | ![alt tag](docs/img/TV3D.png) |
 | Generalized N-dimensional Anisotropic Total Variation (tensor denoising) | ![alt tag](docs/img/TVND.png), with X(di) every possible 1-dimensional slice of X following dimension di.|
 
+## C interface
+
+You can generate a **c** static or dynamic library using **cmake**. If `libproxTV` is not provided by your package-manager, install it from source:
+
+    mkdir proxTV-dev ; cd proxTV-dev
+    git clone https://github.com/albarji/proxTV proxTV
+    mkdir build ; cd build
+    cmake ../proxTV
+    make -j4
+    make install
+
+The required dependencies are `lapack` and `lapacke`, the c-interface for `lapack`, and optionally, but recommended: `OpenMP` with `pthreads` for multi-threading support.
+
+You can provide extra options to `cmake` via the command line or a gui (i.e `ccmake`).
+
+    cmake ../proxTV -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_INSTALL_PREFIX=/opt/ -DENABLE_TESTING:BOOL=ON
+
+To use proxTV in your `cmake` project just write in your `CMakeLists.txt`:
+
+    find_package(proxTV)
+    add_executable(foo main.cpp)
+    target_link_libraries(foo PUBLIC proxTV::proxTV)
+
+That will propagate all the dependencies of proxTV to your target. If you haven't installed proxTV in a system folder, you have to point to the installation directory when configuring your project with `cmake`.
+
+    cmake /path/my_project_source_folder -DproxTV_DIR:PATH="/proxTV_install_folder/lib/cmake/proxTV"
+
 ## Python interface
 
 ### Install
