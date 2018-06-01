@@ -1,6 +1,6 @@
 /**
     Optimizers for problems dealing with Lp norm regularization or Lp ball constraints.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */

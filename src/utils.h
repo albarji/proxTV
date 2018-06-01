@@ -1,6 +1,6 @@
 /**
     General utility functions.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
