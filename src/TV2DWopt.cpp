@@ -2,7 +2,7 @@
     Optimizers for problems dealing with weighted 2 dimensional versions of TV norm regularization.
     One dimensional weighted solvers are used as building blocks within a proximal stacking framework.
     The proximal combiners are coded here.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
@@ -51,12 +51,12 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
   double *tb = NULL;
   Workspace **ws = NULL;
   int maxDim;
-  
+
   #define FREE \
     if(t) free(t); \
     if(tb) free(tb); \
     if(ws) freeWorkspaces(ws,nThreads);
-    
+
   #define CANCEL(txt,info) \
       printf("DR2L1W_TV: %s\n",txt); \
       FREE \
@@ -76,7 +76,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
 
   if (!t || !tb || !ws)
     {CANCEL("out of memory", info)}
-    
+
   /* Set number of iterations */
   if(maxit <= 0) maxit = MAX_ITERS_DR;
 
@@ -84,7 +84,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
   double sum=0;
   for (i=0; i < M*N; i++)
     sum += unary[i];
-  sum = 2*sum / (M*N); 
+  sum = 2*sum / (M*N);
   for (i=0; i < M*N; i++)
     t[i]=sum;
 
@@ -105,8 +105,8 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
     DR_columnsPass(M, N, t, s, W1, ws);
     // Reflection
     for (i=0; i < M*N; i++) s[i] = 2*s[i] - t[i];
-    
-    // reflect for -B_horizontal 
+
+    // reflect for -B_horizontal
     // t = 2*( -dualprojLines(-s', u2', W2')) - s';
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"Dual projection along rows\n"); fflush(DEBUG_FILE);
@@ -119,27 +119,27 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
     // Combiner step
     for (i=0; i < M*N; i++) t[i] = 0.5*(t[i]+tb[i]);
   }
-  
+
   // DR is divergent, but with an additional projection we can recover valid solutions
   DR_columnsPass(M, N, t, s, W1, ws);
   DR_rowsPass(M, N, s, tb, unary, W2, ws);
   for (i = 0; i < M*N; i++) s[i] = - s[i] - tb[i];
-  
+
     /* Gather output information */
     if(info){
         info[INFO_ITERS] = iter;
         info[INFO_RC] = RC_OK;
     }
-  
+
   // Free and return
   FREE
   return 0;
-  
+
   #undef FREE
   #undef CANCEL
 }
 
-/** 
+/**
     Performs the columns proximity step in the DR algorithm.
 
     @param M number of rows in input signal
@@ -150,7 +150,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
     @param ws array of Workspaces to use for the computation
 */
 void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W, Workspace **ws) {
-    #pragma omp parallel shared(M,N,input,output,W,ws) default(none) 
+    #pragma omp parallel shared(M,N,input,output,W,ws) default(none)
     {
         int i,j;
         // Get thread number
@@ -158,7 +158,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
         // Get corresponding workspace
         Workspace *wsi = ws[id];
         wsi->warm = 0;
-        
+
         // Run 1-d solvers in parallel on each column of the input
         #pragma omp for
         for (j=0; j < N; j++) {
@@ -177,7 +177,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
     }
 }
 
-/** 
+/**
     Performs the rows proximity step in the DR algorithm.
 
     @param M number of rows in input signal
@@ -189,7 +189,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
     @param ws array of Workspaces to use for the computation
 */
 void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref, double* W, Workspace **ws) {
-    #pragma omp parallel shared(M,N,input,ref,output,W,ws) default(none) 
+    #pragma omp parallel shared(M,N,input,ref,output,W,ws) default(none)
     {
         int i,j;
         // Get thread number
@@ -197,7 +197,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
         // Get corresponding workspace
         Workspace *wsi = ws[id];
         wsi->warm = 0;
-        
+
         // Run 1-d solvers in parallel on each row of the input
         #pragma omp for
         for (j=0; j < M; j++) {
@@ -222,7 +222,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
 
 /**
  Applies the weighted L1-TV proximity operator to the given 1D input and returns the difference between input and output of prox.
- 
+
  @param n length of input signal
  @param input signal
  @param output signal
@@ -236,6 +236,6 @@ void DR_proxDiff(size_t n, double* input, double* output, double* W, Workspace *
     tautString_TV1_Weighted(input, W, output, n);
     // Return differences between input and proximity output
     for (i=0; i < n; i++)
-      output[i] = input[i] - output[i];   
+      output[i] = input[i] - output[i];
 }
 

@@ -8,7 +8,7 @@
  #
  #  Description     : This file contains an implementation in the C language
  #					  of algorithms described in the research paper:
- #	
+ #
  # 					  L. Condat, "A Direct Algorithm for 1D Total Variation
  #					  Denoising", preprint hal-00675043, Feb. 2012.
  #
@@ -19,9 +19,9 @@
  #					  to be found on the web).
  #
  #					  If you use this code or parts of it for any purpose,
- #					  the author asks you to cite the paper above or, in 
- #					  that event, its published version. Please email him if 
- #					  the proposed algorithms were useful for one of your 
+ #					  the author asks you to cite the paper above or, in
+ #					  that event, its published version. Please email him if
+ #					  the proposed algorithms were useful for one of your
  #					  projects, or for any comment or suggestion.
  #
  #  Usage rights	: Copyright Laurent Condat.
@@ -66,14 +66,14 @@
 #define floattype double
 
 
-/* 
-This function implements the 1D total variation denoising 
-algorithm described in the paper referenced above. 
-If output=input, the process is performed in place. Else, 
-the values of input are left unchanged. 
-lambda must be nonnegative. lambda=0 is admissible and 
-yields output[k]=input[k] for all k. 
-If width<=0, nothing is done. 
+/*
+This function implements the 1D total variation denoising
+algorithm described in the paper referenced above.
+If output=input, the process is performed in place. Else,
+the values of input are left unchanged.
+lambda must be nonnegative. lambda=0 is admissible and
+yields output[k]=input[k] for all k.
+If width<=0, nothing is done.
 */
 void TV1D_denoise(double* input, double* output, const int width, const double lambda) {
 	if (width>0 && lambda>=0) {				/*to avoid invalid memory access to input[0] and invalid lambda values*/
@@ -92,8 +92,8 @@ void TV1D_denoise(double* input, double* output, const int width, const double l
 					do output[k0++]=vmax; while (k0<=kplus);
 					umin=(vmax=input[kplus=k=k0])+(umax=minlambda)-vmin;
 				} else {
-					vmin+=umin/(k-k0+1); 
-					do output[k0++]=vmin; while(k0<=k); 
+					vmin+=umin/(k-k0+1);
+					do output[k0++]=vmin; while(k0<=k);
 					return;
 				}
 			}
@@ -110,24 +110,24 @@ void TV1D_denoise(double* input, double* output, const int width, const double l
 				if (umin>=lambda) {		/*update of vmin*/
 					vmin+=(umin-lambda)/((kminus=k)-k0+1);
 					umin=lambda;
-				} 
+				}
 				if (umax<=minlambda) {	/*update of vmax*/
 					vmax+=(umax+lambda)/((kplus=k)-k0+1);
 					umax=minlambda;
-				} 	
+				}
 			}
 		}
 	}
 }
 
-/* 
+/*
 This function implements 1D total variation denoising by
-the taut string algorithm. It was adapted from the Matlab 
-code written by Lutz Duembgen, which can be found at 
+the taut string algorithm. It was adapted from the Matlab
+code written by Lutz Duembgen, which can be found at
 http://www.imsv.unibe.ch/content/staff/personalhomepages/
 duembgen/software/multiscale_densities/index_eng.html
 Note: numerical blow-up if floattype=float for N>=10^6
-because the algorithm is based on the running sum of the 
+because the algorithm is based on the running sum of the
 signal values.
 */
 void TV1D_denoise_tautstring(double* input, double* output, int width, const double lambda) {
@@ -163,7 +163,7 @@ void TV1D_denoise_tautstring(double* input, double* output, int width, const dou
 		slope_low[c_low] = y_low[i]-y_low[i-1];
 		while ((c_low > s_low+1) && (slope_low[MAX(s_low,c_low-1)]<=slope_low[c_low])) {
 			index_low[--c_low] = i;
-			if (c_low > s_low+1) 
+			if (c_low > s_low+1)
 				slope_low[c_low] = (y_low[i]-y_low[index_low[c_low-1]]) /
 					(i-index_low[c_low-1]);
 			else
@@ -191,7 +191,7 @@ void TV1D_denoise_tautstring(double* input, double* output, int width, const dou
 			slope_up[c_up] = (y_up[i]-z[c]) / (i-index[c]);
 		}
 	}
-	for (i=1;i<=c_low-s_low;i++) 
+	for (i=1;i<=c_low-s_low;i++)
 		z[c+i]=y_low[index[c+i]=index_low[s_low+i]];
 	c = c + c_low-s_low;
 	int j=0;

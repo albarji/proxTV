@@ -1,6 +1,6 @@
 /**
     Optimizers for problems dealing with Lp norm regularization or Lp ball constraints.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
@@ -31,25 +31,25 @@ double PN_LPpGap(double *x, double *y, double *diff, int n, double q, double lam
     If the value of p is too large, the norm is approximated as an Linf norm.
     For the general case, instead of computing the norm using the standard formula, a normalized version is used.
     This ensures a more stable computation. The formula used is:
-    
+
         norm(x,p) = norm(x,inf) * (sum_i |x(i) / norm(x,inf)|^p)^(1/p)
-        
+
     Inputs:
         - double *x: vector for which to compute the norm.
         - double p: Lp norm value.
-        
+
     Output: Lp norm value of x.
 */
 double LPnorm(double *x, int n, double p) {
     double norm = 0;
-    
+
     /* Small norm limit case */
     if ( p <= LPPROJ_PSMALL ) {
         for ( int i = 0 ; i < n ; i++ )
             norm += fabs(x[i]);
-        return norm;    
+        return norm;
     }
-    
+
     /* Compute normalization factor c = norm(x,inf) = max_i |x(i)| */
     double aux, c=0;
     for ( int i = 0 ; i < n ; i++ ) {
@@ -57,34 +57,34 @@ double LPnorm(double *x, int n, double p) {
         if ( aux > c )
             c = aux;
     }
-    
+
     /* If c == 0, then the norm is 0, regardless of p */
     if ( c == 0 )
         return 0;
-        
+
     /* Large norm limit case: just return c */
     if ( p >= LPPROJ_PLARGE ) {
         return c;
     }
-   
+
     /* General case: normalized norm computation */
     for ( int i = 0 ; i < n ; i++ )
         norm += pow( fabs(x[i]/c) , p );
     norm = c*pow( norm , 1./p );
-    
+
     return norm;
 }
 
 /*  PN_LP1
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x||_1 ,
-        
+
     for the L1 norm. This is done in closed form using the soft-thresholding operator
-    
+
         x = sgn(y) .* max {|y| − lambda, 0}
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -96,27 +96,27 @@ int PN_LP1(double *y,double lambda,double *x,double *info,int n){
     /* Apply soft-thresholding iteratively */
     for (int i = 0 ; i < n ; i++ )
         x[i] = sign(y[i]) * max(fabs(y[i]) - lambda, 0);
-    
+
     /* Fill info fields */
     if (info) {
         info[INFO_ITERS] = 0;
         info[INFO_GAP] = 0;
         info[INFO_RC] = RC_OK;
     }
-    
+
     return 1;
 }
 
 /*  PN_LP2
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x||_2 ,
-        
+
     for the L2 norm. This is done in closed form using the operator
-    
+
         x = y * max {||y||_2 - lambda , 0} / ||y||_2
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -139,31 +139,31 @@ int PN_LP2(double *y,double lambda,double *x,double *info,int n){
         for (int i = 0 ; i < n ; i++ )
             x[i] = y[i] * corr / norm;
     }
-    
+
     /* Fill info fields */
     if (info) {
         info[INFO_ITERS] = 0;
         info[INFO_GAP] = 0;
         info[INFO_RC] = RC_OK;
     }
-    
+
     return 1;
 }
 
 /*  PN_LPinf
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x||_inf ,
-        
+
     for the Linf norm. This is done by means of solving the easier dual projection problem
-    
+
         min_z 0.5 ||z-y||^2  s.t. ||z||_1 <= lambda
-        
+
     The primal solution is then recovered using Moreu's decomposition
-    
+
         x = y - z
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -175,29 +175,29 @@ int PN_LP2(double *y,double lambda,double *x,double *info,int n){
 int PN_LPinf(double *y,double lambda,double *x,double *info,int n,Workspace *ws){
     /* Invoke dual L1 projection problem */
     LP1_project(y, lambda, x, n, ws);
-    
+
     /* Recover primal solution using Moreau's decomposition */
     for(int i = 0 ;i < n ; i++)
         x[i] = y[i] - x[i];
-    
+
     /* Fill info fields */
     if (info) {
         info[INFO_ITERS] = 0;
         info[INFO_GAP] = 0;
         info[INFO_RC] = RC_OK;
     }
-    
+
     return 1;
 }
 
 /*  PN_LPp
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x||_p ,
-        
+
     for the Lp norm. To do so a Projected Newton algorithm is used.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -215,12 +215,12 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     int *inactive=NULL,*signs=NULL;
     int i,j,iters,recomp,found,nI;
     short updateKind;
-    
+
     #define CHECK_INACTIVE(x,g,inactive,nI,i) \
         for(i=nI=0 ; i<n ; i++) \
             if( x[i] > epsilon || (x[i] <= epsilon && g[i] < -EPSILON) )  \
                 inactive[nI++] = i;
-        
+
     #define FREE \
         if(!ws){ \
             if(g) free(g); \
@@ -230,19 +230,19 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             if(inactive) free(inactive); \
             if(signs) free(signs); \
         }
-        
+
     #define CANCEL(txt,info) \
         printf("PN_LPp: %s\n",txt); \
         FREE \
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
-        
+
     /* Reduction of stepsize if no improvement detected */
     #define NO_IMPROVE_CUT 0.1
-    
+
     /* Compute dual norm q */
     q = 1/(1-1/p);
-    
+
     /* Special case where the solution is the trivial x = 0 */
     /* This is bound to happen if ||y||_q <= lambda */
     if ( LPnorm(y, n, q) <= lambda ) {
@@ -284,7 +284,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     }
     if(!g || !d || !xnorm || !auxv || !inactive)
         {CANCEL("out of memory",info)}
-        
+
     /* As initial points, use an approximation for the closed-form solution */
 
     /* Find close-form solution for TV-L2 */
@@ -294,7 +294,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         auxv[i] = x[i] - y[i];
     nx = LPnorm( x, n, p );
     stop = PN_LPpGap(x, y, auxv, n, q, lambda, nx);
-    
+
     /* Find close-form solution for TV-L1 or TV-Linf, whichever is closer in norm value */
     if ( p < 2 )
         PN_LP1(y , lambda , xnorm, NULL ,n);
@@ -305,11 +305,11 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         auxv[i] = xnorm[i] - y[i];
     nx = LPnorm( xnorm, n, p );
     stop2 = PN_LPpGap(xnorm, y, auxv, n, q, lambda, nx);
-    
+
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"Starting candidates: p2 = %lf, p%s = %lf\n", stop, p<2 ? "1" : "inf", stop2);
     #endif
-    
+
     /* Use as starting point the closed-form solution with smaller dual gap */
     if ( stop2 < stop ) {
         /* Copy starting point */
@@ -325,7 +325,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         }
         return 1;
     }
-    
+
     /* Take out the sign from the input, remembering original signs */
     /* Remove also from the starting point */
     if(!positive){
@@ -335,10 +335,10 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             y[i] = fabs(y[i]);
         }
     }
-    
+
     /* Tolerance for considering an x component as 0 */
     epsilon = EPSILON_PNLP;
-    
+
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"p=%lf, q=%lf, qInv=%lf\n",p,q,-1/q);
         fprintf(DEBUG_FILE,"lambda=%lf\n",lambda);
@@ -350,18 +350,18 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%lf ",x[i]);
         fprintf(DEBUG_FILE,"]\n");
     #endif
-    
+
     /* Initial check for zero values */
     for ( i = 0 ; i < n ; i++ )
         if ( x[i] < epsilon )
             x[i] = epsilon;
-    
+
     /* Initial value of the point norm */
     nx = LPnorm(x,n,p);
     /* Compute differences x - y */
     for ( i = 0 ; i < n ; i++ )
         auxv[i] = x[i]-y[i];  /* auxv storing differences x-y*/
-        
+
     /* Projected Newton loop */
     stop = gap = DBL_MAX; iters = 0;
     for(iters=0 ; stop > STOP_PNLP && iters < MAX_ITERS_PNLP && gap > objGap ; iters++){
@@ -370,7 +370,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",x[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Compute current obj. function value */
 
         /* Current obj. function value */
@@ -382,7 +382,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, fval=%lf\n",iters,f);
         #endif
-        
+
         /* Gradient at the current x */
         for(i=0;i<n;i++){
             // Compute normalized current vector, powered to p-1
@@ -400,7 +400,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             fprintf(DEBUG_FILE,"]\n");
             fprintf(DEBUG_FILE,"||g||_inf = %lg, ||g||_2=%lf\n",LPnorm(g,n,DBL_MAX),LPnorm(g,n,2));
         #endif
-        
+
         #ifdef DEBUG
         {
             double drift = 0;
@@ -409,15 +409,15 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             fprintf(DEBUG_FILE,"Iter %d, gDrift=%lf\n",iters,drift);
         }
         #endif
-        
+
         /* Find inactive constraints (variables to update) */
-        CHECK_INACTIVE(x,g,inactive,nI,i)        
+        CHECK_INACTIVE(x,g,inactive,nI,i)
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, nI=%d\n",iters,nI);
         #endif
         /* Special case where no inactive constraints exist: the optimum has been found */
         if(!nI) break;
-        
+
         /* If the norm of x is zero, the Hessian is undefined */
         for ( i = 0 ; i < nI ; i++ ) {
             j = inactive[i];
@@ -434,19 +434,19 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         else {
             updateKind = PNLP_HESSIAN;
         }
-            
+
         /* Calculate updating direction using the chosen strategy */
         switch (updateKind) {
-        
+
             /* Use the gradient as the (reversed) updating direction */
-            case PNLP_GRAD: 
+            case PNLP_GRAD:
                 /* Copy over the gradient for inactive variables */
                 for(i=0;i<nI;i++){
                     j = inactive[i];
                     d[j] = g[j];
                 }
                 break;
-                
+
             /* Use minimum norm subgradient updating direction */
             case PNLP_MNSG:
                 /* Compute minimum norm subgradient at x=0 */
@@ -457,7 +457,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                     inactive[i] = i;
                 }
                 break;
-            
+
             /* Hessian (Newton) updating direction */
             case PNLP_HESSIAN:
                 /* Auxiliar terms for updating direction */
@@ -465,7 +465,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 #ifdef DEBUG
                     fprintf(DEBUG_FILE,"Iter %d, c=%lg\n",iters,c);
                 #endif
-            
+
                 /* Precompute auxv = 1./(1-c * xnorm./x) .* xnorm vector */
                 /* At the same time, compute the 1./(1-c xnorm./x) .* g vector, which is the diagonal part of the direction
                    and the inner product  1./(1-c * xnorm./x) .* xnorm · g */
@@ -481,7 +481,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                     /* 1./(1+c * xnorm./x) .* xnorm · g */
                     xp1vGrad += auxv[j] * g[j];
                 }
-                
+
                 #ifdef DEBUG
                     fprintf(DEBUG_FILE,"Iter %d, dDiag=[ ",iters);
                     for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%lg ",d[i]);
@@ -491,7 +491,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                     fprintf(DEBUG_FILE,"]\n");
                     fprintf(DEBUG_FILE,"xp1vGrad=%lg\n",xp1vGrad);
                 #endif
-                
+
                 /* Precompute denominator of 1-rank part of direction */
                 den = 1./c;
                 for(i=0;i<nI;i++){
@@ -501,7 +501,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 #ifdef DEBUG
                     fprintf(DEBUG_FILE,"Iter %d, den=%lg\n",iters,den);
                 #endif
-                
+
                 /* 1-rank part of direction */
                 den = xp1vGrad / den;
                 for(i=0;i<nI;i++){
@@ -515,16 +515,16 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 }
             break;
         }
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, d=[ ",iters);
             for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%lg ",d[i]);
             fprintf(DEBUG_FILE,"]\n");
             fprintf(DEBUG_FILE,"||d||_inf = %lg, ||d||_2=%lf\n",LPnorm(d,n,DBL_MAX),LPnorm(d,n,2));
         #endif
-        
+
         /*** Stepsize computation ***/
-        
+
         /* Gradient times direction */
         gRd = 0;
         /* In the MNSG update the gradient is not to be trusted, also, we want to get out of the current point as soon as possible,
@@ -539,7 +539,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"gRd=%lg\n", gRd);
         #endif
-        
+
         /* Copy over the full current point, in order to have in auxv those components that wont be updated */
         for(i=0;i<n;i++)
             auxv[i] = x[i]; /* auxv will hold the tentative new point x + delta · d*/
@@ -550,14 +550,14 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"Iter %d, delta=%lg\n",iters,delta);
             #endif
-            
+
             /* Compute projected point after update for the current stepsize */
             for(i=0;i<nI;i++){
                 j = inactive[i];
                 auxv[j] = x[j] - delta * d[j];
                 if(auxv[j] < epsilon) auxv[j] = epsilon;
             }
-            
+
             /* Compute Lp norm after the update */
             nx = LPnorm(auxv,n,p);
 
@@ -567,7 +567,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 fprintf(DEBUG_FILE,"]\n");
                 fprintf(DEBUG_FILE,"||xP||_%lg = %lg\n",p,nx); fflush(DEBUG_FILE);
             #endif
-            
+
             /* If delta too small, the algorithm is unable to obtain further improvement */
             if(delta < MIN_STEP_PNLP) {
                 /* Stop optimization and consider solution found */
@@ -582,10 +582,10 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 fupdate += aux*aux;
             }
             fupdate = 0.5*fupdate + lambda*nx;
-            
+
             /* Compute improvement */
             improve = f - fupdate;
-            
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"f=%lg, fupdate=%lg, improve=%lg\n", f, fupdate, improve);
             #endif
@@ -595,10 +595,10 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 delta *= NO_IMPROVE_CUT;
                 continue;
             }
-            
+
             /* Compute right hand side of Armijo rule */
             rhs = SIGMA_PNLP * delta * gRd;
-            
+
             /* Check if the rule is met */
 
             #ifdef DEBUG
@@ -631,24 +631,24 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 #endif
             }
         }
-        
+
         /* Update point */
         for(i=0;i<nI;i++){
             j = inactive[i];
             x[j] = auxv[j];
         }
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, x=[ ",iters);
             for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%lg ",x[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Compute differences x - y of new point */
         /* This can be done efficiently by realizing that auxv already contains x */
         for ( i = 0 ; i < n ; i++ )
             auxv[i] -= y[i];
-        
+
         /* Compute stopping criterion: relative change in objetive function */
         /* This is averaged with the stop value from the previous iteration,
            to avoid stopping at incidental low improvement iters */
@@ -656,30 +656,30 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             stop = 0.5 * improve / fupdate + 0.5 * stop;
         else
             stop = improve / fupdate;
-        
+
         /* Compute dual gap */
         gap = PN_LPpGap(x, y, auxv, n, q, lambda, nx);
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, stop=%lg, gap=%lg\n",iters,stop,gap);
         #endif
     }
-    
+
     /* Set almost zero entries to exact zero */
     for ( i = 0 ; i < n ; i++ )
         if (x[i]  <= epsilon)
             x[i] = 0;
-    
+
     /* Place the sign back into the solution and the original data*/
     /* (only if input was not all positive) */
     if(!positive){
         for(i=0;i<n;i++){
-            if(signs[i] == -1){ 
+            if(signs[i] == -1){
                 x[i] = -x[i];
                 y[i] = -y[i];
             }
         }
     }
-    
+
     /* Check termination condition */
     if ( iters >= MAX_ITERS_PNLP ) {
         if (info) info[INFO_RC] = RC_ITERS;
@@ -690,11 +690,11 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         if (info) info[INFO_RC] = INFO_GAP;
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"WARNING: algorithm stuck, suboptimal solution found\n"); fflush(DEBUG_FILE);
-        #endif   
+        #endif
     } else {
         if (info) info[INFO_RC] = RC_OK;
     }
-    
+
     /* Free resources and return */
     FREE
     if (info) {
@@ -702,7 +702,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         info[INFO_ITERS] = iters;
     }
     return 1;
-    
+
     #undef CHECK_INACTIVE
     #undef FREE
     #undef CANCEL
@@ -712,11 +712,11 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
 /*  PN_LPp
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x||_p ,
-        
+
     for the Lp norm. To do so a Projected Newton algorithm is used.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -726,7 +726,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         - p: degree of the Lp norm.
         - ws: workspace of allocated memory to use. If NULL, any needed memory is locally managed.
         - positive: 1 if all inputs y >= 0, 0 else.
-        
+
     The proximity problem is solved to a default level of accuracy, as given by STOP_GAP_PNLP.
 */
 int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive) {
@@ -736,7 +736,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
 /** PN_LPpGap
 
     Computes the dual gap of the current PN-Lp prox solution.
-    
+
     @argument x current PN-Lp prox solution
     @argument y reference point for PN-Lp problem
     @argument diff differences vector x - y
@@ -748,17 +748,17 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
 double PN_LPpGap(double *x, double *y, double *diff, int n, double q, double lambda, double norm) {
     /* Compute dual norm */
     double dualnorm = LPnorm(diff,n,q);
-    
+
     /* Compute rescale factor to obtain feasible primal */
     double c;
     if ( dualnorm <= lambda )
         c = 1;
     else
         c = lambda / dualnorm;
-        
+
     /* Initialize gap */
     double gap = lambda * norm;
-        
+
     /* Add (1+c^2) 1/2 ||diff||^2 term */
     /* Also add c * y' diff term */
     double coef = (1.+c*c) * 0.5;
@@ -766,7 +766,7 @@ double PN_LPpGap(double *x, double *y, double *diff, int n, double q, double lam
         gap += coef * diff[i] * diff[i];
         gap += c * y[i] * diff[i];
     }
-    
+
     /*
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"(PN_LPpGap) norm=%lg, ||x||=%lg\n",norm,LPnorm(x,n,q/(q-1.0)));
@@ -778,26 +778,26 @@ double PN_LPpGap(double *x, double *y, double *diff, int n, double q, double lam
         fflush(DEBUG_FILE);
     #endif
     */
-    
+
     return fabs(gap);
 }
 
 /*  LP1_project
 
     Given a point y, computes its euclidean projection onto the ||x||_1 = lambda ball
-    
+
         min_x ||x-y||^2   s.t.  ||x||_1 <= lambda .
-        
+
     This is solved efficiently using John Duchi's method. The code in this function is
     a C port of the original Matlab code.
-    
+
     Inputs:
         - y: reference point.
         - lambda: ball radius.
         - x: array in which to store the projection.
         - n: length of array y (and x).
         - ws: workspace of allocated memory to use. If NULL, any needed memory is locally managed.
-        
+
     Output:
         int with 1 value if solution found, 0 if error.
 */
@@ -805,20 +805,20 @@ int LP1_project(double *y,double lambda,double *x,int n,Workspace *ws){
     double *u=NULL,*sv=NULL;
     double theta;
     int i,rho;
-    
+
     #define FREE \
         if(!ws){ \
             if(u) free(u); \
             if(sv) free(sv); \
         }
-        
+
     #define CANCEL(txt) \
         printf("LP1_project: %s\n",txt); \
         return 0;
-    
+
     // Lambda safety check
     if(lambda < 0) lambda = 0;
-    
+
     // Take memory from workspace if available
     if(ws){
         u = getDoubleWorkspace(ws);
@@ -827,7 +827,7 @@ int LP1_project(double *y,double lambda,double *x,int n,Workspace *ws){
     else{
         u = (double*)malloc(sizeof(double)*n);
         sv = (double*)malloc(sizeof(double)*n);
-    }    
+    }
     if(!u || !sv)
         {CANCEL("insufficient memory")}
 
@@ -851,18 +851,18 @@ int LP1_project(double *y,double lambda,double *x,int n,Workspace *ws){
     // Compute thresholding value
     theta = (sv[rho] - lambda) / (rho+1);
     if(theta < 0) theta = 0;
-    
+
     // Get projection
     for(i=0;i<n;i++){
         x[i] = fabs(y[i]) - theta;
         if(x[i] < 0) x[i] = 0;
         if(y[i] < 0) x[i] = -x[i];
     }
-    
+
     // Free resources and return
     FREE
     return 1;
-    
+
     #undef FREE
     #undef CANCEL
 }
@@ -870,12 +870,12 @@ int LP1_project(double *y,double lambda,double *x,int n,Workspace *ws){
 /*  LPp_project
 
     Given a point y, computes its euclidean projection onto the ||x||_p = lambda ball
-    
+
         min_x ||x-y||^2   s.t.  ||x||_p <= lambda .
-        
+
     This problem is dual to Lp proximity, and this duality is used to solve it through
     the Lp-prox solver.
-    
+
     Inputs:
         - y: reference point.
         - lambda: ball radius.
@@ -889,20 +889,20 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
     double q;
     int *s=NULL;
     int i;
-    
+
     #define FREE \
         if(!ws) \
             if(s) free(s);
-        
+
     #define CANCEL(txt,info) \
         printf("LPp_project: %s\n",txt); \
         *info = (double)RC_ERROR; \
         return 0;
-        
+
     /* If p too small or too large, approximate by p=1 or p=inf */
     if(p <= LPPROJ_PSMALL) p = 1;
     else if(p >= LPPROJ_PLARGE) p = mxGetInf();
-        
+
     /* Special case p == inf: solved by orthogonal projection in each component */
     if(p == mxGetInf()){
         /* Orthogonal projection */
@@ -923,7 +923,7 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
 
     /* Compute dual norm */
     q = 1./(1.-1./p);
-    
+
     /* Alloc memory for sign information (or take from workspace) */
     if(ws)
         s = getIntWorkspace(ws);
@@ -931,13 +931,13 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
         s = (int*)malloc(sizeof(int)*n);
     if(!s)
         {CANCEL("insufficient memory",info)}
-    
+
     /* Remove sign from inputs */
     for(i=0;i<n;i++){
         s[i] = sign(y[i]);
         y[i] = fabs(y[i]);
     }
-    
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(LPp_project), abs(y)=[ ");
             for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",y[i]);
@@ -950,12 +950,12 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
     /* Invoke Lp prox solver on dual norm */
     if(!PN_LPp(y,lambda,x,info,n,q,ws,1))
         {CANCEL("error in internal Lp prox solver",info)}
-    
+
     /* Apply Moreau's decomposition to recover primal problem solution */
     /* primal(y)* = y - dual(y)*     */
     for(i=0;i<n;i++)
         x[i] = y[i] - x[i];
-        
+
     /* Place sign back */
     for(i=0;i<n;i++){
         if(s[i] < 0){
@@ -963,7 +963,7 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
             x[i] = -x[i];
         }
     }
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(LPp_project), dual=[ ");
             for(i=0;i<n && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",x[i]);
@@ -975,11 +975,11 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
         norm = LPnorm(x,n,p);
         fprintf(DEBUG_FILE,"(LPp_project) p=%lf norm=%lf\n",p,norm);
     #endif
-    
+
     /* Free and return */
     FREE
     return 1;
-    
+
     #undef FREE
     #undef CANCEL
 }
@@ -990,7 +990,7 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
         argmin_s  s · z  s.t.  ||s||_p <= lambda
 
     This is done in O(n) time.
-    
+
     @argument z linear weights of the problem.
     @argument n length of vector z.
     @argument p norm of the Lp ball constraint.
@@ -999,12 +999,12 @@ int LPp_project(double *y,double lambda,double *x,double *info,int n,double p,Wo
 */
 void solveLinearLP(double *z, int n, double p, double lambda, double *s) {
     int i;
-    
+
     // Special case where the norm p is very large
     if ( p >= LPPROJ_PLARGE ) {
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(solveLinearLP) Using large p approximation for p=%lg\n",p);
-        #endif 
+        #endif
         // The solution approximately lies at the opposite corner of the linf ball
         for ( i = 0 ; i < n ; i++ )
             s[i] = - lambda * sign(z[i]);
@@ -1013,11 +1013,11 @@ void solveLinearLP(double *z, int n, double p, double lambda, double *s) {
     } else if ( p <= LPPROJ_PSMALL ) {
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(solveLinearLP) Using small p approximation for p=%lg\n",p);
-        #endif 
+        #endif
         // The solution approximately lies at the opposite corner of the l1 ball
         double largest = 0, val;
         int ilargest;
-        
+
         // Find largest entry of z, in absolute value
         for ( i = 0 ; i < n ; i++ ) {
             val = fabs(z[i]);
@@ -1026,33 +1026,33 @@ void solveLinearLP(double *z, int n, double p, double lambda, double *s) {
                 ilargest = i;
             }
         }
-        
+
         // Initialize solution to all zeros
         memset(s , 0 , sizeof(double)*n);
         // Set largest entry to corner value
         s[ilargest] = - lambda * sign(z[ilargest]);
         return;
     }
-    
+
     // General case
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"(solveLinearLP) Solving general case for p=%lg\n",p);
-    #endif 
+    #endif
 
     // Compute dual norm q
     double q = 1./(1. - 1./p);
     double qMinus = q - 1;
-    
+
     // Compute value of the dual norm for z
     double zNorm = LPnorm( z , n , q );
-    
+
     // Get direction of solution (z is normalized to prevent numerical errors for large values of q)
     for ( i = 0 ; i < n ; i++ )
         s[i] = - sign(z[i]) * pow( fabs ( z[i] / zNorm ) , qMinus);
-        
+
     // Compute primal norm of resultant vector
     double sNorm = LPnorm( s , n , p );
-        
+
     // Scale back to Lp ball
     for ( i = 0 ; i < n ; i++ )
         s[i] = s[i] / sNorm * lambda;

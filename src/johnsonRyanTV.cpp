@@ -13,7 +13,7 @@ void dp(int n, double *y, double lam, double *beta) {
     for (int i=0; i<n; i++) beta[i] = y[i];
     return;
   }
-  
+
   // These are used to store the derivative of the
   // piecewise quadratic function of interest
   double afirst, alast, bfirst, blast;
@@ -87,7 +87,7 @@ void dp(int n, double *y, double lam, double *beta) {
     blast = -lam+y[k+1];
   }
 
-  // Compute the last coefficient: this is where 
+  // Compute the last coefficient: this is where
   // the function has zero derivative
 
   alo = afirst;

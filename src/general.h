@@ -1,6 +1,6 @@
 /**
     General definitions
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
@@ -58,7 +58,7 @@ inline double mxGetInf() { return INFINITY; }
 
 /* Comparison tolerance */
 #define EPSILON 1e-10
-#define IS_ZERO(x) (x < EPSILON & x > -EPSILON) 
+#define IS_ZERO(x) (x < EPSILON & x > -EPSILON)
 #define IS_POSITIVE(x) (x > EPSILON)
 #define IS_NEGATIVE(x) (x < -EPSILON)
 

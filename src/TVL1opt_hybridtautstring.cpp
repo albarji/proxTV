@@ -1,6 +1,6 @@
 /**
     Hybrid taut-string solver for TV-L1 proximity
-    
+
     @author Álvaro Barbero Jiménez
 */
 #include <math.h>
@@ -26,7 +26,7 @@
 
     The macro has no effect if no switch was performed. If it was,
     forces immediate return of the method, and the prox array contains the full
-    solution to the problem. 
+    solution to the problem.
 */
 #define ATTEMPTSWITCH(backtracks, maxbacktracks, signal, n, lam, prox, currentstep, offset) \
     if (backtracks > maxbacktracks && currentstep + 1 < n) { \
@@ -47,10 +47,10 @@
         - n: length of signal
         - lambda: strength of l1 regularization
         - x: array in which to store solution
-        - backtracksexp: maximum number of backtrack steps, defined as an 
-        exponent over the number of elements in the signal. Maximum number 
+        - backtracksexp: maximum number of backtrack steps, defined as an
+        exponent over the number of elements in the signal. Maximum number
         is 2 as the worst case for Condat's method is O(n^2)
-        
+
     Returns: signal after TV-l1 proximity.
 */
 void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, double backtracksexp) {
@@ -71,14 +71,14 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
     // Backtracking cost tracker
     int backtracks = 0;
     double maxbacktracks = pow(n,backtracksexp);
-    
+
     /* Starting point */
     mnHeight = mxHeight = 0;
     mn = minuslambda + y[0];
     mx = lambda + y[0];
     lastBreak = -1;
     mnBreak = mxBreak = 0;
-        
+
     /* Proceed along string */
     i = 0;
     while ( i < n ) {
@@ -87,9 +87,9 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
             /* Update height of minorant slope w.r.t. tube center */
             /* This takes into account both the slope of the minorant and the change in the tube center */
             mnHeight += mn - y[i];
-        
+
             /* Check for ceiling violation: tube ceiling at current point is below proyection of minorant slope */
-            /* Majorant is r + lambda (except for last point), which is computed on the fly */   
+            /* Majorant is r + lambda (except for last point), which is computed on the fly */
             if ( lambda < mnHeight ) {
                 /* Break segment at last minorant breaking point */
                 i = mnBreak + 1;
@@ -101,7 +101,7 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 /* Start new segment after the break */
                 lastBreak = mnBreak;
                 /* Build first point of new segment, which can be done in closed form */
-                mn = y[i]; 
+                mn = y[i];
                 mx = lambda2+y[i];
                 mxHeight = lambda;
                 mnHeight = minuslambda;
@@ -109,11 +109,11 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 i++; backtracks++;
                 continue;
             }
-            
+
             /* Update height of minorant slope w.r.t. tube center */
             /* This takes into account both the slope of the minorant and the change in the tube center */
             mxHeight += mx - y[i];
-            
+
             /* Check for minorant violation: minorant at current point is above proyection of majorant slope */
             /* Minorant is r - lambda (except for last point), which is computed on the fly */
             if ( minuslambda > mxHeight ) {
@@ -127,7 +127,7 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 /* Start new segment after the break*/
                 lastBreak = mxBreak;
                 /* Build first point of new segment, which can be done in closed form */
-                mx = y[i]; 
+                mx = y[i];
                 mn = minuslambda2+y[i];
                 mxHeight = lambda;
                 mnHeight = minuslambda;
@@ -135,7 +135,7 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 i++; backtracks++;
                 continue;
             }
-            
+
             /* No violations at this point */
 
             /* Check if proyected majorant height is above ceiling */
@@ -147,7 +147,7 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 /* This is a possible majorant breaking point */
                 mxBreak = i;
             }
-            
+
             /* Check if proyected minorant height is under actual minorant */
             if ( mnHeight <= minuslambda ) {
                 /* Update minorant slope */
@@ -157,22 +157,22 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
                 /* This is a possible minorant breaking point */
                 mnBreak = i;
             }
-            
+
             /* At this point: no violations, so keep up building current segment */
             i++; backtracks++;
         }
-        
+
         /* Special case i == n-1 (last point) */
         /* We try to validate the last segment, and if we can, we are finished */
-        /* The code is essentially the same as the one for the general case, 
+        /* The code is essentially the same as the one for the general case,
            the only different being that here the tube ceiling and floor are both 0 */
-        
+
         /* Update height of minorant slope w.r.t. tube center */
         /* This takes into account both the slope of the minorant and the change in the tube center */
         mnHeight += mn - y[i];
-    
+
         /* Check for ceiling violation: tube ceiling at current point is below proyection of minorant slope */
-        /* Majorant is 0 at this point */   
+        /* Majorant is 0 at this point */
         if ( IS_POSITIVE(mnHeight) ) { // 0 < mnHeight
             /* Break segment at last minorant breaking point */
             i = mnBreak + 1;
@@ -185,17 +185,17 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
             lastBreak = mnBreak;
             /* Go back to main loop, starting a new segment */
             /* We do not precompute the first point of the new segment here, as it might be n-1 and this leads to issues */
-            mn = y[i]; 
+            mn = y[i];
             mx = lambda2+y[i];
             mxHeight = mnHeight = minuslambda;
             mnBreak = mxBreak = i;
             continue;
         }
-            
+
         /* Update height of minorant slope w.r.t. tube center */
         /* This takes into account both the slope of the minorant and the change in the tube center */
         mxHeight += mx - y[i];
-        
+
         /* Check for minorant violation: minorant at current point is above proyection of majorant slope */
         /* Minorant is 0 at this point */
         if ( IS_NEGATIVE(mxHeight) ) { // 0 > mxHeight
@@ -210,25 +210,25 @@ void hybridTautString_TV1_custom(double *y, int n, double lambda, double *x, dou
             lastBreak = mxBreak;
             /* Go back to main loop, starting a new segment */
             /* We do not precompute the first point of the new segment here, as it might be n-1 and this leads to issues */
-            mx = y[i]; 
+            mx = y[i];
             mn = minuslambda2+y[i];
             mxHeight = mnHeight = lambda;
             mnBreak = mxBreak = i;
             continue;
         }
-        
+
         /* No violations at this point */
-        
+
         /* Check if proyected minorant height is under actual minorant */
         if ( mnHeight <= 0 ) {
             /* Update minorant slope */
             mn += ( - mnHeight ) / ( i - lastBreak );
         }
-        
+
         /* At this point: we are finished validating last segment! */
         i++;
     }
-    
+
     /* Build last valid segment */
     for ( i = lastBreak+1 ; i < n ; i++ )
         x[i] = mn;

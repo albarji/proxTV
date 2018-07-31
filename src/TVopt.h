@@ -1,6 +1,6 @@
 /**
     Headers for all the Total Variation algorithms and routines.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */

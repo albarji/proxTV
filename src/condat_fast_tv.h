@@ -1,5 +1,5 @@
 /*
- #  File            : condat_fast_tv.c 
+ #  File            : condat_fast_tv.c
  #
  #  Version			: proxTV 1.0, Dec. 18, 2012
  #
@@ -8,7 +8,7 @@
  #
  #  Description     : This file contains an implementation in the C language
  #					  of algorithms described in the research paper:
- #	
+ #
  # 					  L. Condat, "A Direct Algorithm for 1D Total Variation
  #					  Denoising", preprint hal-00675043, Feb. 2012.
  #
@@ -19,9 +19,9 @@
  #					  to be found on the web).
  #
  #					  If you use this code or parts of it for any purpose,
- #					  the author asks you to cite the paper above or, in 
- #					  that event, its published version. Please email him if 
- #					  the proposed algorithms were useful for one of your 
+ #					  the author asks you to cite the paper above or, in
+ #					  that event, its published version. Please email him if
+ #					  the proposed algorithms were useful for one of your
  #					  projects, or for any comment or suggestion.
  #
  #  Usage rights	: Copyright Laurent Condat.
@@ -58,19 +58,19 @@
 #ifndef _CONDAT_FAST_TV_H
 #define _CONDAT_FAST_TV_H
 
-#include <math.h>		
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 
-/* 
-This function implements the 1D total variation denoising 
-algorithm described in the paper referenced above. 
-If output=input, the process is performed in place. Else, 
-the values of input are left unchanged. 
-lambda must be nonnegative. lambda=0 is admissible and 
-yields output[k]=input[k] for all k. 
-If width<=0, nothing is done. 
+/*
+This function implements the 1D total variation denoising
+algorithm described in the paper referenced above.
+If output=input, the process is performed in place. Else,
+the values of input are left unchanged.
+lambda must be nonnegative. lambda=0 is admissible and
+yields output[k]=input[k] for all k.
+If width<=0, nothing is done.
 */
 
 extern "C" {

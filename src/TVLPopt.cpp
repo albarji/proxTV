@@ -1,6 +1,6 @@
 /**
     Optimizers for problems dealing with general TV-Lp norm regularization.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
@@ -20,12 +20,12 @@
 /*  GP_TVp
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x_i - x_(i-1)||_p .
-        
+
     To do so a Gradient Projection method is used to solve its dual problem, employing
     an Lp proximity solver based on Projected Newton.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -40,12 +40,12 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     int iter,stuck,nn,i,lambdaStep;
     Workspace *wsinner=NULL;
     lapack_int one=1,rc,nnp;
-    
+
     /* Problem constants */
     #define L 4 // Lipschitz constant
     #define Linv 0.25 // Inverse of Lipschitz constant
     #define Lsqrt 2 // Squared root of Lipschitz constant
-    
+
     #define FREE \
         if(!ws){ \
             if(w) free(w); \
@@ -53,20 +53,20 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             if(aux2) free(aux2); \
         } \
         freeWorkspace(wsinner);
-        
+
     #define CANCEL(txt,info) \
         printf("GP_TVp: %s\n",txt); \
         FREE \
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
-        
+
     /* Gradient to dual gap, considering also the special cases p~=1 and p~=inf */
     #define GRAD2GAP(w,g,gap,lambda,p,n,i,tmp) \
         gap = lambda * LPnorm(g, n, p); \
         for ( i = 0 ; i < n ; i++ ) \
             gap += w[i] * g[i]; \
         gap = fabs(gap);
-    
+
     nn = n-1;
     /* Alloc memory if no workspace available */
     if(!ws){
@@ -85,16 +85,16 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         {CANCEL("out of memory",info)}
     /* Gradient will be stored in an auxiliar vector */
     g = aux2;
-    
+
     /* Alloc an additional workspace for the inner Lp ball projection solver */
     wsinner = newWorkspace(n);
     if(!wsinner)
         {CANCEL("out of memory",info)}
-    
+
     /* Precompute useful quantities */
     for(i=0;i<nn;i++)
         w[i] = y[i+1] - y[i]; /* Dy */
-        
+
     #ifdef TIMING
         clock_t tIni = clock();
         DUAL2PRIMAL(w,x,i)
@@ -102,7 +102,7 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         GRAD2GAP(w,g,stop,lambda,p,nn,i,tmp)
         fprintf(DEBUG_FILE,"%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
     #endif
-    
+
     /* Compute dual norm */
     q = 1./(1. - 1./p);
     /* Factorize Hessian */
@@ -115,7 +115,7 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-    
+
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 
@@ -139,24 +139,24 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         FREE
         return 1;
     }
-    
+
     /* Initialize lambda step */
     if(LAMBDA_STEPS_TVLP > 1) lambdaCurrent = lambdaIni = lambda/LAMBDA_REDUCTION_TVLP;
     else lambdaCurrent = lambdaIni = lambda;
     lambdaStep = 0;
-    
+
     /* Project point to feasible region (in case it was not feasible) */
     resetWorkspace(wsinner);
     if(!LPp_project(w,lambdaCurrent,aux,info,nn,q,wsinner))
         {CANCEL("error when invoking Lp ball projection subroutine",info)}
     for(i=0;i<nn;i++) w[i] = aux[i];
-    
+
     /* Compute mu-convexity */
     mu = 2. - 2. * cos ( M_PI / (nn+1));
     musqrt = sqrt(mu);
     /* Compute beta */
     beta = (Lsqrt - musqrt) / (Lsqrt + musqrt);
-    
+
     /* Start Gradient Projections iterations */
     stop = DBL_MAX; bestdual = DBL_MAX; stuck = 0;
     /* Stop when one these conditions are met:
@@ -169,7 +169,7 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",w[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-    
+
         /* Compute the primal solution */
         DUAL2PRIMAL(w,x,i)
         /* Gradient evaluation */
@@ -179,37 +179,37 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",g[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Lipschitz step */
         for(i=0;i<nn;i++)
             aux[i] = w[i] - Linv * g[i];
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(GP_TVp) Iter %d, xs=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-            
+
         /* Projection onto lp-ball */
         resetWorkspace(wsinner);
         if(!PN_LPp(aux,lambdaCurrent,w,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP))
             {CANCEL("error when invoking Lp ball projection subroutine",info)}
 
         for(i=0;i<nn;i++) w[i] = aux[i] - w[i];
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(GP_TVp) Iter %d, xsproy=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",w[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Compute the primal solution */
-        DUAL2PRIMAL(w,x,i)    
+        DUAL2PRIMAL(w,x,i)
         /* Gradient evaluation */
         PRIMAL2GRAD(x,g,i)
         /* Compute dual gap */
-        GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)   
-        
+        GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
+
         /* Check improvement in dual */
         DUALVAL(w,y,dual,i)
         if(dual < bestdual){
@@ -218,28 +218,28 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         }
         else
             stuck++;
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(GP_TVp) iter %d lamStep=%d lam=%lf gap=%lf, dual=%lf, bestdual=%lf\n",iter,lambdaStep,lambdaCurrent,stop,dual,bestdual); fflush(DEBUG_FILE);
         #endif
-        
+
         /* Check dual gap */
         while(stop < STOP_TVLP){
             /* If met, move to following lambda step, if any */
             lambdaStep++;
             if(lambdaStep < LAMBDA_STEPS_TVLP){
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
-                GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp) 
+                GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
             }
             else break;
         }
-        
+
         #ifdef TIMING
             printf("%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
         #endif
     }
-    
+
     /* Termination check */
     if(iter >= MAX_ITERS_TVLP){
         #ifdef DEBUG
@@ -262,11 +262,11 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         info[INFO_ITERS] = iter-1;
         info[INFO_GAP] = fabs(stop);
     }
-    
+
     /* Free resources and return */
     FREE
-    return 1;   
-    
+    return 1;
+
     #undef L
     #undef Linv
     #undef Lsqrt
@@ -278,12 +278,12 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
 /*  OGP_TVp
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x_i - x_(i-1)||_p .
-        
+
     To do so an Optimal Gradient Projection method is used to solve its dual problem, employing
     an Lp proximity solver based on Projected Newton.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -298,12 +298,12 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
     int iter,stuck,nn,i,lambdaStep;
     Workspace *wsinner=NULL;
     lapack_int one=1,rc,nnp;
-    
+
     /* Problem constants */
     #define L 4 // Lipschitz constant
     #define Linv 0.25 // Inverse of Lipschitz constant
     #define Lsqrt 2 // Squared root of Lipschitz constant
-    
+
     #define FREE \
         if(!ws){ \
             if(w) free(w); \
@@ -311,13 +311,13 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
             if(aux2) free(aux2); \
         } \
         freeWorkspace(wsinner);
-        
+
     #define CANCEL(txt,info) \
         printf("OGP_TVp: %s\n",txt); \
         FREE \
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
-        
+
     /* Gradient to dual gap, considering also the special cases p~=1 and p~=inf */
     #define GRAD2GAP(w,g,gap,lambda,p,n,i,tmp) \
         gap = tmp = 0; \
@@ -343,7 +343,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
             gap += lambda * pow(tmp,1.0/p); \
         } \
         gap = fabs(gap);
-    
+
     nn = n-1;
     /* Alloc memory if no workspace available */
     if(!ws){
@@ -362,16 +362,16 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
         {CANCEL("out of memory",info)}
     /* Gradient will be stored in an auxiliar vector */
     g = aux2;
-    
+
     /* Alloc an additional workspace for the inner Lp ball projection solver */
     wsinner = newWorkspace(n);
     if(!wsinner)
         {CANCEL("out of memory",info)}
-    
+
     /* Precompute useful quantities */
     for(i=0;i<nn;i++)
         w[i] = y[i+1] - y[i]; /* Dy */
-        
+
     #ifdef TIMING
         clock_t tIni = clock();
         DUAL2PRIMAL(w,x,i)
@@ -379,7 +379,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
         GRAD2GAP(w,g,stop,lambda,p,nn,i,tmp)
         printf("%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
     #endif
-    
+
     /* Compute dual norm */
     q = 1./(1. - 1./p);
     /* Factorize Hessian */
@@ -392,7 +392,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-    
+
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 
@@ -416,22 +416,22 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
         FREE
         return 1;
     }
-    
+
     /* Initialize lambda step */
     if(LAMBDA_STEPS_TVLP > 1) lambdaCurrent = lambdaIni = lambda/LAMBDA_REDUCTION_TVLP;
     else lambdaCurrent = lambdaIni = lambda;
     lambdaStep = 0;
-    
+
     /* Project point to feasible region (in case it was not feasible) */
     resetWorkspace(wsinner);
     if(!LPp_project(w,lambdaCurrent,aux,info,nn,q,wsinner))
         {CANCEL("error when invoking Lp ball projection subroutine",info)}
     for(i=0;i<nn;i++) w[i] = aux[i];
-    
+
     /* Alloc auxiliary memory */
     double *z = (double*)malloc(sizeof(double)*nn);
     for (i=0;i<nn;i++) z[i] = w[i];
-    
+
     /* Compute mu-convexity */
     mu = 2. - 2. * cos ( M_PI / (nn+1));
     musqrt = sqrt(mu);
@@ -440,7 +440,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"mu = %lg, beta = %lg\n",mu, beta); fflush(DEBUG_FILE);
     #endif
-    
+
     /* Start Gradient Projections iterations */
     stop = DBL_MAX; bestdual = DBL_MAX; stuck = 0;
     /* Stop when one these conditions are met:
@@ -453,7 +453,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",w[i]);
             fprintf(DEBUG_FILE,"]\n"); fflush(DEBUG_FILE);
         #endif
-    
+
         /* Compute the primal solution */
         DUAL2PRIMAL(z,x,i)
         /* Gradient evaluation */
@@ -463,23 +463,23 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",g[i]);
             fprintf(DEBUG_FILE,"]\n"); fflush(DEBUG_FILE);
         #endif
-        
+
         /* Lipschitz step */
         for(i=0;i<nn;i++)
             aux[i] = z[i] - Linv * g[i];
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, xs=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux[i]);
             fprintf(DEBUG_FILE,"]\n"); fflush(DEBUG_FILE);
         #endif
-            
+
         /* Projection onto lp-ball */
         resetWorkspace(wsinner);
         if(!PN_LPp(aux,lambdaCurrent,z,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP))
             {CANCEL("error when invoking Lp ball projection subroutine",info)}
         for(i=0;i<nn;i++) z[i] = aux[i] - z[i];
-            
+
         /* mu-convexity step */
         for(i=0;i<nn;i++) {
             // Take projected value
@@ -489,14 +489,14 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
             // Store projected value for next update
             w[i] = tmp;
         }
-        
+
         /* Compute the primal solution */
-        DUAL2PRIMAL(w,x,i)    
+        DUAL2PRIMAL(w,x,i)
         /* Gradient evaluation */
         PRIMAL2GRAD(x,g,i)
         /* Compute dual gap */
-        GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)   
-        
+        GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
+
         /* Check improvement in dual */
         DUALVAL(w,y,dual,i)
         if(dual < bestdual){
@@ -505,28 +505,28 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
         }
         else
             stuck++;
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(OGP_TVp) iter=%d lamStep=%d lam=%lf gap=%lf dual=%lf bestdual=%lf\n",iter,lambdaStep,lambdaCurrent,stop,dual,bestdual); fflush(DEBUG_FILE);
         #endif
-        
+
         /* Check dual gap */
         while(stop < STOP_TVLP){
             /* If met, move to following lambda step, if any */
             lambdaStep++;
             if(lambdaStep < LAMBDA_STEPS_TVLP){
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
-                GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp) 
+                GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
             }
             else break;
         }
-        
+
         #ifdef TIMING
             printf("%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
         #endif
     }
-    
+
     /* Termination check */
     if(iter >= MAX_ITERS_TVLP){
         #ifdef DEBUG
@@ -549,12 +549,12 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
         info[INFO_ITERS] = iter-1;
         info[INFO_GAP] = fabs(stop);
     }
-    
+
     /* Free resources and return */
     FREE
     free(z); // Free auxiliary memory
-    return 1;   
-    
+    return 1;
+
     #undef L
     #undef Linv
     #undef Lsqrt
@@ -566,12 +566,12 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
 /*  FISTA_TVp
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x_i - x_(i-1)||_p .
-        
+
     To do so a FISTA method is used to solve its dual problem, employing
     an Lp proximity solver based on Projected Newton.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -586,12 +586,12 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
     int iter,stuck,nn,i,lambdaStep;
     Workspace *wsinner=NULL;
     lapack_int one=1,rc,nnp;
-    
+
     /* Problem constants */
     #define L 4 // Lipschitz constant
     #define Linv 0.25 // Inverse of Lipschitz constant
     #define Lsqrt 2 // Squared root of Lipschitz constant
-    
+
     #define FREE \
         if(!ws){ \
             if(w) free(w); \
@@ -601,13 +601,13 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
         if(z) free(z); \
         if(wpre) free(wpre); \
         freeWorkspace(wsinner);
-        
+
     #define CANCEL(txt,info) \
         printf("FISTA_TVp: %s\n",txt); \
         FREE \
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
-        
+
     /* Gradient to dual gap, considering also the special cases p~=1 and p~=inf */
     #define GRAD2GAP(w,g,gap,lambda,p,n,i,tmp) \
         gap = tmp = 0; \
@@ -633,7 +633,7 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
             gap += lambda * pow(tmp,1.0/p); \
         } \
         gap = fabs(gap);
-    
+
     nn = n-1;
     /* Alloc memory if no workspace available */
     if(!ws){
@@ -652,16 +652,16 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
         {CANCEL("out of memory",info)}
     /* Gradient will be stored in an auxiliar vector */
     g = aux2;
-    
+
     /* Alloc an additional workspace for the inner Lp ball projection solver */
     wsinner = newWorkspace(n);
     if(!wsinner)
         {CANCEL("out of memory",info)}
-    
+
     /* Precompute useful quantities */
     for(i=0;i<nn;i++)
         w[i] = y[i+1] - y[i]; /* Dy */
-        
+
     #ifdef TIMING
         clock_t tIni = clock();
         DUAL2PRIMAL(w,x,i)
@@ -669,7 +669,7 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
         GRAD2GAP(w,g,stop,lambda,p,nn,i,tmp)
         printf("%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
     #endif
-    
+
     /* Compute dual norm */
     q = 1./(1. - 1./p);
     /* Factorize Hessian */
@@ -682,7 +682,7 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-    
+
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 
@@ -706,25 +706,25 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
         FREE
         return 1;
     }
-    
+
     /* Initialize lambda step */
     if(LAMBDA_STEPS_TVLP > 1) lambdaCurrent = lambdaIni = lambda/LAMBDA_REDUCTION_TVLP;
     else lambdaCurrent = lambdaIni = lambda;
     lambdaStep = 0;
-    
+
     /* Project point to feasible region (in case it was not feasible) */
     resetWorkspace(wsinner);
     if(!LPp_project(w,lambdaCurrent,aux,info,nn,q,wsinner))
         {CANCEL("error when invoking Lp ball projection subroutine",info)}
     for(i=0;i<nn;i++) w[i] = aux[i];
-    
+
     /* Alloc auxiliary memory */
     z = (double*)malloc(sizeof(double)*nn);
     wpre = (double*)malloc(sizeof(double)*nn);
     for (i=0;i<nn;i++) z[i] = w[i];
 
     double fistaStep = 1, fistaStepPrev;
-    
+
     /* Start Gradient Projections iterations */
     stop = DBL_MAX; bestdual = DBL_MAX; stuck = 0;
     /* Stop when one these conditions are met:
@@ -737,7 +737,7 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",w[i]);
             fprintf(DEBUG_FILE,"]\n"); fflush(DEBUG_FILE);
         #endif
-    
+
         /* Compute the primal solution */
         DUAL2PRIMAL(z,x,i)
         /* Gradient evaluation */
@@ -747,28 +747,28 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",g[i]);
             fprintf(DEBUG_FILE,"]\n"); fflush(DEBUG_FILE);
         #endif
-        
+
         /* Lipschitz step */
         for(i=0;i<nn;i++)
             aux[i] = z[i] - Linv * g[i];
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"Iter %d, xs=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux[i]);
             fprintf(DEBUG_FILE,"]\n"); fflush(DEBUG_FILE);
         #endif
-        
+
         /* Store current point */
         for(i=0;i<nn;i++) {
             wpre[i] = w[i];
         }
-        
+
         /* Projection onto lq-ball */
         resetWorkspace(wsinner);
         if(!PN_LPp(aux,lambdaCurrent,w,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP))
             {CANCEL("error when invoking Lp ball projection subroutine",info)}
         for(i=0;i<nn;i++) w[i] = aux[i] - w[i];
-            
+
         /* FISTA readjustment step */
         fistaStepPrev = fistaStep;
         fistaStep = (1. + sqrt(1.+4*fistaStep*fistaStep)) / 2.;
@@ -777,14 +777,14 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
             // Compute new z value (FISTA step)
             z[i] = w[i] + beta * (w[i] - wpre[i]);
         }
-        
+
         /* Compute the primal solution */
-        DUAL2PRIMAL(w,x,i)    
+        DUAL2PRIMAL(w,x,i)
         /* Gradient evaluation */
         PRIMAL2GRAD(x,g,i)
         /* Compute dual gap */
-        GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)   
-        
+        GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
+
         /* Check improvement in dual */
         DUALVAL(w,y,dual,i)
         if(dual < bestdual){
@@ -793,28 +793,28 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
         }
         else
             stuck++;
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(FISTA_TVp) iter=%d lamStep=%d lam=%lf gap=%lf dual=%lf bestdual=%lf\n",iter,lambdaStep,lambdaCurrent,stop,dual,bestdual); fflush(DEBUG_FILE);
         #endif
-        
+
         /* Check dual gap */
         while(stop < STOP_TVLP){
             /* If met, move to following lambda step, if any */
             lambdaStep++;
             if(lambdaStep < LAMBDA_STEPS_TVLP){
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
-                GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp) 
+                GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
             }
             else break;
         }
-        
+
         #ifdef TIMING
             printf("%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
         #endif
     }
-    
+
     /* Termination check */
     if(iter >= MAX_ITERS_TVLP){
         #ifdef DEBUG
@@ -837,11 +837,11 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
         info[INFO_ITERS] = iter-1;
         info[INFO_GAP] = fabs(stop);
     }
-    
+
     /* Free resources and return */
     FREE
-    return 1;   
-    
+    return 1;
+
     #undef L
     #undef Linv
     #undef Lsqrt
@@ -853,13 +853,13 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
 /*  FW_TVp
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x_i - x_(i-1)||_p .
-        
+
     To do so a Franke-Wolfe conditional gradient is used to solve its dual problem
-    
+
         min_u   1/2 ||D^T u||^2_2 - u^T D y    s.t. ||u||_q <= lambda
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -873,7 +873,7 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     double *w=NULL, *aux=NULL, *aux2=NULL, *g=NULL;
     double stop, q, lambdaMax, gap, step, den, tmp, fval, fvalPrev;
     lapack_int one=1,rc,nnp;
-    
+
     /* Gradient to dual gap, considering also the special cases p~=1 and p~=inf */
     #define GRAD2GAP(w,g,gap,lambda,p,n,i,tmp) \
         gap = tmp = 0; \
@@ -899,7 +899,7 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             gap += lambda * pow(tmp,1.0/p); \
         } \
         gap = fabs(gap);
-        
+
     #define FREE \
         if (!ws) { \
             if(w) free(w); \
@@ -907,7 +907,7 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             if(aux2) free(aux2); \
             if(g) free(g); \
         }
-        
+
     #define CANCEL(txt,info) \
         printf("FW_TVp: %s\n",txt); \
         FREE \
@@ -933,7 +933,7 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     /* Precompute useful quantities */
     for(i=0;i<nn;i++)
         w[i] = y[i+1] - y[i]; /* Dy */
-    
+
     /* Compute dual norm */
     q = 1./(1. - 1./p);
     /* Factorize Hessian */
@@ -946,7 +946,7 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-    
+
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 
@@ -970,11 +970,11 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         FREE
         return 1;
     }
-    
+
     /* Else, use radially projected point as starting guess */
     for(i=0;i<nn;i++)
         w[i] = w[i] / lambdaMax * lambda;
-        
+
     /* Initial dual value */
     DUALVAL(w,y,fval,i);
     fvalPrev = DBL_MAX;
@@ -988,44 +988,44 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",w[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-    
+
         /* Get gradient */
         DUAL2PRIMAL(w,x,i)
         PRIMAL2GRAD(x,g,i)
-        
+
         /* Store current primal value */
         fvalPrev = fval;
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(FW_TVp) Iter %d, g=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",g[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-    
+
         /* Solve linear surrogate problem: argmin_s  s · gradient(w)  s.t.  ||s||_q <= lambda */
         solveLinearLP(g,nn,q,lambda,aux);
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(FW_TVp) Iter %d, s=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Get displacement vector */
         for ( i = 0 ; i < nn ; i++ )
             aux2[i] = aux[i] - w[i];
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(FW_TVp) Iter %d, disp=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux2[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Compute surrogate dual gap */
         gap = 0;
         for ( i = 0 ; i < nn ; i++ )
             gap -= aux2[i] * g[i];
-        
+
         /* Compute unbounded minimizing stepsize: gap / ||D' · (w-s)|| */
         /* (D'd)[0] = -d[0], (D'd)[i] = sum(d[i-1] - d[i]), (D'd)[nn] = d[nn] */
         den = aux2[0] * aux2[0];
@@ -1035,29 +1035,29 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         }
         den += aux2[nn] * aux2[nn];
         step = gap / den;
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(FW_TVp) Iter %d, step=%lf\n",iter,step);
         #endif
-        
+
         /* Clip down to interval [0,1] */
         step = min(max(0.,step),1.);
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(FW_TVp) Iter %d, stepClip=%lf\n",iter,step);
         #endif
-        
+
         /* Peform a step along the surrogate solution */
         for ( i = 0 ; i < nn ; i++ )
             w[i] = (1.-step) * w[i] + step * aux[i];
-            
+
         /* Compute new dual value */
         DUALVAL(w,y,fval,i);
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(FW_TVp) surrgap=%lf, dual=%lf\n",gap,fval); fflush(stdout);
         #endif
-            
+
         /* If surrogate gap is met, check whether the same applies for the real gap */
         if ( gap <= STOP_TVLP ) {
             /* Compute the primal solution */
@@ -1070,17 +1070,17 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
                 fprintf(DEBUG_FILE,"(FW_TVp) gap=%lf\n",gap); fflush(stdout);
             #endif
         }
-        
+
         iter++;
     }
-        
+
     /* Return info if requested */
     if (info) {
         info[INFO_RC] = RC_OK;
         info[INFO_ITERS] = iter;
         info[INFO_GAP] = gap;
     }
-    
+
     #undef FREE
     #undef CANCEL
     #undef GRAD2GAP
@@ -1089,13 +1089,13 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
 /*  GPFW_TVp
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + lambda ||x_i - x_(i-1)||_p .
-        
+
     To do so a hybrid Gradient Projection + Frank-Wolfe method is used to solve its dual problem, employing
     an Lp proximity solver based on Projected Newton. Iterations of both methods are interleaved for
     further efficiency.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalty parameter.
@@ -1110,10 +1110,10 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     int iter,stuck,nn,i,lambdaStep,cycle;
     Workspace *wsinner=NULL;
     lapack_int one=1,rc,nnp;
-    
+
     /* Problem constants */
     #define Linv 0.25 // Inverse of Lipschitz constant
-    
+
     #define FREE \
         if(!ws){ \
             if(w) free(w); \
@@ -1122,24 +1122,24 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
             if(g) free(g); \
         } \
         freeWorkspace(wsinner);
-        
+
     #define CANCEL(txt,info) \
         printf("GPFW_TVp: %s\n",txt); \
         FREE \
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
-        
+
     /* Gradient to dual gap, considering also the special cases p~=1 and p~=inf */
     #define GRAD2GAP(w,g,gap,lambda,p,n,i) \
         gap = lambda * LPnorm(g, n, p); \
         for ( i = 0 ; i < n ; i++ ) \
             gap += w[i] * g[i]; \
         gap = fabs(gap);
-        
+
     /* If p > 10 then FW is terrible: switch to pure GP */
     if ( p > 10 )
         return GP_TVp(y, lambda, x, info, n, p, ws);
-    
+
     nn = n-1;
     /* Alloc memory if no workspace available */
     if(!ws){
@@ -1159,16 +1159,16 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     if(!w || !aux || !aux2 || !g)
         {CANCEL("out of memory",info)}
     /* Gradient will be stored in an auxiliar vector */
-    
+
     /* Alloc an additional workspace for the inner Lp ball projection solver */
     wsinner = newWorkspace(n);
     if(!wsinner)
         {CANCEL("out of memory",info)}
-    
+
     /* Precompute useful quantities */
     for(i=0;i<nn;i++)
         w[i] = y[i+1] - y[i]; /* Dy */
-        
+
     #ifdef TIMING
         clock_t tIni = clock();
         DUAL2PRIMAL(w,x,i)
@@ -1176,7 +1176,7 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
         GRAD2GAP(w,g,stop,lambda,p,nn,i)
         fprintf(DEBUG_FILE,"%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
     #endif
-    
+
     /* Compute dual norm */
     q = 1./(1. - 1./p);
     /* Factorize Hessian */
@@ -1189,7 +1189,7 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-    
+
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 
@@ -1213,18 +1213,18 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
         FREE
         return 1;
     }
-    
+
     /* Project point to feasible region (in case it was not feasible) */
     resetWorkspace(wsinner);
     if(!LPp_project(w,lambda,aux,info,nn,q,wsinner))
         {CANCEL("error when invoking Lp ball projection subroutine",info)}
     for(i=0;i<nn;i++) w[i] = aux[i];
-    
+
     /* Compute initial primal vector */
     DUAL2PRIMAL(w,x,i)
     /* Initial gradient evaluation */
     PRIMAL2GRAD(x,g,i)
-    
+
     /* Start Gradient Projections iterations */
     stop = DBL_MAX; bestdual = DBL_MAX; stuck = 0; cycle = 0;
     /* Stop when one these conditions are met:
@@ -1237,52 +1237,52 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",w[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(GPFW_TVp) Iter %d, g=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",g[i]);
             fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /*** Gradient Projection cycle ***/
         if ( cycle < 0 || !(cycle % FW_CYCLES_TVLP) ) {
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) GP iteration\n");
             #endif
-                
+
             /* Lipschitz step */
             for(i=0;i<nn;i++)
                 aux2[i] = w[i] - Linv * g[i];
-                
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) Iter %d, xs=[ ",iter);
                 for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux2[i]);
                 fprintf(DEBUG_FILE,"]\n");
             #endif
-                
+
             /* Projection onto lp-ball */
             resetWorkspace(wsinner);
             if(!PN_LPp(aux2,lambda,aux,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP))
                 {CANCEL("error when invoking Lp ball projection subroutine",info)}
             for(i=0;i<nn;i++) aux[i] = aux2[i] - aux[i];
-                
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) Iter %d, xsproy=[ ",iter);
                 for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux[i]);
                 fprintf(DEBUG_FILE,"]\n");
             #endif
-            
+
             /* Find optimal stepsize between original w and Lipschitz+Projected point */
-            
+
             /* Get displacement vector */
             for ( i = 0 ; i < nn ; i++ )
                 aux2[i] = aux[i] - w[i];
-            
+
             /* Compute stepsize numerator */
             num = 0;
             for ( i = 0 ; i < nn ; i++ )
                 num -= aux2[i] * g[i];
-            
+
             /* Compute unbounded minimizing stepsize: num / ||D' · d|| */
             /* (D'd)[0] = -d[0], (D'd)[i] = sum(d[i-1] - d[i]), (D'd)[nn] = d[nn] */
             den = aux2[0] * aux2[0];
@@ -1292,24 +1292,24 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
             }
             den += aux2[nn] * aux2[nn];
             step = num / den;
-            
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) step=%lf\n",step); fflush(stdout);
             #endif
-            
+
             /* If we get negative stepsize, don't clip it. We will enworse the obj. function in this step,
                but this should help moving out of numericaly unstable regions */
             if ( step < 0 || cycle < 0 ) {
                 step = 1;
                 cycle = -MAX_ITERS_TVLPFW;
-            } else            
+            } else
                 /* Clip down to interval [0,1] */
             step = min(max(0.,step),1.);
-            
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) stepClip=%lf\n",step); fflush(stdout);
             #endif
-            
+
             /* Peform a step along the surrogate solution */
             if ( step == 1 )
                 memcpy(w, aux, sizeof(double)*nn);
@@ -1326,37 +1326,37 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) gap=%lf\n",stop); fflush(stdout);
             #endif
-        
+
         /*** Frank-Wolfe step ***/
         } else {
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) FW iteration\n");
             #endif
-    
+
             /* Solve linear surrogate problem: argmin_s  s · gradient(w)  s.t.  ||s||_q <= lambda */
             solveLinearLP(g,nn,q,lambda,aux);
-            
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) Iter %d, s=[ ",iter);
                 for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux[i]);
                 fprintf(DEBUG_FILE,"]\n");
             #endif
-            
+
             /* Get displacement vector */
             for ( i = 0 ; i < nn ; i++ )
                 aux2[i] = aux[i] - w[i];
-                
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) Iter %d, disp=[ ",iter);
                 for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",aux2[i]);
                 fprintf(DEBUG_FILE,"]\n");
             #endif
-            
+
             /* Compute surrogate dual gap */
             stop = 0;
             for ( i = 0 ; i < nn ; i++ )
                 stop -= aux2[i] * g[i];
-            
+
             /* Compute unbounded minimizing stepsize: gap / ||D' · (w-s)|| */
             /* (D'd)[0] = -d[0], (D'd)[i] = sum(d[i-1] - d[i]), (D'd)[nn] = d[nn] */
             den = aux2[0] * aux2[0];
@@ -1366,34 +1366,34 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
             }
             den += aux2[nn] * aux2[nn];
             step = stop / den;
-            
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) step=%lf\n",step); fflush(stdout);
             #endif
-            
+
             /* Clip down to interval [0,1] */
             step = min(max(0.,step),1.);
-            
+
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"(GPFW_TVp) stepClip=%lf\n",step); fflush(stdout);
             #endif
-            
+
             /* Peform a step along the surrogate solution */
             for ( i = 0 ; i < nn ; i++ )
                 w[i] = (1.-step) * w[i] + step * aux[i];
-            
+
             /* Compute the primal solution */
             DUAL2PRIMAL(w,x,i)
             /* Gradient evaluation */
             PRIMAL2GRAD(x,g,i)
-                
+
             /* If surrogate gap is met, check whether the same applies for the real gap */
             if ( stop <= STOP_TVLP ) {
                 /* Compute real dual gap */
                 GRAD2GAP(w,g,stop,lambda,p,nn,i)
-            } 
+            }
         }
-        
+
         /* Check improvement in dual */
         DUALVAL(w,y,dual,i)
         /* Check significant improvement in dual */
@@ -1405,18 +1405,18 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
         else
             stuck++;
 
-        if ( dual < bestdual ) 
+        if ( dual < bestdual )
             bestdual = dual;
-            
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(GPFW_TVp) iter %d gap=%lf, dual=%lf, bestdual=%lf\n",iter,stop,dual,bestdual); fflush(DEBUG_FILE); fflush(stdout);
         #endif
-        
+
         #ifdef TIMING
             printf("%lf\t%lf\n",((double)(clock()-tIni))/((double)CLOCKS_PER_SEC),stop);
         #endif
     }
-    
+
     /* Termination check */
     if(iter >= MAX_ITERS_TVLP){
         #ifdef DEBUG
@@ -1439,11 +1439,11 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
         info[INFO_ITERS] = iter-1;
         info[INFO_GAP] = fabs(stop);
     }
-    
+
     /* Free resources and return */
     FREE
-    return 1;   
-    
+    return 1;
+
     #undef L
     #undef FREE
     #undef CANCEL

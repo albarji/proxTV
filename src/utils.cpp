@@ -1,6 +1,6 @@
 /**
     General utility functions.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
@@ -14,7 +14,7 @@
 
 /**
     Returns the sign of a number.
-    
+
     @argument s input number
     @returns -1 if number is negative, +1 if positive, 0 if exactly 0
 */
@@ -24,7 +24,7 @@ short sign(double s) {
 
 /**
     Returns the minimum of two numbers
-    
+
     @argument x
     @argument y
     @returns value of the minimum number
@@ -32,13 +32,13 @@ short sign(double s) {
 double min(double x, double y) {
     if ( x < y )
         return x;
-    else 
+    else
         return y;
 }
 
 /**
     Returns the maximum of two numbers
-    
+
     @argument x
     @argument y
     @returns value of the maximum number
@@ -46,7 +46,7 @@ double min(double x, double y) {
 double max(double x, double y) {
     if ( x > y )
         return x;
-    else 
+    else
         return y;
 }
 
@@ -72,13 +72,13 @@ void radialProjection(double *x, int n, double norm, double lambda) {
 
 /**
     Creates and initiallizes a workspace structure
-    
+
     @argument n dimension of data vectors.
     @returns pointer to new workspace
 */
 Workspace* newWorkspace(int n) {
     Workspace *ws;
-    
+
     #define CANCEL \
         freeWorkspace(ws); \
         return NULL;
@@ -86,35 +86,35 @@ Workspace* newWorkspace(int n) {
     /* Alloc structure */
     ws = (Workspace*)calloc(1,sizeof(Workspace));
     if(!ws) {CANCEL}
-    
+
     /* Alloc input and output fields */
     ws->n = n;
     ws->in = (double*)malloc(sizeof(double)*n);
     ws->out = (double*)malloc(sizeof(double)*n);
     if(!ws->in || !ws->out) {CANCEL}
-    
+
     /* Alloc generic double fields holder */
     ws->d = (double**)calloc(WS_MAX_MEMORIES,sizeof(double*));
     if(!ws->d) {CANCEL}
     ws->nd = ws->maxd = 0;
-    
+
     /* Alloc generic int fields holder */
     ws->i = (int**)calloc(WS_MAX_MEMORIES,sizeof(int*));
     if(!ws->i) {CANCEL}
     ws->ni = ws->maxi = 0;
-    
+
     /* Alloc warm restart fields */
     ws->warmDual = (double*)malloc(sizeof(double)*(n-1));
     if(!ws->warmDual) {CANCEL}
-        
+
     return ws;
-    
+
     #undef CANCEL
 }
 
 /**
     Resets the memory assignments in the workspace
-    
+
     @argument ws pointer to workspace to reset
 */
 void resetWorkspace(Workspace *ws) {
@@ -125,7 +125,7 @@ void resetWorkspace(Workspace *ws) {
 /**
     Returns a vector of double memory from the workspace.
     New memory is allocated on-demand
-    
+
     @argument ws pointer to workspace
 */
 double* getDoubleWorkspace(Workspace *ws) {
@@ -142,10 +142,10 @@ double* getDoubleWorkspace(Workspace *ws) {
         /* Increase number of allocated vectors */
         ws->maxd++;
     }
-    
+
     /* Increase number of used vectors */
     ws->nd++;
-    
+
     /* Return memory */
     return ws->d[ws->nd-1];
 }
@@ -153,7 +153,7 @@ double* getDoubleWorkspace(Workspace *ws) {
 /**
     Returns a vector of int memory from the workspace.
     New memory is allocated on-demand
-    
+
     @argument ws pointer to workspace
 */
 int* getIntWorkspace(Workspace *ws) {
@@ -170,10 +170,10 @@ int* getIntWorkspace(Workspace *ws) {
         /* Increase number of allocated vectors */
         ws->maxi++;
     }
-    
+
     /* Increase number of used vectors */
     ws->ni++;
-    
+
     /* Return memory */
     return ws->i[ws->ni-1];
 }
@@ -197,7 +197,7 @@ void freeWorkspace(Workspace *ws){
         }
         /* Warm restart fields */
         if(ws->warmDual) free(ws->warmDual);
-        
+
         free(ws);
     }
 }
@@ -206,28 +206,28 @@ void freeWorkspace(Workspace *ws){
 Workspace** newWorkspaces(int n,int p){
     int i;
     Workspace **wa=NULL;
-    
+
     #define CANCEL \
         freeWorkspaces(wa,p); \
         return NULL;
-    
+
     /* Alloc the array */
     wa = (Workspace**)calloc(p,sizeof(Workspace*));
     if(!wa) {CANCEL}
-    
+
     /* Alloc each individual workspace */
     for(i=0;i<p;i++){
         wa[i] = newWorkspace(n);
         if(!wa[i]) {CANCEL}
     }
-    
+
     return wa;
 }
 
 /* Frees an array of p workspaces */
 void freeWorkspaces(Workspace **wa,int p){
     int i;
-    
+
     if(wa){
         /* Free each workspace */
         for(i=0;i<p;i++) freeWorkspace(wa[i]);

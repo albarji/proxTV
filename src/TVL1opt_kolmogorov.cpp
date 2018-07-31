@@ -3,7 +3,7 @@
     with the implementation of the method in the paper
 
     Total Variation on a Tree
-    by Vladimir Kolmogorov, Thomas Pock and Michal Rolínek. 
+    by Vladimir Kolmogorov, Thomas Pock and Michal Rolínek.
 
     Minor modifications by Álvaro Barbero.
 */

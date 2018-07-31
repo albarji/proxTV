@@ -1,6 +1,6 @@
 /**
     General functions dealing with TV norm regularization.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
@@ -18,7 +18,7 @@
 /**
     General function for 1 dimensional unweighted TV optimization. Invokes different algorithms depending on the
     TV norm p.
-    
+
     @param y input signal
     @param lambda regularization value
     @param x preallocated space in which to store solution
@@ -36,7 +36,7 @@ int TV(double *y,double lambda,double *x,double *info,int n,double p,Workspace *
     // Check arguments
     if ( p < 1 )
         {CANCEL("TV only works for norms p >= 1",info)}
-        
+
     // Invoke appropriate method
     if(p == 1) {
         hybridTautString_TV1(y, n, lambda, x);
@@ -49,9 +49,9 @@ int TV(double *y,double lambda,double *x,double *info,int n,double p,Workspace *
     else if(p == 2)
         morePG_TV2(y, lambda, x, info, n, ws);
     else // general p norm
-        GPFW_TVp(y, lambda, x, info, n, p, ws); 
-        
+        GPFW_TVp(y, lambda, x, info, n, p, ws);
+
     return 1;
- 
-    #undef CANCEL   
+
+    #undef CANCEL
 }

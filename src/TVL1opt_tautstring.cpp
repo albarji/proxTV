@@ -250,7 +250,7 @@ inline Segment* newknot(Buffer* majorant, Buffer* minorant, Point* origin, Point
         switching to this algorithm from othe taut-string method.
         A positive offset mean the starting point is above the tube center
         by this offset quantity, negative means it is under the tube center.
-        
+
     Returns: signal after TV-l1 proximity.
 */
 int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox, double offset) {
@@ -286,7 +286,7 @@ int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox
     Point *plastexplored = &lastexplored;
     lastexplored.x = 1;
     lastexplored.y = signal[0];
-        
+
     // Iterate along the signal length
     Segment *saux;
     int i, iaux;
@@ -349,7 +349,7 @@ int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox
         - n: length of signal
         - lam: strength of l1 regularization
         - prox: array in which to save results
-        
+
     Returns: signal after TV-l1 proximity.
 */
 int classicTautString_TV1(double *signal, int n, double lam, double *prox) {

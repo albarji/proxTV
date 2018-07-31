@@ -1,6 +1,6 @@
 /**
     Optimizers for problems dealing with weighted TV-L1 norm regularization.
-    
+
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
@@ -20,11 +20,11 @@
 /*  PN_TV1_Weighted
 
     Given a reference signal y and a weight vector lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + sum_i lambda_i |x_i - x_(i-1)| .
-        
+
     To do so a Projected Newton algorithm is used to solve its dual problem.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: weight vector.
@@ -40,29 +40,29 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
     double *w=NULL,*g=NULL,*d=NULL,*aux=NULL,*aux2=NULL;
     int *inactive=NULL;
     lapack_int one=1,rc,nnp=nn,nIp;
-    
+
     /* Macros */
     #define GRAD2GAP(g,w,gap,i) \
         gap = 0; \
         for(i=0;i<nn;i++) \
             gap += fabs(g[i]) * lambda[i] + w[i] * g[i];
-        
+
     #define PRIMAL2VAL(x,val,i) \
         val = 0; \
         for(i=0;i<n;i++) \
             val += x[i]*x[i]; \
         val *= 0.5;
-            
+
     #define PROJECTION(w) \
         for(i=0;i<nn;i++) \
             if(w[i] > lambda[i]) w[i] = lambda[i]; \
             else if(w[i] < -lambda[i]) w[i] = -lambda[i];
-            
+
     #define CHECK_INACTIVE(w,g,inactive,nI,i) \
         for(i=nI=0 ; i<nn ; i++) \
             if( (w[i] > -lambda[i] && w[i] < lambda[i]) || (w[i] == -lambda[i] && g[i] < -EPSILON) || (w[i] == lambda[i] && g[i] > EPSILON) )  \
                 inactive[nI++] = i;
-                
+
     #define FREE \
         if(!ws){ \
             if(w) free(w); \
@@ -72,13 +72,13 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
             if(aux2) free(aux2); \
             if(inactive) free(inactive); \
         }
-        
+
     #define CANCEL(txt,info) \
         printf("PN_TV1: %s\n",txt); \
         FREE \
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
-            
+
     /* Alloc memory if no workspace available */
     if(!ws){
         w = (double*)malloc(sizeof(double)*nn);
@@ -104,7 +104,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
     for(i=0;i<nn;i++)
       w[i] = (y[i+1] - y[i]); /* Dy */
     iters = 0;
-        
+
     /* Factorize Hessian */
     for(i=0;i<nn-1;i++){
         aux[i] = 2;
@@ -114,23 +114,23 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-    
+
     /* above assume we solved DD'u = Dy */
     /* we wanted to solve DD'Wu = Dy; so now obtain u by dividing by W */
     for(i=0;i<nn;i++) w[i]=w[i] / lambda[i];
 
     /* Compute maximum effective penalty */
     lambdaMax = 0;
-    for(i=0;i<nn;i++) 
+    for(i=0;i<nn;i++)
         if((tmp = fabs(w[i])) > lambdaMax) lambdaMax = tmp;
 
     /* Check if the unconstrained solution is feasible for the given lambda */
     #ifdef DEBUG
         fprintf(DEBUG_FILE,"lambda=%lf,lambdaMax=%lf\n",1.0,lambdaMax);
     #endif
-   
+
     /*  check if infnorm(u ./ w) <= 1 */
-    if(1.0 >= lambdaMax){  
+    if(1.0 >= lambdaMax){
         /* In this case all entries of the primal solution should be the same as the mean of y */
         tmp = 0;
         for(i=0;i<n;i++) tmp += y[i];
@@ -148,11 +148,11 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
         FREE
         return 1;
     }
-    
+
     /* If restart info available, use it to decide starting point */
     if(ws && ws->warm)
         memcpy(w,ws->warmDual,sizeof(double)*(n-1));
-    
+
     /* Initial guess and gradient */
     PROJECTION(w)
     DUAL2PRIMAL(w,x,i)
@@ -169,7 +169,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
         fprintf(DEBUG_FILE,"fVal=%lf\n",fval0);
         fprintf(DEBUG_FILE,"-------------------------------\n");
     #endif
-    
+
     /* Solver loop */
     stop = DBL_MAX;
     stopPrev = -DBL_MAX;
@@ -177,7 +177,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
     while(stop > STOP_PN && iters < MAX_ITERS_PN && fabs(stop-stopPrev) > EPSILON){
         /* If every constraint is active, we have finished */
         if(!nI){ FREE return 1;}
-        
+
         /* Compute reduced Hessian (only inactive rows/columns) */
         for(i=0;i<nI-1;i++){
             aux[i] = 2;
@@ -196,7 +196,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
             fprintf(DEBUG_FILE,"c=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",aux[i]); fprintf(DEBUG_FILE,"]\n");
             fprintf(DEBUG_FILE,"l=["); for(i=0;i<nI-1;i++) fprintf(DEBUG_FILE,"%lf ",aux2[i]); fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Solve Choleski-like linear system to obtain Newton updating direction */
         for(i=0;i<nI;i++)
             d[i] = g[inactive[i]];
@@ -204,7 +204,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"d=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",d[i]); fprintf(DEBUG_FILE,"]\n");
         #endif
-        
+
         /* Stepsize selection algorithm (quadratic interpolation) */
         gRd = 0;
         for(i=0;i<nI;i++)
@@ -243,7 +243,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
                     #ifdef DEBUG
                         fprintf(DEBUG_FILE,"maxStep=%lf\n",maxStep);
                     #endif
-                    
+
                     /* Compute gradient w.r.t stepsize at the present position */
                     grad0 = 0;
                     if(!inactive[0]){
@@ -262,7 +262,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
                             //grad0 += -d[nI-1] * (2*w[nn-1] - w[nn-2] - y[nn] - y[nn-1]); // Old (wrong!) gradient computation, corrected in v1.1
                             grad0 += -d[nI-1] * (2*w[nn-1] - w[nn-2] - y[nn] + y[nn-1]);
                     }
-                
+
                     recomp = 1;
                 }
                 /* Use quadratic interpolation to determine next stepsize */
@@ -282,11 +282,11 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
                 maxStep = delta;
             }
         }
-            
+
         /* Perform update */
         memcpy((void*)w,(void*)aux,sizeof(double)*nn);
         fval0 = fval1;
-        
+
         /* Reconstruct gradient */
         PRIMAL2GRAD(x,g,i)
 
@@ -297,7 +297,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
         stopPrev = stop;
         GRAD2GAP(g,w,stop,i)
         iters++;
-        
+
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"---------End of iteration %d--------\n",iters);
             fprintf(DEBUG_FILE,"w=["); for(i=0;i<nn;i++) fprintf(DEBUG_FILE,"%lf ",w[i]); fprintf(DEBUG_FILE,"]\n");
@@ -307,7 +307,7 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
             fprintf(DEBUG_FILE,"stop=%lf\n",stop);
         #endif
     }
-    
+
     /* Termination check */
     if(iters >= MAX_ITERS_PN){
         #ifdef DEBUG
@@ -329,19 +329,19 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
         info[INFO_ITERS] = iters;
         info[INFO_GAP] = fabs(stop);
     }
-    
+
     /* If restart structure available, store info for later warm restart */
     if(ws){
         memcpy(ws->warmDual,w,sizeof(double)*(n-1));
         ws->warm = 1;
     }
-    
+
     FREE
     return 1;
-         
-    #undef GRAD2GAP        
-    #undef PRIMAL2VAL            
-    #undef PROJECTION            
+
+    #undef GRAD2GAP
+    #undef PRIMAL2VAL
+    #undef PROJECTION
     #undef CHECK_INACTIVE
     #undef FREE
     #undef CANCEL
@@ -350,11 +350,11 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
 /*  tautString_TV1_Weighted
 
     Given a reference signal y and a penalty parameter lambda, solves the proximity operator
-    
+
         min_x 0.5 ||x-y||^2 + sum_i \lambda_i |x_i - x_(i-1)| .
-        
+
     To do so a Taut String algorithm is used to solve its equivalent problem.
-    
+
     Inputs:
         - y: reference signal.
         - lambda: penalties vector.
@@ -372,24 +372,24 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
     int lastBreak;
     /* Auxiliary variables */
     int i, j;
-        
+
     #define CANCEL(txt,info) \
         printf("tautString_TV1_Weighted: %s\n",txt); \
         return 0;
-        
+
     #ifdef DEBUG
         fprintf(DEBUG_FILE, "tautString_TV1_Weighted start\n");
         fprintf(DEBUG_FILE, "y = ["); for(i=0;i<n&&i<DEBUG_N;i++) fprintf(DEBUG_FILE, " %.3f", y[i]); fprintf(DEBUG_FILE, "]\n");
         fprintf(DEBUG_FILE, "lambda = ["); for(i=0;i<n-1&&i<DEBUG_N;i++) fprintf(DEBUG_FILE, " %.3f", lambda[i]); fprintf(DEBUG_FILE, "]\n");
     #endif
-    
+
     /* Starting point */
     mnHeight = mxHeight = 0;
     mn = -lambda[0] + y[0];
     mx = lambda[0] + y[0];
     lastBreak = -1;
     mnBreak = mxBreak = 0;
-        
+
     /* Proceed along string */
     i = 0;
     while ( i < n ) {
@@ -398,13 +398,13 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"i = %d, mx = %.3f, mn = %.3f, mxHeight = %.3f, mnHeight = %.3f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,mx,mn,mxHeight,mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
             #endif
-            
+
             /* Update height of minorant slope w.r.t. tube center */
             /* This takes into account both the slope of the minorant and the change in the tube center */
             mnHeight += mn - y[i];
-        
+
             /* Check for ceiling violation: tube ceiling at current point is below proyection of minorant slope */
-            /* Majorant is r + lambda (except for last point), which is computed on the fly */   
+            /* Majorant is r + lambda (except for last point), which is computed on the fly */
             if ( lambda[i] < mnHeight ) {
                 #ifdef DEBUG
                     fprintf(DEBUG_FILE,"CEILING VIOLATION i = %d, mxVal = %f, mnHeight = %f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,lambda[i],mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
@@ -425,11 +425,11 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
                 i++;
                 continue;
             }
-            
+
             /* Update height of minorant slope w.r.t. tube center */
             /* This takes into account both the slope of the minorant and the change in the tube center */
             mxHeight += mx - y[i];
-            
+
             /* Check for minorant violation: minorant at current point is above proyection of majorant slope */
             /* Minorant is r - lambda (except for last point), which is computed on the fly */
             if ( -lambda[i] > mxHeight ) {
@@ -452,7 +452,7 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
                 i++;
                 continue;
             }
-            
+
             /* No violations at this point */
 
             /* Check if proyected majorant height is above ceiling */
@@ -464,7 +464,7 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
                 /* This is a possible majorant breaking point */
                 mxBreak = i;
             }
-            
+
             /* Check if proyected minorant height is under actual minorant */
             if ( mnHeight <= -lambda[i] ) {
                 /* Update minorant slope */
@@ -478,22 +478,22 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"i = %d, mx = %.3f, mn = %.3f, mxHeight = %.3f, mnHeight = %.3f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,mx,mn,mxHeight,mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
             #endif
-            
+
             /* At this point: no violations, so keep up building current segment */
             i++;
         }
-        
+
         /* Special case i == n-1 (last point) */
         /* We try to validate the last segment, and if we can, we are finished */
-        /* The code is essentially the same as the one for the general case, 
+        /* The code is essentially the same as the one for the general case,
            the only different being that here the tube ceiling and floor are both 0 */
-        
+
         /* Update height of minorant slope w.r.t. tube center */
         /* This takes into account both the slope of the minorant and the change in the tube center */
         mnHeight += mn - y[i];
-    
+
         /* Check for ceiling violation: tube ceiling at current point is below proyection of minorant slope */
-        /* Majorant is 0 at this point */   
+        /* Majorant is 0 at this point */
         if ( IS_POSITIVE(mnHeight) ) { // 0 < mnHeight
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"ENDING CEILING VIOLATION i = %d, mxVal = %f, mnHeight = %g, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,0.0,mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
@@ -513,11 +513,11 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
             mnBreak = mxBreak = i;
             continue;
         }
-            
+
         /* Update height of minorant slope w.r.t. tube center */
         /* This takes into account both the slope of the minorant and the change in the tube center */
         mxHeight += mx - y[i];
-        
+
         /* Check for minorant violation: minorant at current point is above proyection of majorant slope */
         /* Minorant is 0 at this point */
         if ( IS_NEGATIVE(mxHeight) ) { // 0 > mxHeight
@@ -539,9 +539,9 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
             mnBreak = mxBreak = i;
             continue;
         }
-        
+
         /* No violations at this point */
-        
+
         /* Check if proyected minorant height is under actual minorant */
         if ( mnHeight <= 0 ) {
             /* Update minorant slope */
@@ -551,18 +551,18 @@ int tautString_TV1_Weighted(double *y,double *lambda,double *x,int n) {
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"i = %d, mx = %.3f, mn = %.3f, mxHeight = %.3f, mnHeight = %.3f, mxBreak = %d, mnBreak = %d, lastBreak = %d\n",i,mx,mn,mxHeight,mnHeight,mxBreak,mnBreak,lastBreak); fflush(DEBUG_FILE);
         #endif
-        
+
         /* At this point: we are finished validating last segment! */
         i++;
     }
-    
+
     /* Build last valid segment */
     for ( i = lastBreak+1 ; i < n ; i++ )
         x[i] = mn;
-        
+
     /* Return */
     return 1;
-    
+
     #undef CANCEL
 }
 
