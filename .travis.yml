@@ -22,11 +22,13 @@ script:
       /root/miniconda3/bin/conda config --set always_yes yes --set changeps1 no &&
       /root/miniconda3/bin/conda create -n testenv python=${PYTHONVERSION} &&
       source /root/miniconda3/bin/activate testenv &&
+      which python &&
       python -V &&
       pip install nose coveralls &&
       cd app &&
       python setup.py install &&
       nosetests --with-coverage --cover-package=prox_tv
       "
+      # TODO: python version install is not working, it just uses python 3.7 always
 after_success:
     - coveralls
