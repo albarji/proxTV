@@ -29,6 +29,7 @@ script:
       /root/miniconda3/bin/conda config --set always_yes yes --set changeps1 no &&
       /root/miniconda3/bin/conda create -n testenv python=${PYTHONVERSION} &&
       source /root/miniconda3/bin/activate testenv &&
+      python -V &&
       pip install nose coveralls &&
       cd app &&
       python setup.py install &&
