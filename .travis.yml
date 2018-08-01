@@ -8,15 +8,26 @@ python:
   - "3.6"
 os: linux
 dist: trusty
+sudo: required
 addons:
-    apt:
-        packages:
-        - libopenblas-dev
-        - liblapack-dev
-        - liblapacke-dev
+    #apt:
+    #    packages:
+    #    - libopenblas-dev
+    #    - liblapack-dev
+    #    - liblapacke-dev
 install:
+    - docker pull ubuntu:xenial
     - pip install coveralls
-    - python setup.py install
-script: nosetests --with-coverage --cover-package=prox_tv
+    #- python setup.py install
+script:
+    - >
+      docker run -v $(pwd):/app ubuntu bash -c "
+      apt-get update &&
+      apt-get install libopenblas-dev liblapack-dev liblapacke-dev &&
+      pip install coveralls &&
+      cd app &&
+      python setup.py install &&
+      nosetests --with-coverage --cover-package=prox_tv
+      "
 after_success:
     - coveralls
