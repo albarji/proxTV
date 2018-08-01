@@ -28,7 +28,7 @@ script:
       bash Miniconda3-latest-Linux-x86_64.sh -b &&
       /root/miniconda3/bin/conda config --set always_yes yes --set changeps1 no &&
       /root/miniconda3/bin/conda create -n testenv python=${PYTHONVERSION} &&
-      source activate testenv &&
+      source /root/miniconda3/bin/activate testenv &&
       pip install nose coveralls &&
       cd app &&
       python setup.py install &&
