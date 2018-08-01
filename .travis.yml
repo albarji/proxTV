@@ -21,9 +21,14 @@ install:
     #- python setup.py install
 script:
     - >
-      docker run -v $(pwd):/app ubuntu bash -c "
+      docker run -e "PYTHONVERSION=$(python -c 'import platform; print(platform.python_version())')" -v $(pwd):/app ubuntu:xenial bash -c "
       apt-get update &&
-      apt-get install libopenblas-dev liblapack-dev liblapacke-dev &&
+      apt-get install -y wget libopenblas-dev liblapack-dev liblapacke-dev &&
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh &&
+      bash Miniconda3-latest-Linux-x86_64.sh -b &&
+      export PATH="$HOME/miniconda3/bin:$PATH" &&
+      conda create -n testenv python=PYTHONVERSION &&
+      source activate testenv &&
       pip install coveralls &&
       cd app &&
       python setup.py install &&
