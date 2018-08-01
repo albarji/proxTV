@@ -20,3 +20,11 @@ install:
 script: nosetests --with-coverage --cover-package=prox_tv
 after_success:
     - coveralls
+# TODO: things needed to make all this work on all platforms
+# -install openblas as dependency (conda install openblas?)
+# -install lapack-dev as dependency
+# -install lapacke-dev as dependency
+# -install gcc, g++, gfortran (build tools) as a dependency OR create a wheel with the preinstalled package??
+
+# If ew install with conda openblas, there are issues finding lapacke.h
+# If we install with conda openblas + gcc, the install step works until a problem shows up with ld
