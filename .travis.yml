@@ -14,7 +14,7 @@ install:
     - pip install coveralls
 script:
     - >
-      docker run -e "PYTHONVERSION=$(python -c 'import platform; print(platform.python_version())')" -v $(pwd):/app ubuntu:xenial bash -c "
+      docker run -e "PYTHONVERSION=$(python -c 'import platform; print(platform.python_version())')" -v $(pwd):/app ubuntu:xenial bash -x -c "
       apt-get update &&
       apt-get install -y wget bzip2 build-essential libopenblas-dev liblapack-dev liblapacke-dev &&
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh &&
