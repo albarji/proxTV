@@ -9,16 +9,9 @@ python:
 os: linux
 dist: trusty
 sudo: required
-addons:
-    #apt:
-    #    packages:
-    #    - libopenblas-dev
-    #    - liblapack-dev
-    #    - liblapacke-dev
 install:
     - docker pull ubuntu:xenial
     - pip install coveralls
-    #- python setup.py install
 script:
     - >
       docker run -e "PYTHONVERSION=$(python -c 'import platform; print(platform.python_version())')" -v $(pwd):/app ubuntu:xenial bash -c "
