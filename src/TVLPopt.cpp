@@ -1081,6 +1081,10 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         info[INFO_GAP] = gap;
     }
 
+    /* Free resources and return */
+    FREE
+    return 1;
+
     #undef FREE
     #undef CANCEL
     #undef GRAD2GAP
