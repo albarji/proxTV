@@ -796,6 +796,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
 
     // Free memory and return
     FREE
+    return 1;
 
     #undef FREE
     #undef CANCEL
