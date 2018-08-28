@@ -13,7 +13,7 @@ addons:
         packages:
         - libopenblas-dev
         - liblapack-dev
-        - liblapacke-dev
+        - libgfortran3
 install:
     - pip install coveralls
     - python setup.py install
