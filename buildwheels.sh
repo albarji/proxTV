@@ -9,7 +9,7 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib64"
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
-    "${PYBIN}/pip" wheel /io/ -w wheelhouse/ -vv
+    "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
 
 # Bundle external shared libraries into the wheels

@@ -9,12 +9,6 @@ python:
 os: linux
 dist: trusty
 sudo: required
-addons:
-    apt:
-        packages:
-        - libopenblas-dev
-        - liblapack-dev
-        - libgfortran3
 install:
     - docker pull quay.io/pypa/manylinux1_x86_64
     - pip install coveralls
