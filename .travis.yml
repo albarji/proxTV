@@ -2,12 +2,13 @@ language: python
 python:
   - "2.6"
   - "2.7"
-  - "3.3"
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 os: linux
 dist: trusty
+sudo: required
 addons:
     apt:
         packages:
@@ -15,16 +16,15 @@ addons:
         - liblapack-dev
         - libgfortran3
 install:
+    - docker pull quay.io/pypa/manylinux1_x86_64
     - pip install coveralls
-    - python setup.py install
-script: nosetests --with-coverage --cover-package=prox_tv
+script:
+    - export PYTHONVERSION=$(python -c 'import platform; print(platform.python_version()[0] + platform.python_version()[2])')
+    # Build precompiled python wheels
+    - docker run --rm -it -v $(pwd):/io quay.io/pypa/manylinux1_x86_64 bash -c "cd /io; bash buildwheels.sh"
+    # Install wheel for this with version
+    - pip install wheelhouse/prox_tv-*-cp${PYTHONVERSION}-cp${PYTHONVERSION}m-manylinux1_x86_64.whl
+    # Unit tests
+    - nosetests --with-coverage --cover-package=prox_tv
 after_success:
     - coveralls
-# TODO: things needed to make all this work on all platforms
-# -install openblas as dependency (conda install openblas?)
-# -install lapack-dev as dependency
-# -install lapacke-dev as dependency
-# -install gcc, g++, gfortran (build tools) as a dependency OR create a wheel with the preinstalled package??
-
-# If we install with conda openblas, there are issues finding lapacke.h
-# If we install with conda openblas + gcc, the install step works until a problem shows up with ld
