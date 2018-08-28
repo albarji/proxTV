@@ -12,6 +12,7 @@ install:
     - pip install coveralls
 script:
     # Get python version, wheel packaging version
+    - echo ${TRAVIS_PYTHON_VERSION}
     - export PYTHONVERSION=$(python -c 'import platform; print(platform.python_version()[0] + platform.python_version()[2])')
     - export PACKAGING=$([[ ${PYTHONVERSION} = "27" ]] && echo "mu" || echo "m")
     # Build precompiled python wheels
