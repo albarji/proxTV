@@ -1,11 +1,9 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
   - "3.4"
   - "3.5"
   - "3.6"
-  - "3.7"
 os: linux
 dist: trusty
 sudo: required
@@ -13,11 +11,13 @@ install:
     - docker pull quay.io/pypa/manylinux1_x86_64
     - pip install coveralls
 script:
+    # Get python version, wheel packaging version
     - export PYTHONVERSION=$(python -c 'import platform; print(platform.python_version()[0] + platform.python_version()[2])')
+    - export PACKAGING=$([[ ${PYTHONVERSION} = "27" ]] && echo "mu" || echo "m")
     # Build precompiled python wheels
     - docker run --rm -it -v $(pwd):/io quay.io/pypa/manylinux1_x86_64 bash -c "cd /io; bash buildwheels.sh"
     # Install wheel for this with version
-    - pip install wheelhouse/prox_tv-*-cp${PYTHONVERSION}-cp${PYTHONVERSION}m-manylinux1_x86_64.whl
+    - pip install wheelhouse/prox_tv-*-cp${PYTHONVERSION}-cp${PYTHONVERSION}${PACKAGING}-manylinux1_x86_64.whl
     # Unit tests
     - nosetests --with-coverage --cover-package=prox_tv
 after_success:
