@@ -11,9 +11,8 @@ install:
     - docker pull quay.io/pypa/manylinux1_x86_64
     - pip install coveralls
 script:
-    # Get python version, wheel packaging version
-    - echo ${TRAVIS_PYTHON_VERSION}
-    - export PYTHONVERSION=$(python -c 'import platform; print(platform.python_version()[0] + platform.python_version()[2])')
+    # Get python version without dot, wheel packaging version
+    - export PYTHONVERSION=$(echo ${TRAVIS_PYTHON_VERSION} | tr -d .)
     - export PACKAGING=$([[ ${PYTHONVERSION} = "27" ]] && echo "mu" || echo "m")
     # Build precompiled python wheels
     - docker run --rm -it -v $(pwd):/io quay.io/pypa/manylinux1_x86_64 bash -c "cd /io; bash buildwheels.sh"
