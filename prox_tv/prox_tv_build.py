@@ -1,4 +1,3 @@
-import os
 import os.path
 from sys import platform as _platform
 
@@ -108,9 +107,11 @@ ffi.set_source(
     define_macros=[('NOMATLAB', 1)],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
-    libraries=['lapack']
+    libraries=['blas', 'lapack', 'gfortran'],
+    library_dirs=['/usr/lib64'],
+    include_dirs=['/usr/include']
 )
 
 
 if __name__ == '__main__':
-    ffi.compile()
+    ffi.compile(verbose=True)
