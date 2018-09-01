@@ -108,7 +108,7 @@ ffi.set_source(
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
     libraries=['blas', 'lapack', 'gfortran'],
-    library_dirs=['/usr/lib64'],
+    #library_dirs=['/usr/lib64'],  # TODO: needed?
     include_dirs=['/usr/include']
 )
 
