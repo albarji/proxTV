@@ -15,7 +15,7 @@ then
 # Mac build and install
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
-    apt-get install -y libblas-devel liblapack-devel
+    #apt-get install -y libblas-devel liblapack-devel
     pip wheel . -w wheelhouse/
     ls wheelhouse
     # TODO: install
