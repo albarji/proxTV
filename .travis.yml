@@ -1,11 +1,42 @@
 language: python
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-os: linux
-dist: trusty
+matrix:
+    include:
+        - os: linux
+          sudo: required
+          python: "2.7"
+          dist: trusty
+
+        - os: linux
+          sudo: required
+          python: "3.4"
+          dist: trusty
+
+        - os: linux
+          sudo: required
+          python: "3.5"
+          dist: trusty
+
+        - os: linux
+          sudo: required
+          python: "3.6"
+          dist: trusty
+
+        - os: osx
+          language: generic
+          python: "2.7"
+
+        - os: osx
+          language: generic
+          python: "3.4"
+
+        - os: osx
+          language: generic
+          python: "3.5"
+
+        - os: osx
+          language: generic
+          python: "3.6"
+
 sudo: required
 install:
     - docker pull quay.io/pypa/manylinux1_x86_64
