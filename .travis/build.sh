@@ -16,7 +16,7 @@ then
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
     #apt-get install -y libblas-devel liblapack-devel
-    brew install gfortran
+    brew install gcc
     pip wheel . -w wheelhouse/
     ls wheelhouse
     # TODO: install
