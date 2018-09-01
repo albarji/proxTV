@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -ev
-cd ..
 
 # Linux build and install
 if [ "${TRAVIS_OS_NAME}" == "linux" ]
