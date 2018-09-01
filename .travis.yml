@@ -39,7 +39,7 @@ matrix:
 
 sudo: required
 install:
-    - pip install coveralls
+    - pip install nose coveralls
 script:
     # Build and install wheel
     - ./.travis/build.sh
