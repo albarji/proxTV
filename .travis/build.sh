@@ -16,6 +16,7 @@ then
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
     #apt-get install -y libblas-devel liblapack-devel
+    sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
     locate libgfortran.a
     brew install gcc
     locate libgfortran.a
