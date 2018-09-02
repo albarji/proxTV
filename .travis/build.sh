@@ -27,4 +27,7 @@ then
     pip install wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl
     which python
     export PATH=$PATH:/usr/local/bin  # TODO Requirement already satisfied. Updating path needed?
+    echo $PATH
+    ls /usr/local/bin
+    ls /usr/bin
 fi
