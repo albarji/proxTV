@@ -26,10 +26,10 @@ then
     ls wheelhouse
     pip install wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl
     which python
-    export PATH=$PATH:/usr/local/share/python  # TODO Requirement already satisfied. Updating path needed?
+    export PATH=$PATH:/usr/local/Cellar/numpy/1.14.5/libexec/nose/bin  # TODO Requirement already satisfied. Updating path needed?
     echo $PATH
     #ls /usr/local/bin
     #ls /usr/bin
     #ls /usr/local/share/python
-    ls -R / | grep nose
+    #ls -R / | grep nose
 fi
