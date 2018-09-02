@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ev
+set -v
 
 # Linux build and install
 if [ "${TRAVIS_OS_NAME}" == "linux" ]
@@ -16,7 +16,7 @@ then
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
     #apt-get install -y libblas-devel liblapack-devel
-    brew install gcc@6
+    brew install gcc
     pip wheel . -w wheelhouse/
     # TODO: use delocate to embed dependencies https://github.com/MacPython/wiki/wiki/Spinning-wheels
     pip install delocate
