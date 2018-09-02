@@ -18,12 +18,13 @@ then
     #apt-get install -y libblas-devel liblapack-devel
     #sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
     #locate libgfortran.a
-    brew install gcc
+    brew install gcc  # TODO: needed?
     #locate libgfortran.a
     pip wheel . -w wheelhouse/
     pip install delocate
     delocate-listdeps wheelhouse/*.whl
     ls wheelhouse
     pip install wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl
-    pip install nose
+    which python
+    export PATH=$PATH:/usr/local/bin  # TODO Requirement already satisfied. Updating path needed?
 fi

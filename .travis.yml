@@ -42,7 +42,7 @@ install:
     - pip install nose coveralls
 script:
     # Build and install wheel
-    - ./.travis/build.sh
+    - bash -x ./.travis/build.sh
     # Unit tests
     - nosetests --with-coverage --cover-package=prox_tv
 after_success:
