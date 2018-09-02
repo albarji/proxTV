@@ -16,14 +16,14 @@ then
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
     #apt-get install -y libblas-devel liblapack-devel
-    sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
-    locate libgfortran.a
+    #sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
+    #locate libgfortran.a
     brew install gcc
-    locate libgfortran.a
+    #locate libgfortran.a
     pip wheel . -w wheelhouse/
-    # TODO: use delocate to embed dependencies https://github.com/MacPython/wiki/wiki/Spinning-wheels
     pip install delocate
     delocate-listdeps wheelhouse/*.whl
     ls wheelhouse
-    # TODO: install
+    pip install wheelhouse/prox_tv-3.2.12-cp27-cp27m-macosx_10_13_x86_64.whl
+    pip install nose
 fi
