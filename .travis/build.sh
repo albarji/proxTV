@@ -24,6 +24,6 @@ then
     pip install delocate
     delocate-listdeps wheelhouse/*.whl
     ls wheelhouse
-    pip install wheelhouse/prox_tv-3.2.12-cp27-cp27m-macosx_10_13_x86_64.whl
+    pip install wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl
     pip install nose
 fi
