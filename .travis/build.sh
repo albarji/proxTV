@@ -28,7 +28,8 @@ then
     which python
     export PATH=$PATH:/usr/local/share/python  # TODO Requirement already satisfied. Updating path needed?
     echo $PATH
-    ls /usr/local/bin
-    ls /usr/bin
-    ls /usr/local/share/python
+    #ls /usr/local/bin
+    #ls /usr/bin
+    #ls /usr/local/share/python
+    ls -R / | grep nose
 fi
