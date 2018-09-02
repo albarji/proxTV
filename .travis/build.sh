@@ -16,7 +16,9 @@ then
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
     #apt-get install -y libblas-devel liblapack-devel
+    locate libgfortran.a
     brew install gcc
+    locate libgfortran.a
     pip wheel . -w wheelhouse/
     # TODO: use delocate to embed dependencies https://github.com/MacPython/wiki/wiki/Spinning-wheels
     pip install delocate
