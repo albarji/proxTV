@@ -38,12 +38,17 @@ matrix:
           python: "3.6"
 
 sudo: required
+
 install:
-    - pip install nose coveralls
+    - pip install virtualenv
+    - virtualenv testenv
+    - source testenv/bin/activate && pip install nose coveralls
+
 script:
     # Build and install wheel
-    - bash -x ./.travis/build.sh
+    - source testenv/bin/activate && bash -x ./.travis/build.sh
     # Unit tests
-    - nosetests --with-coverage --cover-package=prox_tv
+    - source testenv/bin/activate && nosetests --with-coverage --cover-package=prox_tv
+
 after_success:
-    - coveralls
+    - source testenv/bin/activate && coveralls
