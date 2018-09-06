@@ -15,9 +15,11 @@ then
 # Mac build and install
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
-    #brew install gcc  # TODO: needed?
+    # Build wheel
     pip wheel . -w wheelhouse/
+    # Bundle dependencies
     pip install delocate
     delocate-listdeps wheelhouse/*.whl
+    # Install wheel for this with version
     pip install wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl
 fi
