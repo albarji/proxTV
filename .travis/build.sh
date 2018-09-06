@@ -15,21 +15,9 @@ then
 # Mac build and install
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
-    #apt-get install -y libblas-devel liblapack-devel
-    #sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
-    #locate libgfortran.a
-    brew install gcc  # TODO: needed?
-    #locate libgfortran.a
+    #brew install gcc  # TODO: needed?
     pip wheel . -w wheelhouse/
     pip install delocate
     delocate-listdeps wheelhouse/*.whl
-    ls wheelhouse
     pip install wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl
-    which python
-    export PATH=$PATH:/usr/local/Cellar/numpy/1.14.5/libexec/nose/bin  # TODO Requirement already satisfied. Updating path needed?
-    echo $PATH
-    #ls /usr/local/bin
-    #ls /usr/bin
-    #ls /usr/local/share/python
-    #ls -R / | grep nose
 fi
