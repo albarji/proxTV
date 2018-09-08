@@ -85,6 +85,8 @@ def test_tvp_1d():
 
 
 def test_tv2_1d():
+    # TODO: issues in Mac with this test. Doesn't work even after lowerint atol to 1e-2 (used to be 1e-3)
+    # This might be solvable by using openblas instead of system blas https://github.com/scipy/scipy/issues/2547
     methods = ('ms', 'pg', 'mspg')
     for _ in range(20):
         dimension = np.random.randint(1e1, 3e1)
@@ -92,7 +94,7 @@ def test_tv2_1d():
         w = 20*np.random.rand()
         solutions = [tv2_1d(x, w, method=method) for method in methods]
         for i in range(len(solutions)-1):
-            assert np.allclose(solutions[i], solutions[i+1], atol=1e-2)
+            assert np.allclose(solutions[i], solutions[i+1], atol=1e-3)
 
 
 def _generate2d():
