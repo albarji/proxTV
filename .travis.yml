@@ -1,57 +1,52 @@
 language: python
 matrix:
-    include:
-        - os: linux
-          sudo: required
-          python: "2.7"
-          dist: trusty
-
-        - os: linux
-          sudo: required
-          python: "3.4"
-          dist: trusty
-
-        - os: linux
-          sudo: required
-          python: "3.5"
-          dist: trusty
-
-        - os: linux
-          sudo: required
-          python: "3.6"
-          dist: trusty
-
-        - os: osx
-          language: generic
-          python: "2.7"
-
-        - os: osx
-          language: generic
-          python: "3.4"
-
-        - os: osx
-          language: generic
-          python: "3.5"
-
-        - os: osx
-          language: generic
-          python: "3.6"
-          
-    allow_failures:
-        - os: osx
-
+  include:
+  - os: linux
+    sudo: required
+    python: '2.7'
+    dist: trusty
+  - os: linux
+    sudo: required
+    python: '3.4'
+    dist: trusty
+  - os: linux
+    sudo: required
+    python: '3.5'
+    dist: trusty
+  - os: linux
+    sudo: required
+    python: '3.6'
+    dist: trusty
+  - os: osx
+    language: generic
+    python: '2.7'
+  - os: osx
+    language: generic
+    python: '3.4'
+  - os: osx
+    language: generic
+    python: '3.5'
+  - os: osx
+    language: generic
+    python: '3.6'
+  allow_failures:
+  - os: osx
 sudo: required
-
 install:
-    - pip install virtualenv
-    - virtualenv testenv
-    - source testenv/bin/activate && pip install nose coveralls
-
+- pip install virtualenv
+- virtualenv testenv
+- source testenv/bin/activate && pip install nose coveralls
 script:
-    # Build and install wheel
-    - source testenv/bin/activate && bash -x ./.travis/build.sh
-    # Unit tests
-    - source testenv/bin/activate && nosetests --with-coverage --cover-package=prox_tv
-
+- source testenv/bin/activate && bash -x ./.travis/build.sh
+- source testenv/bin/activate && nosetests --with-coverage --cover-package=prox_tv
 after_success:
-    - source testenv/bin/activate && coveralls
+- source testenv/bin/activate && coveralls
+deploy:
+    provider: pypi
+    user: albarji
+    password:
+        secure: hqpuefgRquAJrVF5mUkfXgIf02vV1RG+JMhb6II+zFCQ8ryb0To94Jucc3Fw9rYB5h1KylXILYgBNz+zURNDetu5FvqW8HjpIzWdzWJNH3oJLrT2AisndDGcSHh6yJZXhRkDBVKGxb327+apJKm3A2vFxOrQi3h5xk+l8UcSYL7nqtfhYfZXiG34AQvAo468xzQcktTOPnaoOUTVgvHV/PMFO7R1eoj1TeUJ5AwDhLjSUb0FJpyaBAn6US2cKVCKuV0M2F8FDxvS3sie85jUrSozQPnltdhWVa+xQfIB5MSYx30icryb2myC7h2GFsc+uIu3xaFyK1uHLVj1SHelKPpRjey4RYfTIfM/uKwlLtA/bUFfDS9ew3Tng7c789MHxC9DWezLdJFDCWhqUMlQFd7q5KvI2b9kbuaJkzL9rXYDb+lXHokxcjS5ieXKj4us+PAAE3S5xBnmHGLiALKCAjbO5HTAdX0taPFxstE+8zP/EdFxiOSqcjSxu6OVAAkt9fb+i+l1ecR8hEGnM9E0nGySnfBipmO+ZVxinJhtvs+r+m6bUZIqa7oCdyQbW5beLBb/PrlgJUNaTa88/XvOQPzMCu6kKUkPZRA14oqKdB8TnHZd894ktKb+qWr9n5M/YVhZozrqZ/eaknB7qV328+0nTqhVKeJjskuVIzhWSbE=
+    #on:
+    #    tags: true
+    server: https://test.pypi.org/legacy/
+    distributions: "sdist bdist_wheel"
