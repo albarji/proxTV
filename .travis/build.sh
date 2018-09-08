@@ -16,6 +16,7 @@ then
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
     # Install open-blas, because native osx blas has precision issues
+    brew install lapack
     brew install openblas
     # Build wheel
     pip wheel . -w wheelhouse/
