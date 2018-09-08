@@ -1,42 +1,44 @@
 language: python
 matrix:
     include:
-#        - os: linux
-#          sudo: required
-#          python: "2.7"
-#          dist: trusty
+        - os: linux
+          sudo: required
+          python: "2.7"
+          dist: trusty
 
-#        - os: linux
-#          sudo: required
-#          python: "3.4"
-#          dist: trusty
+        - os: linux
+          sudo: required
+          python: "3.4"
+          dist: trusty
 
-#        - os: linux
-#          sudo: required
-#          python: "3.5"
-#          dist: trusty
+        - os: linux
+          sudo: required
+          python: "3.5"
+          dist: trusty
 
         - os: linux
           sudo: required
           python: "3.6"
           dist: trusty
 
-#        - os: osx
-#          language: generic
-#          python: "2.7"
+        - os: osx
+          language: generic
+          python: "2.7"
 
-#        - os: osx
-#          language: generic
-#          python: "3.4"
+        - os: osx
+          language: generic
+          python: "3.4"
 
-#        - os: osx
-#          language: generic
-#          python: "3.5"
+        - os: osx
+          language: generic
+          python: "3.5"
 
         - os: osx
           language: generic
           python: "3.6"
-#          osx_image: xcode8  # TODO: useful??
+          
+    allow_failures:
+        - os: osx
 
 sudo: required
 
