@@ -50,4 +50,4 @@ deploy:
         #tags: true
         branch: feature/better_packaging
     server: https://test.pypi.org/legacy/
-    distributions: "sdist bdist_wheel"
+    distributions: "sdist"
