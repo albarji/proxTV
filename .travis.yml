@@ -36,7 +36,7 @@ matrix:
         - os: osx
           language: generic
           python: "3.6"
-          osx_image: xcode8  # TODO: useful??
+#          osx_image: xcode8  # TODO: useful??
 
 sudo: required
 

@@ -94,6 +94,8 @@ def test_tv2_1d():
         w = 20*np.random.rand()
         solutions = [tv2_1d(x, w, method=method) for method in methods]
         for i in range(len(solutions)-1):
+            print("sol " + str(i) + " vs sol " + str(i+1))
+            print(solutions[i] - solutions[i+1])
             assert np.allclose(solutions[i], solutions[i+1], atol=1e-3)
 
 
