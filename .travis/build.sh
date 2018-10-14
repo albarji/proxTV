@@ -30,5 +30,5 @@ then
     mkdir dist
     cp wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl dist
     # Install wheel for this with version
-    pip install wheelhouse/prox_tv-*-cp${PYTHONVERSION}-cp${PYTHONVERSION}-macosx_*.whl
+    pip install wheelhouse/prox_tv-*-cp${PYTHONVERSION}-cp${PYTHONVERSION}m-macosx_*.whl
 fi
