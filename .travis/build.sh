@@ -18,6 +18,10 @@ then
 # Mac build and install
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
+    # TODO: debug traces
+    ls -l /opt/python/
+    which python
+    # TODO: debug traces
     # Build wheel
     pip wheel . -w wheelhouse/
     # Bundle dependencies
