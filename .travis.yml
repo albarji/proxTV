@@ -36,12 +36,13 @@ install:
 - pip install virtualenv
 - virtualenv testenv
 - source testenv/bin/activate && pip install nose coveralls
-- pip install twine
 script:
 - source testenv/bin/activate && bash -x ./.travis/build.sh
 - source testenv/bin/activate && nosetests --with-coverage --cover-package=prox_tv
 after_success:
 - source testenv/bin/activate && coveralls
+before_deploy:
+- pip install twine wheel
 deploy:
     provider: pypi
     user: albarji
