@@ -19,19 +19,41 @@ matrix:
     dist: trusty
   - os: osx
     language: generic
-    python: '2.7'
+    env: TRAVIS_PYTHON_VERSION=2.7
   - os: osx
     language: generic
-    python: '3.4'
+    env: TRAVIS_PYTHON_VERSION=3.4
   - os: osx
     language: generic
-    python: '3.5'
+    env: TRAVIS_PYTHON_VERSION=3.5
   - os: osx
     language: generic
-    python: '3.6'
+    env: TRAVIS_PYTHON_VERSION=3.6
   allow_failures:
   - os: osx
 sudo: required
+before_install:
+  if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    brew update
+    # Per the `pyenv homebrew recommendations <https://github.com/yyuu/pyenv/wiki#suggested-build-environment>`_.
+    brew install openssl readline
+    # See https://docs.travis-ci.com/user/osx-ci-environment/#A-note-on-upgrading-packages.
+    # I didn't do this above because it works and I'm lazy.
+    brew outdated pyenv || brew upgrade pyenv
+    # virtualenv doesn't work without pyenv knowledge. venv in Python 3.3
+    # doesn't provide Pip by default. So, use `pyenv-virtualenv <https://github.com/yyuu/pyenv-virtualenv/blob/master/README.md>`_.
+    brew install pyenv-virtualenv
+    pyenv install $TRAVIS_PYTHON_VERSION
+    # I would expect something like ``pyenv init; pyenv local $PYTHON`` or
+    # ``pyenv shell $PYTHON`` would work, but ``pyenv init`` doesn't seem to
+    # modify the Bash environment. ??? So, I hand-set the variables instead.
+    export PYENV_VERSION=$PYTHON
+    export PATH="/Users/travis/.pyenv/shims:${PATH}"
+    #pyenv-virtualenv venv
+    #source venv/bin/activate
+    # A manual check that the correct version of Python is running.
+    python --version
+  fi
 install:
 - pip install virtualenv
 - virtualenv testenv
@@ -44,4 +66,5 @@ after_success:
 - source testenv/bin/activate && coveralls
 env:
   global:
+    # TWINE_PASSWORD
     secure: k6W/OddycIaotc8CTg4HspqzLQCu3wqyLrq/P8KgtIde/r63uzj79altvdLHq3RXofB1bLk4p0gURtKEFT6OnBB710qfFwAngick5qf9tG5TdG5K/m962ukk2AAtmlGsRHv8DxqakAp21LBXamjQdsys5rhLnic/XKl12aa4c+YrunUcwtuC2XlYL8ZrIlrnZFKpWu/kNGFUV1UGuunZlHnjePiQAY64LHgFb4+7l52OJ1XfWE1Lb+vI/7sj40v4U2jPlWIQ+8cpKb4SL13f+m6GK5+/94YATmIS5MV7tT/Bwgmfgu7+iQr9jB5X0duXw+3RMIJfTb9NhEzAdsGvGdIiCs4CkMRW9XNXMPIVKNNdqh+rXU9OlvgUIt4+wmhD0UZ0MYsO92yiTm2BIGG/F5trCT1IJuUpj+s5kIO3aeldXPdlx77jsFK2Ka1txzPFXVz7Kc/oZyQNT3No5ToFdu3faVNe2KVjdDbl7Y5DyA1/hRJtXNqVrLm6OCx4z28oKMWOdAfwnniUDo8yJ7pTWOjkjs698KW2wU7VGX7sWHG4LKZ0MSAhBX2EXPhCO7yBRS8XYPy78b2mxnEG30tLEF8s0EwNRvJM0o5kL0vr4xuN2GvTTJ2wsdv2WrrtPBskWAcGsvhflIv4XG9TbganV9Mtf00rh/N2pdLjov6AJC0=
