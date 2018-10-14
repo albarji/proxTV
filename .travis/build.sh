@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -v
 
+PYTHONVERSION=$(echo ${TRAVIS_PYTHON_VERSION} | tr -d .)
 # Linux build and install
 if [ "${TRAVIS_OS_NAME}" == "linux" ]
 then
     docker pull quay.io/pypa/manylinux1_x86_64
-    PYTHONVERSION=$(echo ${TRAVIS_PYTHON_VERSION} | tr -d .)
     PACKAGING=$([[ ${PYTHONVERSION} = "27" ]] && echo "mu" || echo "m")
     # Build precompiled python wheels
     docker run --rm -it -v $(pwd):/io quay.io/pypa/manylinux1_x86_64 bash -c "cd /io; bash buildwheels.sh"
