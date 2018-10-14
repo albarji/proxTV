@@ -32,7 +32,7 @@ matrix:
   allow_failures:
   - os: osx
 sudo: required
-before_install:
+before_install: |
   if [ "$TRAVIS_OS_NAME" == "osx" ]; then
     brew update
     # Per the `pyenv homebrew recommendations <https://github.com/yyuu/pyenv/wiki#suggested-build-environment>`_.
