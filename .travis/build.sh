@@ -18,9 +18,6 @@ then
 # Mac build and install
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
-    # Install open-blas, because native osx blas has precision issues
-    #brew install lapack
-    #brew install openblas
     # Build wheel
     pip wheel . -w wheelhouse/
     # Bundle dependencies
@@ -30,5 +27,5 @@ then
     mkdir dist
     cp wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl dist
     # Install wheel for this with version
-    pip install wheelhouse/prox_tv-*-cp*-cp*-macosx_*.whl
+    pip install wheelhouse/prox_tv-*-cp${PYTHONVERSION}-cp${PYTHONVERSION}-macosx_*.whl
 fi
