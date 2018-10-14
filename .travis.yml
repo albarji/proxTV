@@ -43,10 +43,9 @@ after_success:
 - source testenv/bin/activate && coveralls
 before_deploy:
 - pip install twine wheel
-- ll wheelhouse/*
-- ll dist/*
+- ls -l wheelhouse/*
+- ls -l dist/*
 - sudo cp wheelhouse/* dist
-- ls dist/*
 deploy:
     provider: pypi
     user: albarji
