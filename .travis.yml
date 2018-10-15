@@ -56,7 +56,7 @@ before_install: |
   fi
 install:
 - pip install virtualenv
-- virtualenv testenv
+- virtualenv testenv  # TODO: this doesn't work in OSX, we always get python 2.7
 - source testenv/bin/activate && pip install nose coveralls
 script:
 - source testenv/bin/activate && bash -x ./.travis/build.sh

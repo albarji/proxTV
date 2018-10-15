@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -v
 
+# Get just the first two numbers of python version, without dots
+echo ${PYTHONVERSION}
+python --version
 PYTHONVERSION=$(echo ${TRAVIS_PYTHON_VERSION} | tr -d .)
+PYTHONVERSION=${PYTHONVERSION:0:2}
 # Linux build and install
 if [ "${TRAVIS_OS_NAME}" == "linux" ]
 then
