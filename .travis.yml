@@ -49,14 +49,17 @@ before_install: |
     # modify the Bash environment. ??? So, I hand-set the variables instead.
     export PYENV_VERSION=$PYTHON
     export PATH="/Users/travis/.pyenv/shims:${PATH}"
-    #pyenv-virtualenv venv
-    #source venv/bin/activate
+    pyenv-virtualenv testenv
+    source testenv/bin/activate
     # A manual check that the correct version of Python is running.
+    python --version
+  elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+    pip install virtualenv
+    virtualenv testenv
+    source testenv/bin/activate
     python --version
   fi
 install:
-- pip install virtualenv
-- virtualenv testenv  # TODO: this doesn't work in OSX, we always get python 2.7
 - source testenv/bin/activate && pip install nose coveralls
 script:
 - source testenv/bin/activate && bash -x ./.travis/build.sh
