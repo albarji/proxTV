@@ -2,10 +2,9 @@
 set -v
 
 # Get just the first two numbers of python version, without dots
-echo ${PYTHONVERSION}
 python --version
 PYTHONVERSION=$(echo ${TRAVIS_PYTHON_VERSION} | tr -d .)
-PYTHONVERSION=${PYTHONVERSION:0:2}
+echo ${PYTHONVERSION}
 # Linux build and install
 if [ "${TRAVIS_OS_NAME}" == "linux" ]
 then
@@ -22,9 +21,6 @@ then
 # Mac build and install
 elif [ "${TRAVIS_OS_NAME}" == "osx" ]
 then
-    # TODO: debug traces
-    which python
-    # TODO: debug traces
     # Build wheel
     pip wheel . -w wheelhouse/
     # Bundle dependencies
