@@ -23,5 +23,6 @@ rm miniconda.sh
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 
-# Install specific python version
-conda install python=${TRAVIS_PYTHON_VERSION}
+# Create environment with specific python version
+conda create -n testenv python=${TRAVIS_PYTHON_VERSION} nose coveralls
+source activate testenv

@@ -35,12 +35,14 @@ sudo: required
 before_install:
 - bash -x ./.travis/installconda.sh
 install:
-- pip install nose coveralls
-script:
+- source activate testenv
 - bash -x ./.travis/build.sh
+script:
+- source activate testenv
 - nosetests --with-coverage --cover-package=prox_tv
 - bash -x ./.travis/deploy.sh
 after_success:
+- source activate testenv
 - coveralls
 env:
   global:
