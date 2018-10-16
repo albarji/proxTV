@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="prox_tv",
-    version="3.2.15",
+    version="3.2.16",
     description="Toolbox for fast Total Variation proximity operators",
     long_description="""
 proxTV is a toolbox implementing blazing fast implementations of Total Variation

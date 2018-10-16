@@ -24,5 +24,6 @@ conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 
 # Create environment with specific python version
-conda create -n testenv python=${TRAVIS_PYTHON_VERSION} nose coveralls
+conda create -n testenv python=${TRAVIS_PYTHON_VERSION}
 source activate testenv
+pip install nose coveralls
