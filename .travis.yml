@@ -33,7 +33,7 @@ matrix:
   - os: osx
 sudo: required
 before_install:
-- .travis/installconda.sh
+- bash -x ./.travis/installconda.sh
 install:
 - pip install nose coveralls
 script:
