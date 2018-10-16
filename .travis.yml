@@ -34,6 +34,7 @@ matrix:
 sudo: required
 before_install:
 - bash -x ./.travis/installconda.sh
+- export PATH="$HOME/miniconda3/bin:$PATH"
 install:
 - source activate testenv
 - bash -x ./.travis/build.sh
