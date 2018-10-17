@@ -8,7 +8,7 @@ yum install -y blas-devel lapack-devel
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib64"
 
 # Compile wheels
-VERSIONS='/opt/python/cp27-cp27mu/bin /opt/python/cp34-cp34m/bin /opt/python/cp35-cp35m/bin /opt/python/cp36-cp36m/bin'
+VERSIONS='/opt/python/cp27-cp27mu/bin /opt/python/cp34-cp34m/bin /opt/python/cp35-cp35m/bin /opt/python/cp36-cp36m/bin /opt/python/cp37-cp37m/bin'
 for PYBIN in ${VERSIONS}; do
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
