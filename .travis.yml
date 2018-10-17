@@ -3,23 +3,28 @@ matrix:
   include:
   - os: linux
     sudo: required
-    python: '2.7'
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=2.7
     dist: trusty
   - os: linux
     sudo: required
-    python: '3.4'
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.4
     dist: trusty
   - os: linux
     sudo: required
-    python: '3.5'
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.5
     dist: trusty
   - os: linux
     sudo: required
-    python: '3.6'
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.6
     dist: trusty
   - os: linux
     sudo: required
-    python: '3.7'
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.7
     dist: trusty
   - os: osx
     language: generic
