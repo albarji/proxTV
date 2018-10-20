@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="prox_tv",
-    version="3.2.17",
+    version="3.2.18",
     description="Toolbox for fast Total Variation proximity operators",
     long_description="""
 proxTV is a toolbox implementing blazing fast implementations of Total Variation
@@ -38,7 +38,8 @@ norms to apply in the Total Variation term.
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
     ],
     keywords='total variation image processing machine learning',
     test_suite="nose.collector",
