@@ -38,56 +38,29 @@ More technically, the library provides efficient solvers for the following Total
 
 ## Python interface
 
-### Quickstart
-
-You can install the latest version of proxTV through **pip** running
+### Install
 
     pip install prox-tv
-    
-Please note that some prerequisites might not be installed in your system. In case of failure during pip install, refer to the Prerequisites section.
 
-If you want to install from source, please refere to the Installation section.
+### Install from source
 
-### Installation
+If the above doesn't work or you are using an unsupported operative system or Python version, you can install proxTV from souce.
 
-#### Prerequisites
+The following system prerequisites are necessary
 
-To use proxTV within Python the following prerequisites are necessary
+- [gcc](https://gcc.gnu.org/). In Ubuntu, run `apt install build-essential`
+- [BLAS developer libraries](http://www.netlib.org/blas/). In Ubuntu, run `apt install libblas-dev`
+- [LAPACK developer libraries](http://www.netlib.org/lapack/). In Ubuntu, run `apt install liblapack-dev`
 
-- **cffi**: https://cffi.readthedocs.org/en/latest/
-- **numpy**: http://www.numpy.org/
-- **LAPACK**: http://www.netlib.org/lapack/
+Then you can clone this repository and install the library with
 
-You can install **cffi** through **pip**:
-
-    pip install cffi
-  
-Be aware that other packages might be required to install cffi, such as **python-dev** and **libffi-dev**. For a full list of dependencies please refer to cffi documentation (https://cffi.readthedocs.org/en/latest/).
+    python setup.py install
 
 Additionally, if you would like to run the provided demos you will also require the following packages:
 
-* **matplotlib**: http://matplotlib.org/
-* **scipy**: http://www.scipy.org/
-* **scikit-image**: http://scikit-image.org/
-
-#### Manually installing proxTV Python package
-
-After prerequisites have been satisfied, just run
-
-    python setup.py install
-    
-on the folder where this README file is located. You might need superuser permissions for a correct installation, depending on your python installation.
-
-#### Generating docs
-
-Documentation is available at http://pythonhosted.org/prox_tv/. Nevertheless if you would like to compile the docs yourself you just need to run
-
-    make html
-    
-in the docs/ folder. The documentation will be generated in the doc/_build/html/index.html file. During the generation process the following packages will be needed:
-
-- **sphinxcontrib-napoleon**
-- **sphinx_rtd_theme**
+* [matplotlib](http://matplotlib.org/)
+* [scipy](http://www.scipy.org/)
+* [scikit-image](http://scikit-image.org/)
 
 ### Usage
 
@@ -107,7 +80,7 @@ The documentation of use of the package functions is maintained online at http:/
 
 ### Quick start guide
 
-To install proxTV just type "install" at the Matlab prompt once located at proxTV folder. If any problem arises please refer to the "Installation" subsection.
+To install proxTV clone this repository and run `install` at the Matlab prompt once located at proxTV folder. If any problem arises please refer to the "Installation" subsection.
 
 After that the TV solver can be invoked easily through the general purpose "TV" function. For instance,
 
