@@ -3,14 +3,13 @@
 </div>
 
 -----------------
-[![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)
 [![Coverage Status](https://coveralls.io/repos/github/albarji/proxTV/badge.svg?branch=master)](https://coveralls.io/github/albarji/proxTV?branch=master)
 [![Code Climate](https://codeclimate.com/github/albarji/proxTV.svg)](https://codeclimate.com/github/albarji/proxTV)
 [![Python versions](https://img.shields.io/pypi/pyversions/prox_tv.svg)](https://pypi.python.org/pypi/prox_tv)
 
 |Linux|Mac OS X|Windows|
 |-----|--------|-------|
-|[![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)|[![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)|Not supported (yet)|
+|[![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)|[![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)[(!)](#notes-on-mac-os-x)|Not supported (yet)|
 
 
 **proxTV** is a toolbox implementing blazing fast implementations of Total Variation proximity operators, which form the basic building blocks for applications such as image denoising, image deconvolution, image inpainting, video denoising, or fused lasso models, to name a few. While the core algorithms are implemented in C to achieve top efficiency, Matlab and Python interfaces are provided for ease of use.
@@ -293,6 +292,10 @@ Some demos in the form of both Matlab and Python scripts showing how to work wit
 - **demo_filter_image_color**: TV-L1 filtering of 3-dimensional image (length, width and color).
 - **demo_filter_image_threads**: multi-thread TV-L1 filtering of 2-dimensional image.
 - **demo_filter_image_weighted**: weighted TV-L1 filtering of 2-dimensional image.
+
+## Notes on Mac OS X
+
+Under Mac OS X some numerical accuracy issues have been observed for TV-L2 solvers. This is due to low-level Mac numerical libraries, and may produce failures in some of proxTV tests. Other solvers should work OK.
 
 ## Referencing
 
