@@ -1,22 +1,63 @@
 language: python
-python:
-  - "2.6"
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-os: linux
-dist: trusty
-addons:
-    apt:
-        packages:
-        - libopenblas-dev
-        - liblapack-dev
-        - liblapacke-dev
+matrix:
+  include:
+  - os: linux
+    sudo: required
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=2.7
+    dist: trusty
+  - os: linux
+    sudo: required
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.4
+    dist: trusty
+  - os: linux
+    sudo: required
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.5
+    dist: trusty
+  - os: linux
+    sudo: required
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.6
+    dist: trusty
+  - os: linux
+    sudo: required
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.7
+    dist: trusty
+  - os: osx
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=2.7
+  - os: osx
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.4
+  - os: osx
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.5
+  - os: osx
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.6
+  - os: osx
+    language: generic
+    env: TRAVIS_PYTHON_VERSION=3.7
+  allow_failures:
+  - os: osx
+sudo: required
+before_install:
+- bash -x ./.travis/installconda.sh
+- export PATH="$HOME/miniconda3/bin:$PATH"
 install:
-    - pip install coveralls
-    - python setup.py install
-script: nosetests --with-coverage --cover-package=prox_tv
+- source activate testenv
+- bash -x ./.travis/build.sh
+script:
+- source activate testenv
+- nosetests --with-coverage --cover-package=prox_tv
+- bash -x ./.travis/deploy.sh
 after_success:
-    - coveralls
+- source activate testenv
+- coveralls
+env:
+  global:
+    # TWINE_PASSWORD
+    secure: k6W/OddycIaotc8CTg4HspqzLQCu3wqyLrq/P8KgtIde/r63uzj79altvdLHq3RXofB1bLk4p0gURtKEFT6OnBB710qfFwAngick5qf9tG5TdG5K/m962ukk2AAtmlGsRHv8DxqakAp21LBXamjQdsys5rhLnic/XKl12aa4c+YrunUcwtuC2XlYL8ZrIlrnZFKpWu/kNGFUV1UGuunZlHnjePiQAY64LHgFb4+7l52OJ1XfWE1Lb+vI/7sj40v4U2jPlWIQ+8cpKb4SL13f+m6GK5+/94YATmIS5MV7tT/Bwgmfgu7+iQr9jB5X0duXw+3RMIJfTb9NhEzAdsGvGdIiCs4CkMRW9XNXMPIVKNNdqh+rXU9OlvgUIt4+wmhD0UZ0MYsO92yiTm2BIGG/F5trCT1IJuUpj+s5kIO3aeldXPdlx77jsFK2Ka1txzPFXVz7Kc/oZyQNT3No5ToFdu3faVNe2KVjdDbl7Y5DyA1/hRJtXNqVrLm6OCx4z28oKMWOdAfwnniUDo8yJ7pTWOjkjs698KW2wU7VGX7sWHG4LKZ0MSAhBX2EXPhCO7yBRS8XYPy78b2mxnEG30tLEF8s0EwNRvJM0o5kL0vr4xuN2GvTTJ2wsdv2WrrtPBskWAcGsvhflIv4XG9TbganV9Mtf00rh/N2pdLjov6AJC0=

@@ -1,4 +1,3 @@
-import os
 import os.path
 from sys import platform as _platform
 
@@ -90,6 +89,8 @@ if _platform == 'darwin':
     # if openblas was installed by homerew is present use this for lapacke.h
     if os.path.exists('/usr/local/opt/openblas/include'):
         extra_compile_args.append('-I/usr/local/opt/openblas/include')
+    if os.path.exists('/usr/local/opt/openblas/lib'):
+        extra_link_args.append('/usr/local/opt/openblas/lib')
 else:
     # OSX clang does not (yet) support openmp, so don't add it to compile
     # args
@@ -108,9 +109,10 @@ ffi.set_source(
     define_macros=[('NOMATLAB', 1)],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
-    libraries=['lapack']
+    libraries=['blas', 'lapack'],
+    include_dirs=['/usr/include']
 )
 
 
 if __name__ == '__main__':
-    ffi.compile()
+    ffi.compile(verbose=True)
