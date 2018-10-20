@@ -19,7 +19,6 @@
 #ifdef NOMATLAB
 #undef lapack_int
 #define lapack_int              int
-//#include <lapacke.h>
 extern "C" {
     void dpttrs_(lapack_int* n, lapack_int* nrhs, const double* d, const double* e, double* b, lapack_int* ldb,
                  lapack_int *info );
