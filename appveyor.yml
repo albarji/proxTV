@@ -58,6 +58,7 @@ build: false
 test_script:
   - set "PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%CONDA_ROOT%\Library\bin;%PATH%"
   - set PATH
+  # TODO: probably need to install BLAS+LAPACK
   # Compile proxTV
   - pip wheel . -w wheelhouse/
   # Run tests
