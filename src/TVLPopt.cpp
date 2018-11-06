@@ -112,9 +112,13 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     }
     aux[nn-1] = 2;
     nnp=nn;
+#ifdef PROXTV_USE_LAPACK
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
+#else
+    dpttrf_plus_dpttrs_eigen(&nnp, aux, aux2, w);
+#endif
 
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
@@ -389,10 +393,13 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
     }
     aux[nn-1] = 2;
     nnp=nn;
+#ifdef PROXTV_USE_LAPACK
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-
+#else
+    dpttrf_plus_dpttrs_eigen(&nnp, aux, aux2, w);
+#endif
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 
@@ -679,10 +686,13 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
     }
     aux[nn-1] = 2;
     nnp=nn;
+#ifdef PROXTV_USE_LAPACK
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-
+#else
+    dpttrf_plus_dpttrs_eigen(&nnp, aux, aux2, w);
+#endif
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 
@@ -943,9 +953,14 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     }
     aux[nn-1] = 2;
     nnp=nn;
+
+#ifdef PROXTV_USE_LAPACK
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
+#else
+    dpttrf_plus_dpttrs_eigen(&nnp, aux, aux2, w);
+#endif
 
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
@@ -1190,10 +1205,14 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     }
     aux[nn-1] = 2;
     nnp=nn;
+
+#ifdef PROXTV_USE_LAPACK
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
-
+#else
+    dpttrf_plus_dpttrs_eigen(&nnp, aux, aux2, w);
+#endif
     /* Compute maximum effective penalty */
     lambdaMax = LPnorm(w, nn, q);
 

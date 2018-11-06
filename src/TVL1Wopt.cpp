@@ -111,9 +111,13 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
         aux2[i] = -1;
     }
     aux[nn-1] = 2;
+#ifdef PROXTV_USE_LAPACK
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
+#else
+    dpttrf_plus_dpttrs_eigen(&nnp, aux, aux2, w);
+#endif
 
     /* above assume we solved DD'u = Dy */
     /* we wanted to solve DD'Wu = Dy; so now obtain u by dividing by W */
@@ -191,17 +195,18 @@ int PN_TV1_Weighted(double *y,double *lambda,double *x,double *info,int n,double
         #endif
         /* Factorize reduced Hessian */
         nIp = nI;
+        for(i=0;i<nI;i++)
+            d[i] = g[inactive[i]];
+#ifdef PROXTV_USE_LAPACK
         dpttrf_(&nIp,aux,aux2,&rc);
+        /* Solve Choleski-like linear system to obtain Newton updating direction */
+        dpttrs_(&nIp, &one, aux, aux2, d, &nIp, &rc);
+#else
+        dpttrf_plus_dpttrs_eigen(&nIp, aux, aux2, d);
+#endif
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"c=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",aux[i]); fprintf(DEBUG_FILE,"]\n");
             fprintf(DEBUG_FILE,"l=["); for(i=0;i<nI-1;i++) fprintf(DEBUG_FILE,"%lf ",aux2[i]); fprintf(DEBUG_FILE,"]\n");
-        #endif
-
-        /* Solve Choleski-like linear system to obtain Newton updating direction */
-        for(i=0;i<nI;i++)
-            d[i] = g[inactive[i]];
-        dpttrs_(&nIp, &one, aux, aux2, d, &nIp, &rc);
-        #ifdef DEBUG
             fprintf(DEBUG_FILE,"d=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",d[i]); fprintf(DEBUG_FILE,"]\n");
         #endif
 

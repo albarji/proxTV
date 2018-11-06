@@ -6,6 +6,17 @@ set(test_names
 add_executable(test_tv1_2d "test_tv1_2d.cpp")
 add_test(NAME tv1_2d COMMAND test_tv1_2d)
 
+if(proxTV_USE_LAPACK)
+    find_package(Eigen3)
+    if (TARGET Eigen3::Eigen)
+        list(APPEND test_names test_use_eigen)
+        add_executable(test_use_eigen "test_use_eigen.cpp")
+        add_test(NAME use_eigen COMMAND test_use_eigen)
+        target_link_libraries(test_use_eigen PUBLIC Eigen3::Eigen)
+    else()
+        message(WARNING "Eigen3 not found, test comparing lapack and eigen is disabled.")
+    endif()
+endif()
 # To add more tests: append a name to test_names, and add_executable/add_test with that name
 # Tests can be run with `ctest` in the build directory,
 # it accepts regex, and different verbosity: ctest -R tv1 -VV

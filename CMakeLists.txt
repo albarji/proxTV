@@ -14,6 +14,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 #------------------------------------------------------------------------------
 option(proxTV_INSTALL_DEVELOPMENT "Install development files" ON)
 option(ENABLE_TESTING "Compile tests" OFF)
+option(proxTV_USE_LAPACK "Use LAPACK and LAPACKE instead of EIGEN" ON)
 
 #------------------------------------------------------------------------------
 # Set a default build type if none was specified
@@ -40,11 +41,18 @@ endif()
 #------------------------------------------------------------------------------
 # External dependencies
 
-find_package(LAPACKE REQUIRED)
-message(STATUS "Lapacke libraries: ${LAPACKE_LIBRARIES}")
+if(proxTV_USE_LAPACK)
+  find_package(LAPACKE REQUIRED)
+  message(STATUS "Lapacke libraries: ${LAPACKE_LIBRARIES}")
 
-find_package(LAPACK REQUIRED)
-message(STATUS "Lapack libraries: ${LAPACK_LIBRARIES}")
+  find_package(LAPACK REQUIRED)
+  message(STATUS "Lapack libraries: ${LAPACK_LIBRARIES}")
+else()
+  find_package(Eigen3 REQUIRED)
+  get_target_property(EIGEN_INCLUDE_DIR Eigen3::Eigen
+    INTERFACE_INCLUDE_DIRECTORIES)
+  message(STATUS "Eigen Found: ${EIGEN_INCLUDE_DIR}")
+endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG 1)
 find_package(Threads)

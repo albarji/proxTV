@@ -6,6 +6,7 @@ set(headers
     condat_fast_tv.h
     general.h
     johnsonRyanTV.h
+    lapackFunctionsWrap.h
     LPopt.h
     TVmacros.h
     TVopt.h
@@ -15,6 +16,7 @@ set(headers
 set(sources
     condat_fast_tv.cpp
     johnsonRyanTV.cpp
+    lapackFunctionsWrap.cpp
     LPopt.cpp
     TV2Dopt.cpp
     TV2DWopt.cpp
@@ -33,6 +35,9 @@ set(sources
 add_library(proxTV ${sources})
 
 target_compile_definitions(proxTV PUBLIC NOMATLAB)
+if(proxTV_USE_LAPACK)
+    target_compile_definitions(proxTV PUBLIC PROXTV_USE_LAPACK)
+endif()
 
 # Create directory with headers at build and install time.
 file(COPY ${headers}
@@ -43,15 +48,25 @@ install(FILES ${headers}
 target_include_directories(proxTV PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
-    ${LAPACKE_INCLUDE_DIRS}
     )
 
-# Lapacke, Lapack, pthreads
+# Pthreads
 target_link_libraries(proxTV PUBLIC
     ${CMAKE_THREAD_LIBS_INIT}
-    ${LAPACK_LIBRARIES}
-    ${LAPACKE_LIBRARIES}
     )
+
+# Lapacke, Lapack
+if(proxTV_USE_LAPACK)
+    target_include_directories(proxTV PUBLIC
+    ${LAPACKE_INCLUDE_DIRS}
+    )
+    target_link_libraries(proxTV PUBLIC
+        ${LAPACK_LIBRARIES}
+        ${LAPACKE_LIBRARIES}
+        )
+else()
+    target_link_libraries(proxTV PUBLIC Eigen3::Eigen)
+endif()
 
 # OpenMP
 target_compile_options(proxTV PUBLIC ${OpenMP_CXX_FLAGS})
