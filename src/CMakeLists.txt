@@ -47,6 +47,7 @@ install(FILES ${headers}
 
 target_include_directories(proxTV PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
     )
 
@@ -96,11 +97,5 @@ write_basic_package_version_file("proxTVConfigVersion.cmake"
     )
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/proxTVConfigVersion.cmake
-    DESTINATION ${LIB_INSTALL_DIR}/cmake/proxTV
-    )
-
-# Install proxTVConfig.cmake
-install(FILES
-    ${CMAKE_SOURCE_DIR}/cmake/proxTVConfig.cmake
     DESTINATION ${LIB_INSTALL_DIR}/cmake/proxTV
     )

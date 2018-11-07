@@ -12,9 +12,15 @@ message(STATUS "  description: ${proxTV_DESCRIPTION}")
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 #------------------------------------------------------------------------------
-option(proxTV_INSTALL_DEVELOPMENT "Install development files" ON)
-option(ENABLE_TESTING "Compile tests" OFF)
-option(proxTV_USE_LAPACK "Use LAPACK and LAPACKE instead of EIGEN" ON)
+if(NOT DEFINED proxTV_INSTALL_DEVELOPMENT)
+  option(proxTV_INSTALL_DEVELOPMENT "Install development files" ON)
+endif()
+if(NOT DEFINED proxTV_ENABLE_TESTING)
+  option(proxTV_ENABLE_TESTING "Compile tests" OFF)
+endif()
+if(NOT DEFINED proxTV_USE_LAPACK)
+  option(proxTV_USE_LAPACK "Use LAPACK and LAPACKE instead of EIGEN" ON)
+endif()
 
 #------------------------------------------------------------------------------
 # Set a default build type if none was specified
@@ -67,7 +73,7 @@ add_subdirectory(src)
 
 #------------------------------------------------------------------------------
 # Testing
-if(ENABLE_TESTING)
+if(proxTV_ENABLE_TESTING)
     enable_testing()
     add_subdirectory(test)
 endif()
