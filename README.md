@@ -276,7 +276,7 @@ If you find this toolbox useful please reference the following papers:
 
 * Fast Newton-type Methods for Total Variation Regularization. Álvaro Barbero, Suvrit Sra. ICML 2011 proceedings.
     
-* Modular proximal optimization for multidimensional total-variation regularization. Álvaro Barbero, Suvrit Sra. http://arxiv.org/abs/1411.0589
+* Modular Proximal Optimization for Multidimensional Total-Variation Regularization. Álvaro Barbero, Suvrit Sra. http://www.jmlr.org/papers/v19/13-538.html
     
 whose Bibtex entries are
 
@@ -298,11 +298,15 @@ whose Bibtex entries are
       year = 2011
     }
     
-    @Article{barberoTV14,
-      Title                    = {Modular proximal optimization for multidimensional total-variation regularization},
-      Author                   = {\'Alvaro Barbero and Suvrit Sra},
-      Year                     = {2014},
-      Url                      = {http://arxiv.org/abs/1411.0589}
+    @article{JMLR:v19:13-538,
+      author  = {Alvaro Barbero and Suvrit Sra},
+      title   = {Modular Proximal Optimization for Multidimensional Total-Variation Regularization},
+      journal = {Journal of Machine Learning Research},
+      year    = {2018},
+      volume  = {19},
+      number  = {56},
+      pages   = {1-82},
+      url     = {http://jmlr.org/papers/v19/13-538.html}
     }
 
 
