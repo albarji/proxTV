@@ -53,7 +53,12 @@ install:
 script:
 - source activate testenv
 - nosetests --with-coverage --cover-package=prox_tv
-- bash -x ./.travis/deploy.sh
+# - bash -x ./.travis/deploy.sh
+# Build C lib with CMake
+- mkdir -p build && cd build
+- cmake -DENABLE_TESTING:BOOL=ON ../
+- cmake --build .
+- ctest -VV
 after_success:
 - source activate testenv
 - coveralls
