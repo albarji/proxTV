@@ -70,8 +70,10 @@ else()
 endif()
 
 # OpenMP
-target_compile_options(proxTV PUBLIC ${OpenMP_CXX_FLAGS})
-target_link_libraries(proxTV PUBLIC ${OpenMP_CXX_LIBRARIES})
+if(${OpenMP_FOUND}})
+    target_compile_definitions(proxTV _OPENMP)
+    target_link_libraries(proxTV PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 install(TARGETS proxTV EXPORT proxTVTargets
     LIBRARY DESTINATION ${LIB_INSTALL_DIR}
