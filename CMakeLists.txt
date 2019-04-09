@@ -11,6 +11,9 @@ message(STATUS "  description: ${proxTV_DESCRIPTION}")
 # Update CMake module path to lookup proxTV custom CMake modules
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# Add -fPIC
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 #------------------------------------------------------------------------------
 if(NOT DEFINED proxTV_INSTALL_DEVELOPMENT)
   option(proxTV_INSTALL_DEVELOPMENT "Install development files" ON)
