@@ -33,7 +33,7 @@ set(sources
     )
 
 add_library(proxTV ${sources})
-
+set_target_properties(proxTV PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
 target_compile_definitions(proxTV PUBLIC NOMATLAB)
 if(proxTV_USE_LAPACK)
     target_compile_definitions(proxTV PUBLIC PROXTV_USE_LAPACK)
