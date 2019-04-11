@@ -26,8 +26,6 @@ inline double mxGetInf() { return INFINITY; }
 /* Choose here the name of the debug file */
 #ifdef DEBUG
     static FILE* DEBUG_FILE = fopen("debug.tmp","w");
-#else
-    static FILE* DEBUG_FILE = NULL;
 #endif
 #define DEBUG_N 10 /* Maximum vector length to print in debug messages */
 

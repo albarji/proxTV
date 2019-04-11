@@ -36,10 +36,11 @@
 */
 int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws){
     double *w=NULL,*aux=NULL,*aux2=NULL,*g;
-    double q,tmp,stop,dual,bestdual,lambdaMax,lambdaIni,lambdaCurrent,mu,musqrt,beta;
+    double q,tmp,stop,dual,bestdual,lambdaMax,lambdaIni,lambdaCurrent;
+    (void)(tmp); // Because tmp is unused in the macro
     int iter,stuck,nn,i,lambdaStep;
     Workspace *wsinner=NULL;
-    lapack_int one=1,rc,nnp;
+    lapack_int nnp;
 
     /* Problem constants */
     #define L 4 // Lipschitz constant
@@ -113,6 +114,8 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     aux[nn-1] = 2;
     nnp=nn;
 #ifdef PROXTV_USE_LAPACK
+    lapack_int one=1;
+    lapack_int rc;
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
@@ -154,12 +157,6 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     if(!LPp_project(w,lambdaCurrent,aux,info,nn,q,wsinner))
         {CANCEL("error when invoking Lp ball projection subroutine",info)}
     for(i=0;i<nn;i++) w[i] = aux[i];
-
-    /* Compute mu-convexity */
-    mu = 2. - 2. * cos ( M_PI / (nn+1));
-    musqrt = sqrt(mu);
-    /* Compute beta */
-    beta = (Lsqrt - musqrt) / (Lsqrt + musqrt);
 
     /* Start Gradient Projections iterations */
     stop = DBL_MAX; bestdual = DBL_MAX; stuck = 0;
@@ -232,6 +229,7 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
             /* If met, move to following lambda step, if any */
             lambdaStep++;
             if(lambdaStep < LAMBDA_STEPS_TVLP){
+#pragma warning(suppress: 4723)
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
                 GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
@@ -301,7 +299,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
     double q,tmp,stop,dual,bestdual,lambdaMax,lambdaIni,lambdaCurrent,mu,musqrt,beta;
     int iter,stuck,nn,i,lambdaStep;
     Workspace *wsinner=NULL;
-    lapack_int one=1,rc,nnp;
+    lapack_int nnp;
 
     /* Problem constants */
     #define L 4 // Lipschitz constant
@@ -394,6 +392,8 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
     aux[nn-1] = 2;
     nnp=nn;
 #ifdef PROXTV_USE_LAPACK
+    lapack_int one=1;
+    lapack_int rc;
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
@@ -522,6 +522,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
             /* If met, move to following lambda step, if any */
             lambdaStep++;
             if(lambdaStep < LAMBDA_STEPS_TVLP){
+#pragma warning(suppress: 4723)
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
                 GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
@@ -589,10 +590,10 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
 */
 int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws){
     double *w=NULL,*aux=NULL,*aux2=NULL,*z=NULL,*wpre=NULL,*g;
-    double q,tmp,stop,dual,bestdual,lambdaMax,lambdaIni,lambdaCurrent,mu,musqrt,beta;
+    double q,tmp,stop,dual,bestdual,lambdaMax,lambdaIni,lambdaCurrent,beta;
     int iter,stuck,nn,i,lambdaStep;
     Workspace *wsinner=NULL;
-    lapack_int one=1,rc,nnp;
+    lapack_int nnp;
 
     /* Problem constants */
     #define L 4 // Lipschitz constant
@@ -687,6 +688,8 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
     aux[nn-1] = 2;
     nnp=nn;
 #ifdef PROXTV_USE_LAPACK
+    lapack_int one=1;
+    lapack_int rc;
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
@@ -813,6 +816,7 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
             /* If met, move to following lambda step, if any */
             lambdaStep++;
             if(lambdaStep < LAMBDA_STEPS_TVLP){
+#pragma warning(suppress: 4723)
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
                 GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
@@ -882,7 +886,7 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     int nn, iter, i;
     double *w=NULL, *aux=NULL, *aux2=NULL, *g=NULL;
     double stop, q, lambdaMax, gap, step, den, tmp, fval, fvalPrev;
-    lapack_int one=1,rc,nnp;
+    lapack_int nnp;
 
     /* Gradient to dual gap, considering also the special cases p~=1 and p~=inf */
     #define GRAD2GAP(w,g,gap,lambda,p,n,i,tmp) \
@@ -955,6 +959,8 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     nnp=nn;
 
 #ifdef PROXTV_USE_LAPACK
+    lapack_int one = 1;
+    lapack_int rc;
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
@@ -1126,9 +1132,9 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
 int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws) {
     double *w=NULL,*aux=NULL,*aux2=NULL,*g=NULL;
     double q,tmp,stop,dual,bestdual,lambdaMax,num,den,step;
-    int iter,stuck,nn,i,lambdaStep,cycle;
+    int iter,stuck,nn,i,cycle;
     Workspace *wsinner=NULL;
-    lapack_int one=1,rc,nnp;
+    lapack_int nnp;
 
     /* Problem constants */
     #define Linv 0.25 // Inverse of Lipschitz constant
@@ -1207,6 +1213,8 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     nnp=nn;
 
 #ifdef PROXTV_USE_LAPACK
+    lapack_int one = 1;
+    lapack_int rc;
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);

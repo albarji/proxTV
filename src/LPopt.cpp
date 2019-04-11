@@ -211,7 +211,10 @@ int PN_LPinf(double *y,double lambda,double *x,double *info,int n,Workspace *ws)
 */
 int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws,int positive,double objGap){
     double *g=NULL,*d=NULL,*xnorm=NULL,*auxv=NULL;
-    double stop,stop2,q,nx,f,fupdate,aux,c,den,xp1vGrad,gRd,delta,prevDelta,improve,rhs,grad0,gap,epsilon;
+    double stop,stop2,q,nx,f,aux,c,den,xp1vGrad,gRd,delta,prevDelta,rhs,gap,epsilon;
+    double fupdate = 0;
+    double improve = 0;
+    double grad0 = 0;
     int *inactive=NULL,*signs=NULL;
     int i,j,iters,recomp,found,nI;
     short updateKind;
@@ -745,7 +748,7 @@ int PN_LPp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
     @argument lambda multiplier of the Lp norm
     @argument norm precomputed Lp norm of x
 **/
-double PN_LPpGap(double *x, double *y, double *diff, int n, double q, double lambda, double norm) {
+double PN_LPpGap(double *, double *y, double *diff, int n, double q, double lambda, double norm) {
     /* Compute dual norm */
     double dualnorm = LPnorm(diff,n,q);
 
@@ -1016,7 +1019,7 @@ void solveLinearLP(double *z, int n, double p, double lambda, double *s) {
         #endif
         // The solution approximately lies at the opposite corner of the l1 ball
         double largest = 0, val;
-        int ilargest;
+        int ilargest = 0;
 
         // Find largest entry of z, in absolute value
         for ( i = 0 ; i < n ; i++ ) {

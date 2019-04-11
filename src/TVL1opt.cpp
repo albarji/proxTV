@@ -36,10 +36,12 @@
 */
 int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Workspace *ws){
     int i,ind,nI,recomp,found,iters,nn=n-1;
-    double lambdaMax,tmp,fval0,fval1,gRd,delta,grad0,stop,stopPrev,improve,rhs,maxStep,prevDelta;
+    double lambdaMax,tmp,fval0,fval1,gRd,delta,stop,stopPrev,improve,rhs,prevDelta;
+    double grad0 = 0;
+    double maxStep = -DBL_MAX;
     double *w=NULL,*g=NULL,*d=NULL,*aux=NULL,*aux2=NULL;
     int *inactive=NULL;
-    lapack_int one=1,rc,nnp=nn,nIp;
+    lapack_int nnp=nn,nIp;
 
     /* Macros */
 
@@ -113,6 +115,8 @@ int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Wor
     }
     aux[nn-1] = 2;
 #ifdef PROXTV_USE_LAPACK
+    lapack_int one;
+    lapack_int rc;
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);

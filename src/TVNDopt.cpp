@@ -161,7 +161,11 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
         }
 
         /* Parallelize */
+#ifdef DEBUG
         #pragma omp parallel shared(ws,nSlices,ns,incs,x,p,lambdas,z,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+#else
+        #pragma omp parallel shared(ws,nSlices,ns,incs,x,p,lambdas,z,norms,npen,dims) private(d,i,j,k,idx1,idx2) default(none)
+#endif
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -172,7 +176,7 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
                 #ifdef DEBUG
                     fprintf(DEBUG_FILE,"··········Penalty %d··········\n",i);
                 #endif
-                d = dims[i]-1;
+                d = int(dims[i]-1);
 
                 int top=nSlices[d];
                 wsi->warm = 0;
@@ -397,7 +401,11 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         }
 
         /* Parallelize */
+#ifdef DEBUG
 #pragma omp parallel shared(ws,nSlices,ns,incs,x,p,q,lambdas,z,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+#else
+#pragma omp parallel shared(ws,nSlices,ns,incs,x,p,q,lambdas,z,norms,npen,dims) private(d,i,j,k,idx1,idx2) default(none)
+#endif
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -408,7 +416,7 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
                 #ifdef DEBUG
                     fprintf(DEBUG_FILE,"··········Penalty %d··········\n",i);
                 #endif
-                d = dims[i]-1;
+                d = int( dims[i]-1);
 
                 int top=nSlices[d];
                 wsi->warm = 0;
@@ -596,7 +604,11 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
 
 
     /* Parallelize calculation of value */
+    #ifdef DEBUG
     #pragma omp parallel shared(x,ws,nSlices,ns,incs,lambdas,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+    #else
+    #pragma omp parallel shared(x,ws,nSlices,ns,incs,lambdas,norms,npen,dims) private(d,i,j,k,idx1,idx2) default(none)
+    #endif
     {
         /* Get thread number */
         int id = omp_get_thread_num();
@@ -611,7 +623,7 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"··········Penalty %d··········\n",i);
             #endif
-            d = dims[i]-1;
+            d = int(dims[i]-1);
 
             int top=nSlices[d];
 
@@ -678,7 +690,8 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
 int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, int maxit, double* info) {
     double *U1 = NULL, *U2 = NULL, *U3 = NULL, *Z1 = NULL, *Z2 = NULL, *Z3 = NULL;
     double rho;
-    int i, j, k, idx;
+    size_t i, j, k;
+    size_t idx;
     Workspace *ws = NULL;
 
     #define FREE \
@@ -700,8 +713,9 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
     rho = 10;
 
     // Alloc memory
-    int size = (M > N) ? M : N; size = (O > size) ? O : size;
-    int totalSize = M*N*O;
+    size_t size_long = (M > N) ? M : N ; size_long = (O > size_long) ? O : size_long;
+    int size = int(size_long);
+    size_t totalSize = M*N*O;
     U1 = (double*)calloc(totalSize,sizeof(double));
     U2 = (double*)calloc(totalSize,sizeof(double));
     U3 = (double*)calloc(totalSize,sizeof(double));
@@ -738,7 +752,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[k] = -1. / rho * U1[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, M, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, (int) M, 1, ws);
                 // Recover data
                 memcpy(Z1 + M * ( i + N * j ), ws->out, sizeof(double)*M);
             }
@@ -753,7 +767,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[i] = -1. / rho * U2[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, N, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, (int) N, 1, ws);
                 // Recover data
                 for ( i = 0 ; i < N ; i++ ) {
                     idx = k + M * ( i + N * j );
@@ -771,7 +785,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[j] = -1. / rho * U3[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, O, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, (int) O, 1, ws);
                 // Recover data
                 for ( j = 0 ; j < O ; j++ ) {
                     idx = k + M * ( i + N * j );

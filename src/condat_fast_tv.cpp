@@ -195,7 +195,7 @@ void TV1D_denoise_tautstring(double* input, double* output, int width, const dou
 		z[c+i]=y_low[index[c+i]=index_low[s_low+i]];
 	c = c + c_low-s_low;
 	int j=0;
-	float a;
+	floattype a;
 	i=1;
 	while (i<=c) {
 		a = (z[i]-z[i-1]) / (index[i]-index[i-1]);

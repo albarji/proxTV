@@ -168,9 +168,13 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"··········Penalty 0··········\n");
         #endif
-        d = dims[0]-1;
+        d = int(dims[0]-1);
         /* Run 1-dimensional prox operator over each 1-dimensional slice along the specified dimension (parallelized) */
+#ifdef DEBUG
         #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,p,lambdas,z,norms,DEBUG_FILE) private(j,k,idx1,idx2) default(none)
+#else
+        #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,p,lambdas,z,norms) private(j,k,idx1,idx2) default(none)
+#endif
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -217,10 +221,14 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
             #ifdef DEBUG
                 fprintf(DEBUG_FILE,"··········Penalty 1··········\n");
             #endif
-            d = dims[1]-1;
+            d = int(dims[1]-1);
 
             /* Run 1-dimensional prox operator over each 1-dimensional slice along the specified dimension (parallelized) */
+#ifdef DEBUG
             #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,q,lambdas,z,norms,DEBUG_FILE) private(j,k,idx1,idx2) default(none)
+#else
+            #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,q,lambdas,z,norms) private(j,k,idx1,idx2) default(none)
+#endif
             {
                 /* Get thread number */
                 int id = omp_get_thread_num();
@@ -353,12 +361,10 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
   double norm1, double norm2, double*s, int nThreads, int maxit, double* info)
 {
 
-  int i;
-  double *ytr = NULL;
+  size_t i;
   double *t = NULL;
   double *tb = NULL;
   Workspace **ws = NULL;
-  int maxDim;
 
   #define FREE \
     if(t) free(t); \
@@ -373,7 +379,7 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
 
   if (nThreads < 1) nThreads = 1;
   omp_set_num_threads(nThreads);
-  maxDim = (M > N) ? M : N;
+  int maxDim = int( (M > N) ? M : N );
 
   // Alloc memory for algorithm */
   t = (double*) malloc(sizeof(double)*M*N);
@@ -459,7 +465,6 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
 void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W, double norm, Workspace **ws) {
     #pragma omp parallel shared(M,N,input,output,W,norm,ws) default(none)
     {
-        int j;
         // Get thread number
         int id = omp_get_thread_num();
         // Get corresponding workspace
@@ -468,7 +473,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W,
 
         // Run 1-d solvers in parallel on each column of the input
         #pragma omp for
-        for (j=0; j < N; j++) {
+        for (int j=0; j < N; j++) {
             resetWorkspace(wsi);
             // Prepare inputs
             memcpy(wsi->in, input+(M*j), sizeof(double)*M);
@@ -510,7 +515,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
         for (j=0; j < M; j++) {
             resetWorkspace(wsi);
             // Prepare inputs, considering displacement from reference signal
-            int idx;
+            size_t idx;
             for ( idx = j, i = 0 ; i < N ; i++, idx+=M )
                 wsi->in[i] = ref[idx]-input[idx];
             // Compute prox difference for this row
@@ -536,13 +541,12 @@ difference between input and output of prox.
  @param norm degree of TV
  @param ws Workspace to use for the computation
  */
-void DR_proxDiff(size_t n, double* input, double* output, double W, double norm, Workspace *ws) {
-    int i;
+void DR_proxDiff(size_t n, double* input, double* output, double W, double norm, Workspace *) {
 
     // Compute proximity
-    TV(input, W, output, NULL, n , norm, NULL);
+    TV(input, W, output, NULL, (int) n , norm, NULL);
     // Return differences between input and proximity output
-    for (i=0; i < n; i++)
+    for (size_t i=0; i < n; i++)
       output[i] = input[i] - output[i];
 }
 
@@ -585,9 +589,10 @@ void DR_proxDiff(size_t n, double* input, double* output, double W, double norm,
         info -- information structure about optimization
 */
 int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*X, short alg, int maxit, double* info) {
-    double sigma, tau, theta, gamma, normalizer, tmp;
+    double sigma, tau, theta, normalizer, tmp;
+    double gamma = -1;
     double *U1 = NULL, *U2 = NULL, *Xt = NULL, *Z = NULL;
-    int i, j;
+    size_t i, j;
 
     #define FREE \
         if(U1) free(U1); \
@@ -695,12 +700,12 @@ int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*
         // Combiner step: Z = Xt + \theta (Xt - X);
         for ( i = 0 ; i < M*N ; i++ )
             Z[i] = Xt[i] + theta * (Xt[i] - X[i]);
-	    // Update algorithm parameters (only in accelerated Chambolle-Pock)
-	    if ( alg == ALG_CHAMBOLLE_POCK_ACC ) {
+        // Update algorithm parameters (only in accelerated Chambolle-Pock)
+        if ( alg == ALG_CHAMBOLLE_POCK_ACC ) {
             tau *= theta;
             sigma /= theta;
             theta = 1. / sqrt(1 + 2 * gamma * tau); // 1/sqrt(1 + 2*gamma*tau)
-	    }
+        }
 
         // Compute stopping tolerance before copying X
         stop = 0; normalizer = 0;
@@ -787,7 +792,7 @@ int CondatChambollePock2_TV(size_t M, size_t N, double*Y, double lambda, double*
 int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, double* info) {
     double *U1 = NULL, *U2 = NULL, *Z1 = NULL, *Z2 = NULL;
     double rho;
-    int i, j;
+    size_t i, j;
     Workspace *ws = NULL;
 
     #define FREE \
@@ -807,7 +812,7 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
     rho = 10;
 
     // Alloc memory
-    int size = (M > N) ? M : N;
+    int size = int( (M > N) ? M : N );
     U1 = (double*)calloc(M*N,sizeof(double));
     U2 = (double*)calloc(M*N,sizeof(double));
     Z1 = (double*)malloc(sizeof(double)*M*N);
@@ -838,7 +843,7 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
             for ( j = 0 ; j < N ; j++ )
                 ws->in[j] = -1. / rho * U1[j*M+i] + X[j*M+i];
             resetWorkspace(ws);
-            TV(ws->in, lambda/rho, ws->out, NULL, N, 1, ws);
+            TV(ws->in, lambda/rho, ws->out, NULL, (int) N, 1, ws);
             // Recover data
             for ( j = 0 ; j < N ; j++ )
                 Z1[j*M+i] = ws->out[j];
@@ -849,7 +854,7 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
             // Copy column data to workspace
             for ( j = 0 ; j < M ; j++ )
                 ws->in[j] = -1. / rho * U2[i*M+j] + X[i*M+j];
-            TV(ws->in, lambda/rho, ws->out, NULL, M, 1, ws);
+            TV(ws->in, lambda/rho, ws->out, NULL, (int) M, 1, ws);
             // Recover data
             memcpy(Z2+i*M, ws->out, sizeof(double)*M);
         }
@@ -907,7 +912,7 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
 int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, double* info) {
     double sigma, tau, theta, tmp, normalizer;
     double *U = NULL, *Xprev = NULL, *row=NULL, *rowout=NULL, *TMP=NULL;
-    int i, j;
+    size_t i, j;
     size_t NM = N*M;
 
     #define FREE \
@@ -966,7 +971,7 @@ int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int ma
         // Dual prox for cols
         for ( j = 0 ; j < NM ; j+=M ) {
             // Normal prox
-            TV(TMP+j, lambda/sigma, U+j, NULL, M, 1, NULL);
+            TV(TMP+j, lambda/sigma, U+j, NULL, (int) M, 1, NULL);
             // Moreau's identity
             for ( i = 0 ; i < M ; i++ )
                 (U+j)[i] = sigma*((TMP+j)[i] - (U+j)[i]);
@@ -988,7 +993,7 @@ int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int ma
             for ( j = 0 ; j < N ; j++ )
                 row[j] = TMP[j*M+i];
             // Prox operator
-            TV(row, lambda/(1.+1./tau), rowout, NULL, N, 1, NULL);
+            TV(row, lambda/(1.+1./tau), rowout, NULL, (int) N, 1, NULL);
             // Recover output
             for ( j = 0 ; j < N ; j++ )
                 X[j*M+i] = rowout[j];

@@ -70,8 +70,8 @@ else()
 endif()
 
 # OpenMP
-if(${OpenMP_FOUND}})
-    target_compile_definitions(proxTV _OPENMP)
+if(OpenMP_CXX_FOUND)
+    # target_compile_definitions(proxTV PRIVATE _OPENMP)
     target_link_libraries(proxTV PRIVATE OpenMP::OpenMP_CXX)
 endif()
 

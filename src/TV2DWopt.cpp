@@ -46,7 +46,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
 int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, int nThreads, int maxit, double* info)
 {
 
-  int i;
+  size_t i;
   double *t = NULL;
   double *tb = NULL;
   Workspace **ws = NULL;
@@ -67,7 +67,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
 
   if (nThreads < 1) nThreads = 1;
   omp_set_num_threads(nThreads);
-  maxDim = (M > N) ? M : N;
+  maxDim = int( (M > N) ? M : N );
 
   // Alloc memory for algorithm */
   t = (double*) malloc(sizeof(double)*M*N);
@@ -152,7 +152,6 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
 void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W, Workspace **ws) {
     #pragma omp parallel shared(M,N,input,output,W,ws) default(none)
     {
-        int i,j;
         // Get thread number
         int id = omp_get_thread_num();
         // Get corresponding workspace
@@ -161,7 +160,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
 
         // Run 1-d solvers in parallel on each column of the input
         #pragma omp for
-        for (j=0; j < N; j++) {
+        for (int j=0; j < N; j++) {
             resetWorkspace(wsi);
             // Array for weights
             double* wline = getDoubleWorkspace(wsi);
@@ -205,7 +204,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
             // Array for weights
             double* wline = getDoubleWorkspace(wsi);
             // Prepare weights
-            int idx;
+            size_t idx;
             for ( idx = j, i = 0 ; i < N-1 ; i++, idx+=M )
                 wline[i] = W[idx];
             // Prepare inputs, considering displacement from reference signal
@@ -229,13 +228,12 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
  @param W weights of the TV regularization
  @param ws Workspace to use for the computation
  */
-void DR_proxDiff(size_t n, double* input, double* output, double* W, Workspace *ws) {
-    int i;
+void DR_proxDiff(size_t n, double* input, double* output, double* W, Workspace *) {
 
     // Compute proximity
-    tautString_TV1_Weighted(input, W, output, n);
+    tautString_TV1_Weighted(input, W, output, (int) n);
     // Return differences between input and proximity output
-    for (i=0; i < n; i++)
+    for (size_t i=0; i < n; i++)
       output[i] = input[i] - output[i];
 }
 

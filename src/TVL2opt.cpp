@@ -36,7 +36,7 @@ int more_TV2(double *y,double lambda,double *x,double *info,int n){
     int nn=n-1,i;
     double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy,*alpha,*beta,*minus,*p,*aux;
-    lapack_int one=1,rc,nnp=nn;
+    lapack_int nnp=nn;
 
     /* Macros */
 
@@ -105,6 +105,8 @@ int more_TV2(double *y,double lambda,double *x,double *info,int n){
 
 
 #ifdef PROXTV_USE_LAPACK
+        lapack_int one = 1;
+        lapack_int rc;
         /* Compute tridiagonal factorization of Hessian */
         dpttrf_(&nnp,alpha,beta,&rc);
         /* Obtain p by solving Cholesky system */
@@ -195,7 +197,7 @@ int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *w
     int nn=n-1,i,iters;
     double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy=NULL,*alpha=NULL,*beta=NULL,*minus=NULL,*p,*aux;
-    lapack_int one=1,rc,nnp=nn;
+    lapack_int nnp=nn;
 
     /* Macros */
 
@@ -354,6 +356,8 @@ int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *w
         memcpy((void*)aux,(void*)Dy,sizeof(double)*nn);
 
 #ifdef PROXTV_USE_LAPACK
+        lapack_int one = 1;
+        lapack_int rc;
         /* Compute tridiagonal factorization of Hessian */
         dpttrf_(&nnp,alpha,beta,&rc);
         /* Obtain p by solving Cholesky system */

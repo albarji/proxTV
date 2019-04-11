@@ -133,6 +133,7 @@ inline void freePB(Buffer* pb) {
     pb->first = pb->segments; \
     pb->last = pb->first-1;
 
+
 /********************************************
     Taut-string functions
 ********************************************/
@@ -295,10 +296,12 @@ int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox
         // Update majorant
         segment.incx = 1;
         segment.slope = segment.incy = signal[i];
+#pragma warning(suppress: 4244)
         concavemajorantadd(majorant, dirsegment, saux, iaux);
         // Update minorant
         segment.incx = 1;
         segment.slope = segment.incy = signal[i];
+#pragma warning(suppress: 4244)
         convexminorantadd(minorant, dirsegment, saux, iaux);
         // Update last explored point
         lastexplored.x++;
@@ -316,10 +319,12 @@ int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox
     // Update majorant with last segment
     segment.incx = 1;
     segment.slope = segment.incy = signal[n-1] + lam;
+#pragma warning(suppress: 4244)
     concavemajorantadd(majorant, dirsegment, saux, iaux);
     // Update minorant with last segment
     segment.incx = 1;
     segment.slope = segment.incy = signal[n-1] - lam;
+#pragma warning(suppress: 4244)
     convexminorantadd(minorant, dirsegment, saux, iaux);
 
     // At this point, because the endpoint of the tube is the same
