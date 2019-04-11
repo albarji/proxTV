@@ -170,11 +170,7 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         #endif
         d = int(dims[0]-1);
         /* Run 1-dimensional prox operator over each 1-dimensional slice along the specified dimension (parallelized) */
-#ifdef DEBUG
-        #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,p,lambdas,z,norms,DEBUG_FILE) private(j,k,idx1,idx2) default(none)
-#else
         #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,p,lambdas,z,norms) private(j,k,idx1,idx2) default(none)
-#endif
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -190,16 +186,6 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
                 /* Construct slice */
                 for(k=0,idx2=0 ; k<ns[d] ; k++,idx2+=incs[d])
                     wsi->in[k] = x[idx1+idx2]+p[idx1+idx2];
-
-                #ifdef DEBUG
-                {
-                    int dbgi;
-                    fprintf(DEBUG_FILE,"Slice %d: ",j);
-                    for(dbgi=0;dbgi<ns[d];dbgi++)
-                        fprintf(DEBUG_FILE,"%lf ",wsi->in[dbgi]);
-                    fprintf(DEBUG_FILE,"\n");
-                }
-                #endif
 
                 /* Apply 1-dimensional solver */
                 resetWorkspace(wsi);
@@ -218,17 +204,10 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
         /* Prox step for the second penalty term (if any) */
         if(npen >= 2){
-            #ifdef DEBUG
-                fprintf(DEBUG_FILE,"··········Penalty 1··········\n");
-            #endif
             d = int(dims[1]-1);
 
             /* Run 1-dimensional prox operator over each 1-dimensional slice along the specified dimension (parallelized) */
-#ifdef DEBUG
-            #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,q,lambdas,z,norms,DEBUG_FILE) private(j,k,idx1,idx2) default(none)
-#else
             #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,q,lambdas,z,norms) private(j,k,idx1,idx2) default(none)
-#endif
             {
                 /* Get thread number */
                 int id = omp_get_thread_num();
@@ -244,16 +223,6 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
                     /* Construct slice */
                     for(k=0,idx2=0 ; k<ns[d] ; k++,idx2+=incs[d])
                         wsi->in[k] = z[idx1+idx2] + q[idx1+idx2];
-
-                    #ifdef DEBUG
-                    {
-                        int dbgi;
-                        fprintf(DEBUG_FILE,"Slice %d: ",j);
-                        for(dbgi=0;dbgi<ns[d];dbgi++)
-                            fprintf(DEBUG_FILE,"%lf ",wsi->in[dbgi]);
-                        fprintf(DEBUG_FILE,"\n");
-                    }
-                    #endif
 
                     /* Apply 1-dimensional solver */
                     resetWorkspace(wsi);
@@ -295,9 +264,6 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
     /* Termination check */
     if(iters >= MAX_ITERS_PD){
-        #ifdef DEBUG
-            fprintf(DEBUG_FILE,"(PD2_TV) WARNING: maximum number of iterations reached (%d).\n",MAX_ITERS_PD);
-        #endif
         if(info) info[INFO_RC] = RC_ITERS;
     }
     else if(info) info[INFO_RC] = RC_OK;
