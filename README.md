@@ -12,7 +12,7 @@
 |[![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)|[![Build Status](https://travis-ci.org/albarji/proxTV.svg?branch=master)](https://travis-ci.org/albarji/proxTV)[(!)](#notes-on-mac-os-x)|Not supported (yet)|
 
 
-**proxTV** is a toolbox implementing blazing fast implementations of Total Variation proximity operators, which form the basic building blocks for applications such as image denoising, image deconvolution, image inpainting, video denoising, or fused lasso models, to name a few. While the core algorithms are implemented in C to achieve top efficiency, Matlab and Python interfaces are provided for ease of use.
+**proxTV** is a toolbox implementing blazing fast implementations of Total Variation proximity operators, which form the basic building blocks for applications such as image denoising, image deconvolution, image inpainting, video denoising, or fused lasso models, to name a few. While the core algorithms are implemented in C to achieve top efficiency, Matlab, GNU Octave and Python interfaces are provided for ease of use.
 
 Some examples of applications using **proxTV**:
 
@@ -76,11 +76,11 @@ for direct access to all the package routines.
     
 The documentation of use of the package functions is maintained online at http://pythonhosted.org/prox_tv/.
 
-## Matlab interface
+## Matlab or GNU Octave interface
 
 ### Quick start guide
 
-To install proxTV clone this repository and run `install` at the Matlab prompt once located at proxTV folder. If any problem arises please refer to the "Installation" subsection.
+To install proxTV clone this repository and run `install` at the Matlab prompt (or `install_octave` at the Octave prompt) once located at proxTV folder. If any problem arises please refer to the "Installation" subsection.
 
 After that the TV solver can be invoked easily through the general purpose "TV" function. For instance,
 
@@ -100,8 +100,8 @@ To install proxTV follow the steps:
 
 1. Open Matlab.
 2. Change directory to the folder where this README file is located.
-3. Type: "install"
-4. After compilation the message "proxTV successfully installed" will appear. If instead an error message shows up, check your mex compiler configuration (type "mex -setup"). If the error was produced by the "openmp" library, you might need to install it, or you can install proxTV with no multi-thread features by typing "install(1)". 
+3. Type: `install` (or `install_octave`)
+4. After compilation the message "proxTV successfully installed" will appear. If instead an error message shows up, check your mex compiler configuration (type `mex -setup`). If the error was produced by the "openmp" library, you might need to install it, or you can install proxTV with no multi-thread features by typing `install(1)` (or `install_octave(1)`). 
 5. The install script automatically adds the relevant proxTV folders to your Matlab path. If this were to fail for some reason, you should manually add the /matlab subfolder to your Matlab path. You can do this e.g. by using the "pathtool()" utility. You may also add the /matlab/demos subfolder to try out the included demos.
 
 *Note*: this interface has only been tested under Linux. Installation might require LAPACK (http://www.netlib.org/lapack/) and BLAS (http://www.netlib.org/blas/) libraries.
