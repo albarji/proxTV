@@ -30,7 +30,11 @@ function install_octave(nopar)
     CXXFLAGSorig = CXXFLAGS;
     LDFLAGSorig = LDFLAGS;
 
-    CXXFLAGS = [CXXFLAGS ' -fPIC -DOCTAVE'];
+    % CXXFLAGS = [CXXFLAGS ' -fPIC -DOCTAVE'];
+    % some octave versions keep intermediate object files; these must be
+    % destroyed to avoid multiple definitions of mexFunction()
+    % -z muldefs might still be needed in some versions
+    CXXFLAGS = [CXXFLAGS ' -fPIC -DOCTAVE -z muldefs'];
 
     if nopar == 0
         CXXFLAGS = [CXXFLAGS ' -O3 -fopenmp'];
@@ -82,7 +86,10 @@ function install_octave(nopar)
             eval(['mex -v -DDEBUG -lblas -llapack -lm' solver{:} ...
                 '.cpp "*.o"']);
         end
-        system(['rm -f ' solver{:} '.o']); % some versions keep the object file
+        % some octave versions keep the object files; these must be destroyed
+        % here to avoid multiple definitions of mexFunction()
+        % -z muldefs might still be needed in some versions
+        system(['rm -f ' solver{:} '.o']); 
     end
     clear *.mex
     system('rm -f *.o');
