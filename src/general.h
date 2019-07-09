@@ -16,20 +16,24 @@
 #include <limits.h>
 
 /* Mex and LAPACK includes */
+#ifdef OCTAVE
+    #include "mex.h"
+    #define NOMATLAB
+#endif
 #ifdef NOMATLAB
-#undef lapack_int
-#define lapack_int              int
-extern "C" {
-    void dpttrs_(lapack_int* n, lapack_int* nrhs, const double* d, const double* e, double* b, lapack_int* ldb,
-                 lapack_int *info );
-    void dpttrf_( lapack_int* n, double* d, double* e, lapack_int *info );
-}
-inline double mxGetInf() { return INFINITY; }
+    #undef lapack_int
+    #define lapack_int              int
+    extern "C" {
+        void dpttrs_(lapack_int* n, lapack_int* nrhs, const double* d, const double* e, double* b, lapack_int* ldb,
+                     lapack_int *info );
+        void dpttrf_( lapack_int* n, double* d, double* e, lapack_int *info );
+    }
+    inline double mxGetInf() { return INFINITY; }
 #else
-#include "mex.h"
-#include "lapack.h"
-#include "matrix.h"
-#define lapack_int  ptrdiff_t
+    #include "mex.h"
+    #include "lapack.h"
+    #include "matrix.h"
+    #define lapack_int  ptrdiff_t
 #endif
 
 /* Uncomment to print debug messages to a debug file */
