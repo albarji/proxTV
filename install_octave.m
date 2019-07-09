@@ -30,11 +30,7 @@ function install_octave(nopar)
     CXXFLAGSorig = CXXFLAGS;
     LDFLAGSorig = LDFLAGS;
 
-    % CXXFLAGS = [CXXFLAGS ' -fPIC -DOCTAVE'];
-    % some octave versions keep intermediate object files; these must be
-    % destroyed to avoid multiple definitions of mexFunction()
-    % -z muldefs might still be needed in some versions
-    CXXFLAGS = [CXXFLAGS ' -fPIC -DOCTAVE -z muldefs'];
+    CXXFLAGS = [CXXFLAGS ' -fPIC -DOCTAVE'];
 
     if nopar == 0
         CXXFLAGS = [CXXFLAGS ' -O3 -fopenmp'];
@@ -59,12 +55,15 @@ function install_octave(nopar)
     setenv('LDFLAGS', LDFLAGS);
 
     %% Compile C modules
-    mex -v -c ../src/TVgenopt.cpp ../src/TVL1opt.cpp ../src/TVL1Wopt.cpp ...
-        ../src/TVL2opt.cpp ../src/TVLPopt.cpp ../src/TV2Dopt.cpp ...
-        ../src/TV2DWopt.cpp ../src/TVNDopt.cpp ../src/LPopt.cpp ...
-        ../src/utils.cpp ../src/condat_fast_tv.cpp ../src/johnsonRyanTV.cpp ...
-        ../src/TVL1opt_tautstring.cpp ../src/TVL1opt_hybridtautstring.cpp ...
-        ../src/TVL1opt_kolmogorov.cpp
+    deps = {'TVgenopt', 'TVL1opt', 'TVL1Wopt', 'TVL2opt', 'TVLPopt', ...
+        'TV2Dopt', 'TV2DWopt', 'TVNDopt', 'LPopt', 'utils', ...
+        'condat_fast_tv', 'johnsonRyanTV', 'TVL1opt_tautstring', ...
+        'TVL1opt_hybridtautstring', 'TVL1opt_kolmogorov'};
+    deps_obj = '';
+    for dep=deps
+        eval(['mex -v -c ../src/' dep{:} '.cpp']); % compile dependency
+        deps_obj = [deps_obj ' ' dep{:} '.o']; % create list of object files
+    end
 
     fprintf('\n');
 
@@ -79,20 +78,19 @@ function install_octave(nopar)
         'solveTV3D_Yang', 'solveTVND_PDR', 'solveTVp_GPFW', 'solveTV'};
     for solver=solvers
         if nopar == 0 || nopar == 1
-            eval(['mex -v -lblas -llapack -lm ' solver{:} '.cpp "*.o"']);
+            eval(['mex -v -lblas -llapack -lm ' solver{:} '.cpp ' deps_obj]);
         elseif nopar == 2
-            eval(['mex -v -lmwlapack -lm ' solver{:} '.cpp "*.o"']);
+            eval(['mex -v -lmwlapack -lm ' solver{:} '.cpp ' deps_obj]);
         else
             eval(['mex -v -DDEBUG -lblas -llapack -lm' solver{:} ...
-                '.cpp "*.o"']);
+                '.cpp ' deps_obj]);
         end
         % some octave versions keep the object files; these must be destroyed
         % here to avoid multiple definitions of mexFunction()
-        % -z muldefs might still be needed in some versions
         system(['rm -f ' solver{:} '.o']); 
     end
-    clear *.mex
-    system('rm -f *.o');
+    clear *.mex % update mex function in octave workspace
+    system('rm -f *.o'); % remove dependencies object files
 
     cd ..
 
