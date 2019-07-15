@@ -70,7 +70,7 @@ else()
 endif()
 
 # OpenMP
-if(OpenMP_CXX_FOUND)
+if(OpenMP_CXX_FOUND AND NOT MSVC)
     # target_compile_definitions(proxTV PRIVATE _OPENMP)
     target_link_libraries(proxTV PRIVATE OpenMP::OpenMP_CXX)
 endif()
