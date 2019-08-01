@@ -290,7 +290,7 @@ int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox
 
     // Iterate along the signal length
     Segment *saux;
-    int i, iaux;
+    size_t i, iaux;
     double *pwriter = prox;
     for ( i = 1 ; i < n-1 ; i++ ) {
         // Update majorant
