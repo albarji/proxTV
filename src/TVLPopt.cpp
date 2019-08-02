@@ -228,13 +228,17 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         while(stop < STOP_TVLP){
             /* If met, move to following lambda step, if any */
             lambdaStep++;
+            // Avoid divide by zero
+            #if LAMBDA_STEPS_TVLP > 1
             if(lambdaStep < LAMBDA_STEPS_TVLP){
-#pragma warning(suppress: 4723)
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
                 GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
             }
             else break;
+            #else
+            break;
+            #endif
         }
 
         #ifdef TIMING
@@ -521,13 +525,16 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
         while(stop < STOP_TVLP){
             /* If met, move to following lambda step, if any */
             lambdaStep++;
+            #if LAMBDA_STEPS_TVLP > 1
             if(lambdaStep < LAMBDA_STEPS_TVLP){
-#pragma warning(suppress: 4723)
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
                 GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
             }
             else break;
+            #else
+            break;
+            #endif
         }
 
         #ifdef TIMING
@@ -815,13 +822,16 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
         while(stop < STOP_TVLP){
             /* If met, move to following lambda step, if any */
             lambdaStep++;
+            #if LAMBDA_STEPS_TVLP > 1
             if(lambdaStep < LAMBDA_STEPS_TVLP){
-#pragma warning(suppress: 4723)
                 lambdaCurrent = pow(10, log10(lambdaIni) + lambdaStep * log10(LAMBDA_REDUCTION_TVLP) / ((double)(LAMBDA_STEPS_TVLP-1)) );
                 GRAD2GAP(w,g,stop,lambdaCurrent,p,n,i,tmp)
                 stuck = 0; bestdual = DBL_MAX;
             }
             else break;
+            #else
+            break;
+            #endif
         }
 
         #ifdef TIMING
