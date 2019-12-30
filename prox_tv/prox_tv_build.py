@@ -109,7 +109,7 @@ ffi.set_source(
     define_macros=[('NOMATLAB', 1)],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
-    libraries=['blas', 'lapack'],
+    libraries=['openblas', 'blas', 'lapack', 'gfortran'],
     include_dirs=['/usr/include']
 )
 
