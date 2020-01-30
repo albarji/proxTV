@@ -57,7 +57,12 @@ if(proxTV_USE_LAPACK)
   find_package(LAPACK REQUIRED)
   message(STATUS "Lapack libraries: ${LAPACK_LIBRARIES}")
 else()
-  find_package(Eigen3 REQUIRED)
+  # No need to find Eigen3 if the Eigen3 target exists already.
+  # This happens when a project is fetching Eigen before fetching proxTV with add_subdirectory
+  # Particularly, this allows to build the module inside ITK when Module_TotalVariation is ON
+  if(NOT TARGET Eigen3::Eigen3)
+    find_package(Eigen3 REQUIRED)
+  endif()
   get_target_property(EIGEN_INCLUDE_DIR Eigen3::Eigen
     INTERFACE_INCLUDE_DIRECTORIES)
   message(STATUS "Eigen Found: ${EIGEN_INCLUDE_DIR}")
