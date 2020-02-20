@@ -46,7 +46,13 @@ endif()
 if(NOT DEFINED proxTV_INSTALL_INCLUDE_DIR)
    set(proxTV_INSTALL_INCLUDE_DIR include)
 endif()
+if(NOT DEFINED proxTV_INSTALL_CMAKE_DIR)
+  set(proxTV_INSTALL_CMAKE_DIR ${proxTV_INSTALL_LIB_DIR}/cmake/proxTV)
+endif()
 
+message(STATUS "proxTV_INSTALL_INCLUDE_DIR: ${proxTV_INSTALL_INCLUDE_DIR}")
+message(STATUS "proxTV_INSTALL_LIB_DIR: ${proxTV_INSTALL_LIB_DIR}")
+message(STATUS "proxTV_INSTALL_CMAKE_DIR: ${proxTV_INSTALL_CMAKE_DIR}")
 #------------------------------------------------------------------------------
 # External dependencies
 
@@ -120,7 +126,7 @@ if(proxTV_INSTALL_DEVELOPMENT)
     configure_package_config_file(
         cmake/proxTVConfig.cmake.in
         ${install_config}
-        INSTALL_DESTINATION ${proxTV_INSTALL_LIB_DIR}/cmake/proxTV
+        INSTALL_DESTINATION ${proxTV_INSTALL_CMAKE_DIR}
         NO_CHECK_REQUIRED_COMPONENTS_MACRO
         )
 
@@ -128,14 +134,14 @@ if(proxTV_INSTALL_DEVELOPMENT)
     install(EXPORT proxTVTargets
         FILE proxTVTargets.cmake
         NAMESPACE proxTV::
-        DESTINATION ${proxTV_INSTALL_LIB_DIR}/cmake/proxTV
+        DESTINATION ${proxTV_INSTALL_CMAKE_DIR}
         COMPONENT Development
         )
 
     # Install config files
     install(
         FILES ${config_version_file} ${install_config}
-        DESTINATION ${proxTV_INSTALL_LIB_DIR}/cmake/proxTV
+        DESTINATION ${proxTV_INSTALL_CMAKE_DIR}
         COMPONENT Development
         )
 endif()

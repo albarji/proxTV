@@ -1,7 +1,3 @@
-set(LIB_INSTALL_DIR lib CACHE STRING "Install folder for lib (relative")
-set(INCLUDE_INSTALL_DIR include CACHE STRING "Install folder for headers (relative")
-set(EXECUTABLE_INSTALL_DIR bin CACHE STRING "Install folder for executables (relative")
-
 set(headers
     condat_fast_tv.h
     general.h
@@ -43,12 +39,12 @@ endif()
 file(COPY ${headers}
     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/include")
 install(FILES ${headers}
-    DESTINATION ${INCLUDE_INSTALL_DIR})
+    DESTINATION ${proxTV_INSTALL_INCLUDE_DIR})
 
 target_include_directories(proxTV PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
+    $<INSTALL_INTERFACE:${proxTV_INSTALL_INCLUDE_DIR}>
     )
 
 # Pthreads
@@ -76,10 +72,10 @@ if(OpenMP_CXX_FOUND AND NOT MSVC)
 endif()
 
 install(TARGETS proxTV EXPORT proxTVTargets
-    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
-    RUNTIME DESTINATION ${EXECUTABLE_INSTALL_DIR}
-    INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
+    LIBRARY DESTINATION ${proxTV_INSTALL_LIB_DIR}
+    ARCHIVE DESTINATION ${proxTV_INSTALL_LIB_DIR}
+    RUNTIME DESTINATION ${proxTV_INSTALL_BIN_DIR}
+    INCLUDES DESTINATION ${proxTV_INSTALL_INCLUDE_DIR}
     )
 
 # This saves as to develop a hacky FindproxTV for other to use the library.
@@ -88,7 +84,7 @@ install(TARGETS proxTV EXPORT proxTVTargets
 install(EXPORT proxTVTargets
     FILE proxTVTargets.cmake
     NAMESPACE proxTV::
-    DESTINATION ${LIB_INSTALL_DIR}/cmake/proxTV
+    DESTINATION ${proxTV_INSTALL_CMAKE_DIR}
     )
 
 # Generate and install proxTVConfigVersion.cmake
@@ -99,5 +95,5 @@ write_basic_package_version_file("proxTVConfigVersion.cmake"
     )
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/proxTVConfigVersion.cmake
-    DESTINATION ${LIB_INSTALL_DIR}/cmake/proxTV
+    DESTINATION ${proxTV_INSTALL_CMAKE_DIR}
     )
