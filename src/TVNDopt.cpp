@@ -161,7 +161,7 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
         }
 
         /* Parallelize */
-        #pragma omp parallel shared(ws,nSlices,ns,incs,x,p,lambdas,z,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+        #pragma omp parallel shared(ws,nSlices,ns,incs,x,p,lambdas,z,norms,npen,dims) private(d,i,j,k,idx1,idx2) default(none)
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -169,10 +169,7 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
 
             /* Prox step for every penalty term */
             for(i=0;i<npen;i++){
-                #ifdef DEBUG
-                    fprintf(DEBUG_FILE,"··········Penalty %d··········\n",i);
-                #endif
-                d = dims[i]-1;
+                d = int(dims[i]-1);
 
                 int top=nSlices[d];
                 wsi->warm = 0;
@@ -186,16 +183,6 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
                     /* Construct slice */
                     for(k=0,idx2=0 ; k<ns[d] ; k++,idx2+=incs[d])
                         wsi->in[k] = z[i][idx1+idx2];
-
-                    #ifdef DEBUG
-                    {
-                        int dbgi;
-                        fprintf(DEBUG_FILE,"Slice %d: ",j);
-                        for(dbgi=0;dbgi<ns[d];dbgi++)
-                            fprintf(DEBUG_FILE,"%lf ",wsi->in[dbgi]);
-                        fprintf(DEBUG_FILE,"\n");
-                    }
-                    #endif
 
                     /* Apply 1-dimensional solver */
                     resetWorkspace(wsi);
@@ -237,9 +224,6 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
 
     /* Termination check */
     if(iters >= MAX_ITERS_PD){
-        #ifdef DEBUG
-            fprintf(DEBUG_FILE,"(PD_TV) WARNING: maximum number of iterations reached (%d).\n",MAX_ITERS_PD);
-        #endif
         if(info) info[INFO_RC] = RC_ITERS;
     }
     else if(info) info[INFO_RC] = RC_OK;
@@ -397,7 +381,7 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         }
 
         /* Parallelize */
-#pragma omp parallel shared(ws,nSlices,ns,incs,x,p,q,lambdas,z,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+#pragma omp parallel shared(ws,nSlices,ns,incs,x,p,q,lambdas,z,norms,npen,dims) private(d,i,j,k,idx1,idx2) default(none)
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -405,10 +389,7 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
             /* Prox step for every penalty term */
             for(i=0;i<npen;i++){
-                #ifdef DEBUG
-                    fprintf(DEBUG_FILE,"··········Penalty %d··········\n",i);
-                #endif
-                d = dims[i]-1;
+                d = int( dims[i]-1);
 
                 int top=nSlices[d];
                 wsi->warm = 0;
@@ -422,16 +403,6 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
                     /* Construct slice */
                     for(k=0,idx2=0 ; k<ns[d] ; k++,idx2+=incs[d])
                         wsi->in[k] = z[i][idx1+idx2];
-
-                    #ifdef DEBUG
-                    {
-                        int dbgi;
-                        fprintf(DEBUG_FILE,"Slice %d: ",j);
-                        for(dbgi=0;dbgi<ns[d];dbgi++)
-                            fprintf(DEBUG_FILE,"%lf ",wsi->in[dbgi]);
-                        fprintf(DEBUG_FILE,"\n");
-                    }
-                    #endif
 
                     /* Apply 1-dimensional solver */
                     resetWorkspace(wsi);
@@ -485,9 +456,6 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
     /* Termination check */
     if(iters >= MAX_ITERS_DR){
-        #ifdef DEBUG
-            fprintf(DEBUG_FILE,"(PDR_TV) WARNING: maximum number of iterations reached (%d).\n",MAX_ITERS_DR);
-        #endif
         if(info) info[INFO_RC] = RC_ITERS;
     }
     else if(info) info[INFO_RC] = RC_OK;
@@ -596,7 +564,7 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
 
 
     /* Parallelize calculation of value */
-    #pragma omp parallel shared(x,ws,nSlices,ns,incs,lambdas,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+    #pragma omp parallel shared(x,ws,nSlices,ns,incs,lambdas,norms,npen,dims) private(d,i,j,k,idx1,idx2) default(none)
     {
         /* Get thread number */
         int id = omp_get_thread_num();
@@ -608,10 +576,7 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
 
         /* Value for every penalty term */
         for(i=0;i<npen;i++){
-            #ifdef DEBUG
-                fprintf(DEBUG_FILE,"··········Penalty %d··········\n",i);
-            #endif
-            d = dims[i]-1;
+            d = int(dims[i]-1);
 
             int top=nSlices[d];
 
@@ -678,7 +643,8 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
 int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, int maxit, double* info) {
     double *U1 = NULL, *U2 = NULL, *U3 = NULL, *Z1 = NULL, *Z2 = NULL, *Z3 = NULL;
     double rho;
-    int i, j, k, idx;
+    size_t i, j, k;
+    size_t idx;
     Workspace *ws = NULL;
 
     #define FREE \
@@ -700,8 +666,9 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
     rho = 10;
 
     // Alloc memory
-    int size = (M > N) ? M : N; size = (O > size) ? O : size;
-    int totalSize = M*N*O;
+    size_t size_long = (M > N) ? M : N ; size_long = (O > size_long) ? O : size_long;
+    int size = int(size_long);
+    size_t totalSize = M*N*O;
     U1 = (double*)calloc(totalSize,sizeof(double));
     U2 = (double*)calloc(totalSize,sizeof(double));
     U3 = (double*)calloc(totalSize,sizeof(double));
@@ -738,7 +705,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[k] = -1. / rho * U1[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, M, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, (int) M, 1, ws);
                 // Recover data
                 memcpy(Z1 + M * ( i + N * j ), ws->out, sizeof(double)*M);
             }
@@ -753,7 +720,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[i] = -1. / rho * U2[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, N, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, (int) N, 1, ws);
                 // Recover data
                 for ( i = 0 ; i < N ; i++ ) {
                     idx = k + M * ( i + N * j );
@@ -771,7 +738,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[j] = -1. / rho * U3[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, O, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, (int) O, 1, ws);
                 // Recover data
                 for ( j = 0 ; j < O ; j++ ) {
                     idx = k + M * ( i + N * j );

@@ -1,0 +1,17 @@
+@PACKAGE_INIT@
+
+set_and_check(proxTV_TARGETS "${CMAKE_CURRENT_LIST_DIR}/proxTVTargets.cmake")
+
+if(NOT TARGET proxTV::proxTV)
+  include(${proxTV_TARGETS})
+endif()
+
+include(CMakeFindDependencyMacro)
+if(@proxTV_USE_LAPACK@)
+  find_dependency(LAPACKE)
+  find_dependency(LAPACK)
+else()
+  find_dependency(Eigen3)
+endif()
+find_dependency(OpenMP)
+find_dependency(Threads)

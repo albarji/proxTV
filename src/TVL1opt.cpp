@@ -36,10 +36,12 @@
 */
 int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Workspace *ws){
     int i,ind,nI,recomp,found,iters,nn=n-1;
-    double lambdaMax,tmp,fval0,fval1,gRd,delta,grad0,stop,stopPrev,improve,rhs,maxStep,prevDelta;
+    double lambdaMax,tmp,fval0,fval1,gRd,delta,stop,stopPrev,improve,rhs,prevDelta;
+    double grad0 = 0;
+    double maxStep = -DBL_MAX;
     double *w=NULL,*g=NULL,*d=NULL,*aux=NULL,*aux2=NULL;
     int *inactive=NULL;
-    lapack_int one=1,rc,nnp=nn,nIp;
+    lapack_int nnp=nn,nIp;
 
     /* Macros */
 
@@ -112,9 +114,15 @@ int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Wor
         aux2[i] = -1;
     }
     aux[nn-1] = 2;
+#ifdef PROXTV_USE_LAPACK
+    lapack_int one;
+    lapack_int rc;
     dpttrf_(&nnp,aux,aux2,&rc);
     /* Solve Choleski-like linear system to obtain unconstrained solution */
     dpttrs_(&nnp, &one, aux, aux2, w, &nnp, &rc);
+#else
+    dpttrf_plus_dpttrs_eigen(&nnp, aux, aux2, w);
+#endif
 
     /* Compute maximum effective penalty */
     lambdaMax = 0;
@@ -184,20 +192,24 @@ int PN_TV1(double *y,double lambda,double *x,double *info,int n,double sigma,Wor
             fprintf(DEBUG_FILE,"alpha=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",aux[i]); fprintf(DEBUG_FILE,"]\n");
             fprintf(DEBUG_FILE,"beta=["); for(i=0;i<nI-1;i++) fprintf(DEBUG_FILE,"%lf ",aux2[i]); fprintf(DEBUG_FILE,"]\n");
         #endif
+
         /* Factorize reduced Hessian */
         nIp = nI;
-        dpttrf_(&nIp,aux,aux2,&rc);
-        #ifdef DEBUG
-            fprintf(DEBUG_FILE,"c=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",aux[i]); fprintf(DEBUG_FILE,"]\n");
-            fprintf(DEBUG_FILE,"l=["); for(i=0;i<nI-1;i++) fprintf(DEBUG_FILE,"%lf ",aux2[i]); fprintf(DEBUG_FILE,"]\n");
-        #endif
 
-        /* Solve Choleski-like linear system to obtain Newton updating direction */
         for(i=0;i<nI;i++)
             d[i] = g[inactive[i]];
+
+#ifdef PROXTV_USE_LAPACK
+        dpttrf_(&nIp,aux,aux2,&rc);
+        /* Solve Choleski-like linear system to obtain Newton updating direction */
         dpttrs_(&nIp, &one, aux, aux2, d, &nIp, &rc);
+#else
+        dpttrf_plus_dpttrs_eigen(&nIp, aux, aux2, d);
+#endif
         #ifdef DEBUG
-            fprintf(DEBUG_FILE,"d=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",d[i]); fprintf(DEBUG_FILE,"]\n");
+        fprintf(DEBUG_FILE,"c=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",aux[i]); fprintf(DEBUG_FILE,"]\n");
+        fprintf(DEBUG_FILE,"l=["); for(i=0;i<nI-1;i++) fprintf(DEBUG_FILE,"%lf ",aux2[i]); fprintf(DEBUG_FILE,"]\n");
+        fprintf(DEBUG_FILE,"d=["); for(i=0;i<nI;i++) fprintf(DEBUG_FILE,"%lf ",d[i]); fprintf(DEBUG_FILE,"]\n");
         #endif
 
         /* Stepsize selection algorithm (quadratic interpolation) */

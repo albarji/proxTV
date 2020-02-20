@@ -36,7 +36,7 @@ int more_TV2(double *y,double lambda,double *x,double *info,int n){
     int nn=n-1,i;
     double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy,*alpha,*beta,*minus,*p,*aux;
-    lapack_int one=1,rc,nnp=nn;
+    lapack_int nnp=nn;
 
     /* Macros */
 
@@ -101,13 +101,19 @@ int more_TV2(double *y,double lambda,double *x,double *info,int n){
         for(i=0;i<nn;i++)
             alpha[i] = tmp;
         memcpy((void*)beta,(void*)minus,sizeof(double)*(nn-1));
+        memcpy((void*)aux,(void*)Dy,sizeof(double)*nn);
 
+
+#ifdef PROXTV_USE_LAPACK
+        lapack_int one = 1;
+        lapack_int rc;
         /* Compute tridiagonal factorization of Hessian */
         dpttrf_(&nnp,alpha,beta,&rc);
-
         /* Obtain p by solving Cholesky system */
-        memcpy((void*)aux,(void*)Dy,sizeof(double)*nn);
         dpttrs_(&nnp, &one, alpha, beta, aux, &nnp, &rc);
+#else
+        dpttrf_plus_dpttrs_eigen(&nnp, alpha, beta, aux);
+#endif
         memcpy((void*)p,(void*)aux,sizeof(double)*nn);
         pNorm = 0; for(i=0;i<nn;i++) pNorm += aux[i]*aux[i];
         pNormSq = sqrt(pNorm);
@@ -191,7 +197,7 @@ int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *w
     int nn=n-1,i,iters;
     double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy=NULL,*alpha=NULL,*beta=NULL,*minus=NULL,*p,*aux;
-    lapack_int one=1,rc,nnp=nn;
+    lapack_int nnp=nn;
 
     /* Macros */
 
@@ -347,13 +353,18 @@ int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *w
         for(i=0;i<nn;i++)
             alpha[i] = tmp;
         memcpy((void*)beta,(void*)minus,sizeof(double)*(nn-1));
+        memcpy((void*)aux,(void*)Dy,sizeof(double)*nn);
 
+#ifdef PROXTV_USE_LAPACK
+        lapack_int one = 1;
+        lapack_int rc;
         /* Compute tridiagonal factorization of Hessian */
         dpttrf_(&nnp,alpha,beta,&rc);
-
         /* Obtain p by solving Cholesky system */
-        memcpy((void*)aux,(void*)Dy,sizeof(double)*nn);
         dpttrs_(&nnp, &one, alpha, beta, aux, &nnp, &rc);
+#else
+        dpttrf_plus_dpttrs_eigen(&nnp, alpha, beta, aux);
+#endif
         memcpy((void*)p,(void*)aux,sizeof(double)*nn);
         pNorm = 0; for(i=0;i<nn;i++) pNorm += aux[i]*aux[i];
         pNormSq = sqrt(pNorm);

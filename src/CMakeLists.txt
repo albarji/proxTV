@@ -1,0 +1,99 @@
+set(headers
+    condat_fast_tv.h
+    general.h
+    johnsonRyanTV.h
+    lapackFunctionsWrap.h
+    LPopt.h
+    TVmacros.h
+    TVopt.h
+    utils.h
+    )
+
+set(sources
+    condat_fast_tv.cpp
+    johnsonRyanTV.cpp
+    lapackFunctionsWrap.cpp
+    LPopt.cpp
+    TV2Dopt.cpp
+    TV2DWopt.cpp
+    TVgenopt.cpp
+    TVL1opt.cpp
+    TVL1opt_hybridtautstring.cpp
+    TVL1opt_kolmogorov.cpp
+    TVL1opt_tautstring.cpp
+    TVL1Wopt.cpp
+    TVL2opt.cpp
+    TVLPopt.cpp
+    TVNDopt.cpp
+    utils.cpp
+    )
+
+add_library(proxTV ${sources})
+set_target_properties(proxTV PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
+target_compile_definitions(proxTV PUBLIC NOMATLAB)
+if(proxTV_USE_LAPACK)
+    target_compile_definitions(proxTV PUBLIC PROXTV_USE_LAPACK)
+endif()
+
+# Create directory with headers at build and install time.
+file(COPY ${headers}
+    DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/include")
+install(FILES ${headers}
+    DESTINATION ${proxTV_INSTALL_INCLUDE_DIR})
+
+target_include_directories(proxTV PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${proxTV_INSTALL_INCLUDE_DIR}>
+    )
+
+# Pthreads
+target_link_libraries(proxTV PUBLIC
+    ${CMAKE_THREAD_LIBS_INIT}
+    )
+
+# Lapacke, Lapack
+if(proxTV_USE_LAPACK)
+    target_include_directories(proxTV PUBLIC
+    ${LAPACKE_INCLUDE_DIRS}
+    )
+    target_link_libraries(proxTV PUBLIC
+        ${LAPACK_LIBRARIES}
+        ${LAPACKE_LIBRARIES}
+        )
+else()
+    target_link_libraries(proxTV PUBLIC Eigen3::Eigen)
+endif()
+
+# OpenMP
+if(OpenMP_CXX_FOUND AND NOT MSVC)
+    # target_compile_definitions(proxTV PRIVATE _OPENMP)
+    target_link_libraries(proxTV PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
+install(TARGETS proxTV EXPORT proxTVTargets
+    LIBRARY DESTINATION ${proxTV_INSTALL_LIB_DIR}
+    ARCHIVE DESTINATION ${proxTV_INSTALL_LIB_DIR}
+    RUNTIME DESTINATION ${proxTV_INSTALL_BIN_DIR}
+    INCLUDES DESTINATION ${proxTV_INSTALL_INCLUDE_DIR}
+    )
+
+# This saves as to develop a hacky FindproxTV for other to use the library.
+# A regular find_package(proxTV) will look for these targets.
+# It needs an extra proxTVConfig.cmake to handle dependencies (provided in cmake directory)
+install(EXPORT proxTVTargets
+    FILE proxTVTargets.cmake
+    NAMESPACE proxTV::
+    DESTINATION ${proxTV_INSTALL_CMAKE_DIR}
+    )
+
+# Generate and install proxTVConfigVersion.cmake
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("proxTVConfigVersion.cmake"
+    VERSION ${proxTV_VERSION}
+    COMPATIBILITY SameMajorVersion
+    )
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/proxTVConfigVersion.cmake
+    DESTINATION ${proxTV_INSTALL_CMAKE_DIR}
+    )

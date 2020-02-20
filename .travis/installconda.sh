@@ -22,6 +22,7 @@ export PATH="$HOME/miniconda3/bin:$PATH"
 rm miniconda.sh
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
+pip install cmake
 
 # Create environment with specific python version
 conda create -n testenv python=${TRAVIS_PYTHON_VERSION}
