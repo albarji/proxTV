@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <wchar.h>
 #include <time.h>
+#include <iostream>
 #include "TVopt.h"
 #include "TVmacros.h"
 
@@ -192,7 +193,7 @@ int GP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
 
         /* Projection onto lp-ball */
         resetWorkspace(wsinner);
-        if(!PN_LPp(aux,lambdaCurrent,w,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP))
+        if(!PN_LPp(aux,lambdaCurrent,w,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP, NULL, NULL))
             {CANCEL("error when invoking Lp ball projection subroutine",info)}
 
         for(i=0;i<nn;i++) w[i] = aux[i] - w[i];
@@ -476,7 +477,7 @@ int OGP_TVp(double *y,double lambda,double *x,double *info,int n,double p,Worksp
 
         /* Projection onto lp-ball */
         resetWorkspace(wsinner);
-        if(!PN_LPp(aux,lambdaCurrent,z,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP))
+        if(!PN_LPp(aux,lambdaCurrent,z,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP, NULL, NULL))
             {CANCEL("error when invoking Lp ball projection subroutine",info)}
         for(i=0;i<nn;i++) z[i] = aux[i] - z[i];
 
@@ -765,7 +766,7 @@ int FISTA_TVp(double *y,double lambda,double *x,double *info,int n,double p,Work
 
         /* Projection onto lq-ball */
         resetWorkspace(wsinner);
-        if(!PN_LPp(aux,lambdaCurrent,w,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP))
+        if(!PN_LPp(aux,lambdaCurrent,w,info,nn,p,wsinner,0,OBJGAP_LPPROX_TVLP, NULL, NULL))
             {CANCEL("error when invoking Lp ball projection subroutine",info)}
         for(i=0;i<nn;i++) w[i] = aux[i] - w[i];
 
@@ -1107,13 +1108,16 @@ int FW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspa
         - info: array in which to store optimizer information.
         - n: length of array y (and x).
         - p: degree of the TV norm.
+        - objGapTVp: dual gap required by user for the 1D-TVp.
 */
-int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws) {
+int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Workspace *ws, void* ctx_ptr, int (*callback)(const double* s_ptr, size_t s_length, double delta_k, void* ctx_ptr), double objGapTVp){ {
     double *w=NULL,*aux=NULL,*aux2=NULL,*g=NULL;
     double q,tmp,stop,dual,bestdual,lambdaMax,num,den,step;
     int iter,stuck,nn,i,lambdaStep,cycle;
     Workspace *wsinner=NULL;
     lapack_int one=1,rc,nnp;
+
+    /* ADDED NOV 15 BY Nathan Allaire - argument objGapTVp in GPFW_TVp to choose dualGap and modify everything accordingly.*/
 
     /* Problem constants */
     #define Linv 0.25 // Inverse of Lipschitz constant
@@ -1125,7 +1129,9 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
             if(aux2) free(aux2); \
             if(g) free(g); \
         } \
-        freeWorkspace(wsinner);
+        if (wsinner) { \
+            freeWorkspace(wsinner); \
+        }
 
     #define CANCEL(txt,info) \
         printf("GPFW_TVp: %s\n",txt); \
@@ -1229,13 +1235,16 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     /* Initial gradient evaluation */
     PRIMAL2GRAD(x,g,i)
 
+    /* initialize output for callback */
+    bool callback_result = false;
+
     /* Start Gradient Projections iterations */
     stop = DBL_MAX; bestdual = DBL_MAX; stuck = 0; cycle = 0;
     /* Stop when one these conditions are met:
         - Maximum number of iterations reached.
         - Dual gap small.
         - Dual gap not improving for a number of iterations. */
-    for(iter=1 ; iter < MAX_ITERS_TVLPGPFW && stop > STOP_TVLP && stuck < MAX_NOIMP_TVLP_GPFW ; iter++, cycle++){
+    for(iter=1 ; iter < MAX_ITERS_TVLPGPFW && !callback_result && stuck < MAX_NOIMP_TVLP_GPFW ; iter++, cycle++){
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(GPFW_TVp) Iter %d, w=[ ",iter);
             for(i=0;i<nn && i<DEBUG_N;i++) fprintf(DEBUG_FILE,"%g ",w[i]);
@@ -1294,7 +1303,7 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
                 tmp = aux2[i] - aux2[i+1];
                 den += tmp * tmp;
             }
-            den += aux2[nn] * aux2[nn];
+            den += aux2[nn-1] * aux2[nn-1];
             step = num / den;
 
             #ifdef DEBUG
@@ -1368,7 +1377,7 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
                 tmp = aux2[i] - aux2[i+1];
                 den += tmp * tmp;
             }
-            den += aux2[nn] * aux2[nn];
+            den += aux2[nn-1] * aux2[nn-1];
             step = stop / den;
 
             #ifdef DEBUG
@@ -1392,7 +1401,7 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
             PRIMAL2GRAD(x,g,i)
 
             /* If surrogate gap is met, check whether the same applies for the real gap */
-            if ( stop <= STOP_TVLP ) {
+            if ( stop <= objGapTVp ) {
                 /* Compute real dual gap */
                 GRAD2GAP(w,g,stop,lambda,p,nn,i)
             }
@@ -1411,6 +1420,11 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
 
         if ( dual < bestdual )
             bestdual = dual;
+
+
+        /* ADDED NOV 26 NATHAN ALLAIRE */
+        /* Call the callback function from Julia */
+        callback_result = callback(x, n, stop, ctx_ptr);
 
         #ifdef DEBUG
             fprintf(DEBUG_FILE,"(GPFW_TVp) iter %d gap=%lf, dual=%lf, bestdual=%lf\n",iter,stop,dual,bestdual); fflush(DEBUG_FILE); fflush(stdout);
@@ -1445,6 +1459,7 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     }
 
     /* Free resources and return */
+    /* wsinner = NULL; ADDED Sept 20, 2024. wsinner is already freed in PN_LP at line 1273 then not reused. If freed twice, this causes double-free bug. */
     FREE
     return 1;
 
@@ -1453,4 +1468,4 @@ int GPFW_TVp(double *y,double lambda,double *x,double *info,int n,double p,Works
     #undef CANCEL
     #undef GRAD2GAP
 }
-
+}

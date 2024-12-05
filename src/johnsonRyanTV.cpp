@@ -3,6 +3,10 @@
 
 using namespace std;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Dynamic programming algorithm for the 1d fused lasso problem
 // (Ryan's implementation of Nick Johnson's algorithm)
 
@@ -115,3 +119,6 @@ void dp(int n, double *y, double lam, double *beta) {
   free(tp);
 }
 
+#ifdef __cplusplus
+}
+#endif

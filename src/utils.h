@@ -36,17 +36,15 @@ typedef struct {
 /* Workspace defines */
 #define WS_MAX_MEMORIES 100
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*** Module functions ***/
 
 /* Math functions */
 short sign(double s);
-#ifdef min
-    #undef min
-#endif
 double min(double x, double y);
-#ifdef max
-    #undef max
-#endif
 double max(double x, double y);
 void radialProjection(double *x, int n, double norm, double lambda);
 
@@ -61,5 +59,9 @@ void freeWorkspaces(Workspace **wa,int p);
 
 /* Other utility functions */
 int compareDoublesReversed(const void *v1, const void *v2);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

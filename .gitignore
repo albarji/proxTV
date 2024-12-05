@@ -14,3 +14,11 @@ prox_tv.egg-info
 .coverage
 .idea
 wheelhouse
+*.so
+*.dSYM/
+main
+main.cpp   
+*.o            
+*.DS_Store
+*.dylib
+

@@ -20,6 +20,10 @@
 
 #define LAPACK_ILP64
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*  PD_TV
 
     Given a reference multidimensional signal y and a series of penalty terms P(x,lambda,d,p), solves the generalized Total Variation
@@ -199,7 +203,7 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
 
                     /* Apply 1-dimensional solver */
                     resetWorkspace(wsi);
-                    TV(wsi->in, lambdas[i], wsi->out, NULL, ns[d], norms[i], wsi);
+                    TV(wsi->in, lambdas[i], wsi->out, NULL, ns[d], norms[i], wsi, NULL, NULL);
 
                     /* Plug solution back */
                     for(k=0,idx2=0 ; k<ns[d] ; k++,idx2+=incs[d])
@@ -738,7 +742,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[k] = -1. / rho * U1[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, M, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, M, 1, ws, NULL, NULL);
                 // Recover data
                 memcpy(Z1 + M * ( i + N * j ), ws->out, sizeof(double)*M);
             }
@@ -753,7 +757,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[i] = -1. / rho * U2[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, N, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, N, 1, ws, NULL, NULL);
                 // Recover data
                 for ( i = 0 ; i < N ; i++ ) {
                     idx = k + M * ( i + N * j );
@@ -771,7 +775,7 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
                     ws->in[j] = -1. / rho * U3[idx] + X[idx];
                 }
                 resetWorkspace(ws);
-                TV(ws->in, lambda/rho, ws->out, NULL, O, 1, ws);
+                TV(ws->in, lambda/rho, ws->out, NULL, O, 1, ws, NULL, NULL);
                 // Recover data
                 for ( j = 0 ; j < O ; j++ ) {
                     idx = k + M * ( i + N * j );
@@ -802,3 +806,6 @@ int Yang3_TV(size_t M, size_t N, size_t O, double*Y, double lambda, double*X, in
     #undef CANCEL
 }
 
+#ifdef __cplusplus
+}
+#endif

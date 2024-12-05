@@ -20,9 +20,13 @@
 #define LAPACK_ILP64
 
 /* Internal functions */
-void DR_proxDiff(size_t n, double* input, double* output, double W, double norm, Workspace *ws);
-void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W, double norm, Workspace **ws);
-void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref, double W, double norm, Workspace **ws);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void DR_proxDiff_2D(size_t n, double* input, double* output, double W, double norm, Workspace *ws);
+void DR_columnsPass_2D(size_t M, size_t N, double* input, double* output, double W, double norm, Workspace **ws);
+void DR_rowsPass_2D(size_t M, size_t N, double* input, double* output, double* ref, double W, double norm, Workspace **ws);
 
 /* Internal definitions */
 #define ALG_CONDAT 0
@@ -199,7 +203,7 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
                 /* Apply 1-dimensional solver */
                 resetWorkspace(wsi);
-                TV(wsi->in, lambdas[0], wsi->out, NULL, ns[d], norms[0], wsi);
+                TV(wsi->in, lambdas[0], wsi->out, NULL, ns[d], norms[0], wsi, NULL, NULL);
 
                 /* Plug solution back */
                 for(k=0,idx2=0 ; k<ns[d] ; k++,idx2+=incs[d])
@@ -249,7 +253,7 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
                     /* Apply 1-dimensional solver */
                     resetWorkspace(wsi);
-                    TV(wsi->in, lambdas[1], wsi->out, NULL, ns[d], norms[1], wsi);
+                    TV(wsi->in, lambdas[1], wsi->out, NULL, ns[d], norms[1], wsi, NULL, NULL);
 
                     /* Plug solution back */
                     for(k=0,idx2=0 ; k<ns[d] ; k++,idx2+=incs[d])
@@ -406,7 +410,7 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
         fprintf(DEBUG_FILE,"Reflection along columns\n"); fflush(DEBUG_FILE);
     #endif
     // Projection for B_{cols}
-    DR_columnsPass(M, N, t, s, W1, norm1, ws);
+    DR_columnsPass_2D(M, N, t, s, W1, norm1, ws);
     // Reflection for B_{cols}
     for (i=0; i < M*N; i++) s[i] = 2*s[i] - t[i];
 
@@ -414,7 +418,7 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
         fprintf(DEBUG_FILE,"Dual projection along rows\n"); fflush(DEBUG_FILE);
     #endif
     // Projection for B_{-rows*}
-    DR_rowsPass(M, N, s, tb, unary, W2, norm2, ws);
+    DR_rowsPass_2D(M, N, s, tb, unary, W2, norm2, ws);
     // Reflection for B_{-rows*}
     for (i=0; i < M*N; i++) tb[i] = 2*tb[i] - s[i];
 
@@ -424,9 +428,9 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
 
   // DR is divergent, but with an additional projection we can recover valid solutions
   // Projection for B_{cols}
-  DR_columnsPass(M, N, t, s, W1, norm1, ws);
+  DR_columnsPass_2D(M, N, t, s, W1, norm1, ws);
   // Projection for B_{-rows*}
-  DR_rowsPass(M, N, s, tb, unary, W2, norm2, ws);
+  DR_rowsPass_2D(M, N, s, tb, unary, W2, norm2, ws);
   for (i = 0; i < M*N; i++) s[i] = tb[i] - s[i];
 
     /* Gather output information */
@@ -456,7 +460,7 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
     @param norm degree of TV
     @param ws array of Workspaces to use for the computation
 */
-void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W, double norm, Workspace **ws) {
+void DR_columnsPass_2D(size_t M, size_t N, double* input, double* output, double W, double norm, Workspace **ws) {
     #pragma omp parallel shared(M,N,input,output,W,norm,ws) default(none)
     {
         int j;
@@ -473,7 +477,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W,
             // Prepare inputs
             memcpy(wsi->in, input+(M*j), sizeof(double)*M);
             // Compute prox difference for this column
-            DR_proxDiff(M, wsi->in, wsi->out, W, norm, wsi);
+            DR_proxDiff_2D(M, wsi->in, wsi->out, W, norm, wsi);
             // Save output
             memcpy(output+(M*j), wsi->out, sizeof(double)*M);
         }
@@ -495,7 +499,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W,
     @param norm degree of TV
     @param ws array of Workspaces to use for the computation
 */
-void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref, double W, double norm, Workspace **ws) {
+void DR_rowsPass_2D(size_t M, size_t N, double* input, double* output, double* ref, double W, double norm, Workspace **ws) {
     #pragma omp parallel shared(M,N,input,ref,output,W,norm,ws) default(none)
     {
         int i,j;
@@ -514,7 +518,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
             for ( idx = j, i = 0 ; i < N ; i++, idx+=M )
                 wsi->in[i] = ref[idx]-input[idx];
             // Compute prox difference for this row
-            DR_proxDiff(N, wsi->in, wsi->out, W, norm, wsi);
+            DR_proxDiff_2D(N, wsi->in, wsi->out, W, norm, wsi);
             // Save output, recovering displacement from reference signal
             for ( idx = j, i = 0 ; i < N ; i++, idx+=M )
                 output[idx] = ref[idx] - wsi->out[i];
@@ -536,11 +540,11 @@ difference between input and output of prox.
  @param norm degree of TV
  @param ws Workspace to use for the computation
  */
-void DR_proxDiff(size_t n, double* input, double* output, double W, double norm, Workspace *ws) {
+void DR_proxDiff_2D(size_t n, double* input, double* output, double W, double norm, Workspace *ws) {
     int i;
 
     // Compute proximity
-    TV(input, W, output, NULL, n , norm, NULL);
+    TV(input, W, output, NULL, n , norm, NULL, NULL, NULL);
     // Return differences between input and proximity output
     for (i=0; i < n; i++)
       output[i] = input[i] - output[i];
@@ -838,7 +842,7 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
             for ( j = 0 ; j < N ; j++ )
                 ws->in[j] = -1. / rho * U1[j*M+i] + X[j*M+i];
             resetWorkspace(ws);
-            TV(ws->in, lambda/rho, ws->out, NULL, N, 1, ws);
+            TV(ws->in, lambda/rho, ws->out, NULL, N, 1, ws, NULL, NULL);
             // Recover data
             for ( j = 0 ; j < N ; j++ )
                 Z1[j*M+i] = ws->out[j];
@@ -849,7 +853,7 @@ int Yang2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int maxit, d
             // Copy column data to workspace
             for ( j = 0 ; j < M ; j++ )
                 ws->in[j] = -1. / rho * U2[i*M+j] + X[i*M+j];
-            TV(ws->in, lambda/rho, ws->out, NULL, M, 1, ws);
+            TV(ws->in, lambda/rho, ws->out, NULL, M, 1, ws, NULL, NULL);
             // Recover data
             memcpy(Z2+i*M, ws->out, sizeof(double)*M);
         }
@@ -966,7 +970,7 @@ int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int ma
         // Dual prox for cols
         for ( j = 0 ; j < NM ; j+=M ) {
             // Normal prox
-            TV(TMP+j, lambda/sigma, U+j, NULL, M, 1, NULL);
+            TV(TMP+j, lambda/sigma, U+j, NULL, M, 1, NULL, NULL, NULL);
             // Moreau's identity
             for ( i = 0 ; i < M ; i++ )
                 (U+j)[i] = sigma*((TMP+j)[i] - (U+j)[i]);
@@ -988,7 +992,7 @@ int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int ma
             for ( j = 0 ; j < N ; j++ )
                 row[j] = TMP[j*M+i];
             // Prox operator
-            TV(row, lambda/(1.+1./tau), rowout, NULL, N, 1, NULL);
+            TV(row, lambda/(1.+1./tau), rowout, NULL, N, 1, NULL, NULL, NULL);
             // Recover output
             for ( j = 0 ; j < N ; j++ )
                 X[j*M+i] = rowout[j];
@@ -1023,3 +1027,6 @@ int Kolmogorov2_TV(size_t M, size_t N, double*Y, double lambda, double*X, int ma
     #undef CANCEL
 }
 
+#ifdef __cplusplus
+}
+#endif

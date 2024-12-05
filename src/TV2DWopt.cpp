@@ -20,9 +20,13 @@
 #define LAPACK_ILP64
 
 /* Internal functions */
-void DR_proxDiff(size_t n, double* input, double* output, double* W, Workspace *ws);
-void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W, Workspace **ws);
-void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref, double* W, Workspace **ws);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void DR_proxDiff_2DW(size_t n, double* input, double* output, double* W, Workspace *ws);
+void DR_columnsPass_2DW(size_t M, size_t N, double* input, double* output, double* W, Workspace **ws);
+void DR_rowsPass_2DW(size_t M, size_t N, double* input, double* output, double* ref, double* W, Workspace **ws);
 
 /* DR2L1W_TV
  *
@@ -102,7 +106,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
         fprintf(DEBUG_FILE,"Dual projection along columns\n"); fflush(DEBUG_FILE);
     #endif
     // Projection (prox) step
-    DR_columnsPass(M, N, t, s, W1, ws);
+    DR_columnsPass_2DW(M, N, t, s, W1, ws);
     // Reflection
     for (i=0; i < M*N; i++) s[i] = 2*s[i] - t[i];
 
@@ -112,7 +116,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
         fprintf(DEBUG_FILE,"Dual projection along rows\n"); fflush(DEBUG_FILE);
     #endif
     // Projection (prox) step, taking into account displacemente from reference unary signal
-    DR_rowsPass(M, N, s, tb, unary, W2, ws);
+    DR_rowsPass_2DW(M, N, s, tb, unary, W2, ws);
     // Reflection
     for (i=0; i < M*N; i++) tb[i] = -2*tb[i] - s[i];
 
@@ -121,8 +125,8 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
   }
 
   // DR is divergent, but with an additional projection we can recover valid solutions
-  DR_columnsPass(M, N, t, s, W1, ws);
-  DR_rowsPass(M, N, s, tb, unary, W2, ws);
+  DR_columnsPass_2DW(M, N, t, s, W1, ws);
+  DR_rowsPass_2DW(M, N, s, tb, unary, W2, ws);
   for (i = 0; i < M*N; i++) s[i] = - s[i] - tb[i];
 
     /* Gather output information */
@@ -149,7 +153,7 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
     @param W regularization weight along cols, as a matrix of size (M-1)xN
     @param ws array of Workspaces to use for the computation
 */
-void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W, Workspace **ws) {
+void DR_columnsPass_2DW(size_t M, size_t N, double* input, double* output, double* W, Workspace **ws) {
     #pragma omp parallel shared(M,N,input,output,W,ws) default(none)
     {
         int i,j;
@@ -170,7 +174,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
             // Prepare inputs
             memcpy(wsi->in, input+(M*j), sizeof(double)*M);
             // Compute prox difference for this column
-            DR_proxDiff(M, wsi->in, wsi->out, wline, wsi);
+            DR_proxDiff_2DW(M, wsi->in, wsi->out, wline, wsi);
             // Save output
             memcpy(output+(M*j), wsi->out, sizeof(double)*M);
         }
@@ -188,7 +192,7 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
     @param W regularization weight along rows, as a matrix of size Mx(N-1)
     @param ws array of Workspaces to use for the computation
 */
-void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref, double* W, Workspace **ws) {
+void DR_rowsPass_2DW(size_t M, size_t N, double* input, double* output, double* ref, double* W, Workspace **ws) {
     #pragma omp parallel shared(M,N,input,ref,output,W,ws) default(none)
     {
         int i,j;
@@ -212,7 +216,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
             for ( idx = j, i = 0 ; i < N ; i++, idx+=M )
                 wsi->in[i] = ref[idx]-input[idx];
             // Compute prox difference for this row
-            DR_proxDiff(N, wsi->in, wsi->out, wline, wsi);
+            DR_proxDiff_2DW(N, wsi->in, wsi->out, wline, wsi);
             // Save output, recovering displacement from reference signal
             for ( idx = j, i = 0 ; i < N ; i++, idx+=M )
                 output[idx] = wsi->out[i] - ref[idx];
@@ -229,7 +233,7 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
  @param W weights of the TV regularization
  @param ws Workspace to use for the computation
  */
-void DR_proxDiff(size_t n, double* input, double* output, double* W, Workspace *ws) {
+void DR_proxDiff_2DW(size_t n, double* input, double* output, double* W, Workspace *ws) {
     int i;
 
     // Compute proximity
@@ -239,3 +243,6 @@ void DR_proxDiff(size_t n, double* input, double* output, double* W, Workspace *
       output[i] = input[i] - output[i];
 }
 
+#ifdef __cplusplus
+}
+#endif

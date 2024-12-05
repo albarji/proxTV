@@ -4,61 +4,32 @@
     @author Álvaro Barbero Jiménez
     @author Suvrit Sra
 */
+
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
 #include <limits.h>
-#include "utils.h"
 
-/**
-    Returns the sign of a number.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    @argument s input number
-    @returns -1 if number is negative, +1 if positive, 0 if exactly 0
-*/
+/*** Math functions ***/
 short sign(double s) {
     return ( s >= 0 ) - ( s <= 0 );
 }
 
-/**
-    Returns the minimum of two numbers
-
-    @argument x
-    @argument y
-    @returns value of the minimum number
-*/
 double min(double x, double y) {
-    if ( x < y )
-        return x;
-    else
-        return y;
+    return (x < y) ? x : y;
 }
 
-/**
-    Returns the maximum of two numbers
-
-    @argument x
-    @argument y
-    @returns value of the maximum number
-*/
 double max(double x, double y) {
-    if ( x > y )
-        return x;
-    else
-        return y;
+    return (x > y) ? x : y;
 }
 
-/**
-    Performs radial projection of a given point x.
-    The present norm of x and desired norm lambda must be provided.
-
-    @argument x point to project.
-    @argument n length of x.
-    @argument norm present norm of x.
-    @argument lambda desired norm of x.
-*/
 void radialProjection(double *x, int n, double norm, double lambda) {
     /* Check projection is needed */
     if ( norm > lambda ) {
@@ -70,12 +41,7 @@ void radialProjection(double *x, int n, double norm, double lambda) {
     }
 }
 
-/**
-    Creates and initiallizes a workspace structure
-
-    @argument n dimension of data vectors.
-    @returns pointer to new workspace
-*/
+/*** Memory allocation functions ***/
 Workspace* newWorkspace(int n) {
     Workspace *ws;
 
@@ -112,22 +78,11 @@ Workspace* newWorkspace(int n) {
     #undef CANCEL
 }
 
-/**
-    Resets the memory assignments in the workspace
-
-    @argument ws pointer to workspace to reset
-*/
 void resetWorkspace(Workspace *ws) {
     /* Reset assigned memory counters */
     ws->ni = ws->nd = 0;
 }
 
-/**
-    Returns a vector of double memory from the workspace.
-    New memory is allocated on-demand
-
-    @argument ws pointer to workspace
-*/
 double* getDoubleWorkspace(Workspace *ws) {
     /* Check if maximum memory limit has been topped */
     if (ws->nd == WS_MAX_MEMORIES)
@@ -150,12 +105,6 @@ double* getDoubleWorkspace(Workspace *ws) {
     return ws->d[ws->nd-1];
 }
 
-/**
-    Returns a vector of int memory from the workspace.
-    New memory is allocated on-demand
-
-    @argument ws pointer to workspace
-*/
 int* getIntWorkspace(Workspace *ws) {
     /* Check if maximum memory limit has been topped */
     if (ws->ni == WS_MAX_MEMORIES)
@@ -178,7 +127,6 @@ int* getIntWorkspace(Workspace *ws) {
     return ws->i[ws->ni-1];
 }
 
-/* Frees a workspace structure */
 void freeWorkspace(Workspace *ws){
     int i;
 
@@ -202,7 +150,6 @@ void freeWorkspace(Workspace *ws){
     }
 }
 
-/* Allocs memory for an array of p workspaces */
 Workspace** newWorkspaces(int n,int p){
     int i;
     Workspace **wa=NULL;
@@ -224,7 +171,6 @@ Workspace** newWorkspaces(int n,int p){
     return wa;
 }
 
-/* Frees an array of p workspaces */
 void freeWorkspaces(Workspace **wa,int p){
     int i;
 
@@ -236,7 +182,6 @@ void freeWorkspaces(Workspace **wa,int p){
     }
 }
 
-/* Comparison of floating point numbers, in reversed sense (to allow for descending sorting) */
 int compareDoublesReversed(const void *v1, const void *v2){
     static double d1,d2;
     d1 = *((double*)v1);
@@ -245,3 +190,7 @@ int compareDoublesReversed(const void *v1, const void *v2){
     else if(d1 > d2) return -1;
     else return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
