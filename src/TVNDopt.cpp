@@ -69,6 +69,8 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
 
+    if(npen < 1) { if(info) info[INFO_RC] = RC_ERROR; return 0; }
+
     /* Set number of threads */
     nThreads = (ncores > 1) ? ncores : 1;
     #ifdef DEBUG
@@ -122,7 +124,9 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
     #endif
 
     /* Initialization */
+    #ifdef _OPENMP
     #pragma omp parallel for shared(n,x,npen,z,y) private(i,j) default(none)
+    #endif
     for(i=0;i<n;i++){
         x[i] = 0;
         for(j=0;j<npen;j++)
@@ -154,14 +158,18 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
         #endif
 
         /* Copy actual solution */
+        #ifdef _OPENMP
         #pragma omp parallel for shared(x,xLast,n) private(i) default(none)
+        #endif
         for(i=0;i<n;i++){
             xLast[i] = x[i];
             x[i] = 0;
         }
 
         /* Parallelize */
+        #ifdef _OPENMP
         #pragma omp parallel shared(ws,nSlices,ns,incs,x,p,lambdas,z,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+        #endif
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -178,7 +186,9 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
                 wsi->warm = 0;
 
                 /* Run 1-dimensional prox operator over each 1-dimensional slice along the specified dimension */
+                #ifdef _OPENMP
                 #pragma omp for nowait
+                #endif
                 for(j=0;j<top;j++){
                     /* Find slice starting point */
                     idx1 = (j / incs[d])*incs[d]*ns[d] + (j % incs[d]);
@@ -214,14 +224,18 @@ int PD_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double 
                 x[k] += p[i][k] / npen;
 
         /* Z update step */
+        #ifdef _OPENMP
         #pragma omp parallel for shared(n,npen,z,x,p) private(k,i) default(none)
+        #endif
         for(k=0;k<n;k++)
             for(i=0;i<npen;i++)
                 z[i][k] += x[k] - p[i][k];
 
         /* Compute stopping criterion: mean change */
         stop = 0;
+        #ifdef _OPENMP
         #pragma omp parallel for shared(x,xLast,n) private(k) reduction(+:stop) default(none)
+        #endif
         for(k=0;k<n;k++)
             stop += fabs(x[k]-xLast[k]);
         stop /= n;
@@ -303,6 +317,8 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         if(info) info[INFO_RC] = RC_ERROR;\
         return 0;
 
+    if(npen < 1) { if(info) info[INFO_RC] = RC_ERROR; return 0; }
+
     /* Set number of threads */
     nThreads = (ncores > 1) ? ncores : 1;
     #ifdef DEBUG
@@ -357,7 +373,9 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
     #endif
 
     /* Initialization */
+    #ifdef _OPENMP
     #pragma omp parallel for shared(n,x,npen,z,y) private(i,j) default(none)
+    #endif
     for(i=0;i<n;i++){
       x[i]=y[i]/npen;
       for(j=0;j<npen;j++)
@@ -389,7 +407,9 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         #endif
 
         /* Copy actual solution */
+        #ifdef _OPENMP
         #pragma omp parallel for shared(x,xLast,n,q) private(i) default(none)
+        #endif
         for(i=0;i<n;i++){
             xLast[i] = x[i];
             x[i] = 0;
@@ -397,7 +417,9 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         }
 
         /* Parallelize */
+#ifdef _OPENMP
 #pragma omp parallel shared(ws,nSlices,ns,incs,x,p,q,lambdas,z,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+#endif
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -414,7 +436,9 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
                 wsi->warm = 0;
 
                 /* Run 1-dimensional prox operators over each 1-dimensional slice along the specified dimension */
+                #ifdef _OPENMP
                 #pragma omp for nowait
+                #endif
                 for(j=0;j<top;j++){
                     /* Find slice starting point */
                     idx1 = (j / incs[d])*incs[d]*ns[d] + (j % incs[d]);
@@ -462,14 +486,18 @@ int PDR_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
         /* X update step (X for Bauschke, Z for Alvaro) */
         /* X = X + 2Q - P - Y */
+#ifdef _OPENMP
 #pragma omp parallel for shared(n,npen,z,x,p,q) private(k,i) default(none)
+#endif
         for(k=0;k<n;k++)
           for(i=0;i<npen;i++)
             z[i][k] += 2*q[k] - x[k] - p[i][k];
 
         /* Compute stopping criterion: mean change */
         stop = 0;
+        #ifdef _OPENMP
         #pragma omp parallel for shared(x,xLast,n) private(k) reduction(+:stop) default(none)
+        #endif
         for(k=0;k<n;k++)
             stop += fabs(x[k]-xLast[k]);
         stop /= n;
@@ -596,7 +624,9 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
 
 
     /* Parallelize calculation of value */
+    #ifdef _OPENMP
     #pragma omp parallel shared(x,ws,nSlices,ns,incs,lambdas,norms,npen,dims,DEBUG_FILE) private(d,i,j,k,idx1,idx2) default(none)
+    #endif
     {
         /* Get thread number */
         int id = omp_get_thread_num();
@@ -616,7 +646,9 @@ double TVval(double *x,double *lambdas,double *norms,double *dims,int *ns,int nd
             int top=nSlices[d];
 
             /* Compute 1-dimensional TV norm over each 1-dimensional slice along the specified dimension */
+            #ifdef _OPENMP
             #pragma omp for nowait
+            #endif
             for(j=0;j<top;j++){
                 /* Find slice starting point */
                 idx1 = (j / incs[d])*incs[d]*ns[d] + (j % incs[d]);

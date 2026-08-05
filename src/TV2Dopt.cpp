@@ -129,7 +129,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
     #endif
 
     /* Initialization */
+    #ifdef _OPENMP
     #pragma omp parallel for shared(x,y,p,q,n) private(i) default(none)
+    #endif
     for(i=0;i<n;i++){
         x[i] = y[i];
         p[i] = 0;
@@ -160,7 +162,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         #endif
 
         /* Copy actual solution */
+        #ifdef _OPENMP
         #pragma omp parallel for shared(x,xLast,n) private(i) default(none)
+        #endif
         for(i=0;i<n;i++)
             xLast[i] = x[i];
 
@@ -170,7 +174,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         #endif
         d = dims[0]-1;
         /* Run 1-dimensional prox operator over each 1-dimensional slice along the specified dimension (parallelized) */
+        #ifdef _OPENMP
         #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,p,lambdas,z,norms,DEBUG_FILE) private(j,k,idx1,idx2) default(none)
+        #endif
         {
             /* Get thread number */
             int id = omp_get_thread_num();
@@ -178,7 +184,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
             wsi->warm = 0;
             int top=nSlices[d];
 
+            #ifdef _OPENMP
             #pragma omp for
+            #endif
             for(j=0;j<top;j++){
                 /* Find slice starting point */
                 idx1 = (j / incs[d])*incs[d]*ns[d] + (j % incs[d]);
@@ -208,7 +216,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
         }
 
         /* Update p */
+        #ifdef _OPENMP
         #pragma omp parallel for shared(p,x,z,n) private(i) default(none)
+        #endif
         for(i=0;i<n;i++)
             p[i] += x[i] - z[i];
 
@@ -220,7 +230,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
             d = dims[1]-1;
 
             /* Run 1-dimensional prox operator over each 1-dimensional slice along the specified dimension (parallelized) */
+            #ifdef _OPENMP
             #pragma omp parallel shared(ws,nSlices,ns,d,incs,x,q,lambdas,z,norms,DEBUG_FILE) private(j,k,idx1,idx2) default(none)
+            #endif
             {
                 /* Get thread number */
                 int id = omp_get_thread_num();
@@ -228,7 +240,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
                 wsi->warm = 0;
                 int top=nSlices[d];
 
+                #ifdef _OPENMP
                 #pragma omp for
+                #endif
                 for(j=0;j<top;j++){
                     /* Find slice starting point */
                     idx1 = (j / incs[d])*incs[d]*ns[d] + (j % incs[d]);
@@ -258,12 +272,16 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
             }
 
             /* Update q */
+            #ifdef _OPENMP
             #pragma omp parallel for shared(q,z,x,n) private(i) default(none)
+            #endif
             for(i=0;i<n;i++)
                 q[i] += z[i] - x[i];
         }
         else{
+            #ifdef _OPENMP
             #pragma omp parallel for shared(z,x,n) private(i) default(none)
+            #endif
             for(i=0;i<n;i++)
                 x[i] = z[i];
             memcpy(x,z,nBytes);
@@ -271,7 +289,9 @@ int PD2_TV(double *y,double *lambdas,double *norms,double *dims,double *x,double
 
         /* Compute stopping criterion: mean change */
         stop = 0;
+        #ifdef _OPENMP
         #pragma omp parallel for shared(x,xLast,n) private(k) reduction(+:stop) default(none)
+        #endif
         for(k=0;k<n;k++)
             stop += fabs(x[k]-xLast[k]);
         stop /= n;
@@ -457,7 +477,9 @@ int DR2_TV(size_t M, size_t N, double*unary, double W1, double W2,
     @param ws array of Workspaces to use for the computation
 */
 void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W, double norm, Workspace **ws) {
+    #ifdef _OPENMP
     #pragma omp parallel shared(M,N,input,output,W,norm,ws) default(none)
+    #endif
     {
         int j;
         // Get thread number
@@ -467,8 +489,10 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W,
         wsi->warm = 0;
 
         // Run 1-d solvers in parallel on each column of the input
+        #ifdef _OPENMP
         #pragma omp for
-        for (j=0; j < N; j++) {
+        #endif
+        for (size_t j=0; j < N; j++) {
             resetWorkspace(wsi);
             // Prepare inputs
             memcpy(wsi->in, input+(M*j), sizeof(double)*M);
@@ -496,9 +520,11 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double W,
     @param ws array of Workspaces to use for the computation
 */
 void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref, double W, double norm, Workspace **ws) {
+    #ifdef _OPENMP
     #pragma omp parallel shared(M,N,input,ref,output,W,norm,ws) default(none)
+    #endif
     {
-        int i,j;
+        size_t i, j;
         // Get thread number
         int id = omp_get_thread_num();
         // Get corresponding workspace
@@ -506,7 +532,9 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
         wsi->warm = 0;
 
         // Run 1-d solvers in parallel on each row of the input
+        #ifdef _OPENMP
         #pragma omp for
+        #endif
         for (j=0; j < M; j++) {
             resetWorkspace(wsi);
             // Prepare inputs, considering displacement from reference signal
