@@ -33,6 +33,7 @@
         - n: length of array y (and x).
 */
 int more_TV2(double *y,double lambda,double *x,double *info,int n){
+    if(n < 2) { info[INFO_RC] = RC_ERROR; return 0; }
     int nn=n-1,i;
     double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy,*alpha,*beta,*minus,*p,*aux;
@@ -188,6 +189,7 @@ int more_TV2(double *y,double lambda,double *x,double *info,int n){
         - ws: workspace of allocated memory to use. If NULL, any needed memory is locally managed.
 */
 int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *ws){
+    if(n < 2) { if(info) info[INFO_RC] = RC_ERROR; return 0; }
     int nn=n-1,i,iters;
     double stop,tmp,lam,pNorm,qNorm,pNormSq,dist;
     double *Dy=NULL,*alpha=NULL,*beta=NULL,*minus=NULL,*p,*aux;
@@ -213,7 +215,8 @@ int morePG_TV2(double *y,double lambda,double *x,double *info,int n,Workspace *w
 
     #define NORM(x,n,i,tmp) \
         tmp = 0; \
-        for(i=0;i<n;i++) tmp += x[i]*x[i]; tmp = sqrt(tmp);
+        for(i=0;i<n;i++) tmp += x[i]*x[i]; \
+        tmp = sqrt(tmp);
 
     #define FREE \
         if(!ws) { \
@@ -461,7 +464,8 @@ int PG_TV2(double *y,double lambda,double *x,double *info,int n){
 
     #define NORM(x,n,i,tmp) \
         tmp = 0; \
-        for(i=0;i<n;i++) tmp += x[i]*x[i]; tmp = sqrt(tmp);
+        for(i=0;i<n;i++) tmp += x[i]*x[i]; \
+        tmp = sqrt(tmp);
 
     #define FREE \
         if(p) free(p); \

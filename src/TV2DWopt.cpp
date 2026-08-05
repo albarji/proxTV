@@ -150,9 +150,10 @@ int DR2L1W_TV(size_t M, size_t N, double*unary, double*W1, double*W2, double*s, 
     @param ws array of Workspaces to use for the computation
 */
 void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W, Workspace **ws) {
+    #ifdef _OPENMP
     #pragma omp parallel shared(M,N,input,output,W,ws) default(none)
+    #endif
     {
-        int i,j;
         // Get thread number
         int id = omp_get_thread_num();
         // Get corresponding workspace
@@ -160,8 +161,10 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
         wsi->warm = 0;
 
         // Run 1-d solvers in parallel on each column of the input
+        #ifdef _OPENMP
         #pragma omp for
-        for (j=0; j < N; j++) {
+        #endif
+        for (size_t j=0; j < N; j++) {
             resetWorkspace(wsi);
             // Array for weights
             double* wline = getDoubleWorkspace(wsi);
@@ -189,9 +192,11 @@ void DR_columnsPass(size_t M, size_t N, double* input, double* output, double* W
     @param ws array of Workspaces to use for the computation
 */
 void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref, double* W, Workspace **ws) {
+    #ifdef _OPENMP
     #pragma omp parallel shared(M,N,input,ref,output,W,ws) default(none)
+    #endif
     {
-        int i,j;
+        size_t i, j;
         // Get thread number
         int id = omp_get_thread_num();
         // Get corresponding workspace
@@ -199,7 +204,9 @@ void DR_rowsPass(size_t M, size_t N, double* input, double* output, double* ref,
         wsi->warm = 0;
 
         // Run 1-d solvers in parallel on each row of the input
+        #ifdef _OPENMP
         #pragma omp for
+        #endif
         for (j=0; j < M; j++) {
             resetWorkspace(wsi);
             // Array for weights

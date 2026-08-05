@@ -233,7 +233,7 @@ inline Segment* newknot(Buffer* majorant, Buffer* minorant, Point* origin, Point
     The new prox-TV segment is added to the prox array
 */
 #define addproxsegment(prox, segment, j) \
-    for ( j = 0 ; j < segment->incx ; j++ ) \
+    for ( j = 0 ; j < (size_t) segment->incx ; j++ ) \
         (prox)[j] = segment->slope;
 
 /*
@@ -291,14 +291,20 @@ int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox
     Segment *saux;
     int i, iaux;
     double *pwriter = prox;
-    for ( i = 1 ; i < n-1 ; i++ ) {
+    for ( i = 1 ; i < (size_t)(n-1) ; i++ ) {
         // Update majorant
         segment.incx = 1;
         segment.slope = segment.incy = signal[i];
+#ifdef _MSC_VER
+#pragma warning(suppress: 4244)
+#endif
         concavemajorantadd(majorant, dirsegment, saux, iaux);
         // Update minorant
         segment.incx = 1;
         segment.slope = segment.incy = signal[i];
+#ifdef _MSC_VER
+#pragma warning(suppress: 4244)
+#endif
         convexminorantadd(minorant, dirsegment, saux, iaux);
         // Update last explored point
         lastexplored.x++;
@@ -316,10 +322,16 @@ int classicTautString_TV1_offset(double *signal, int n, double lam, double *prox
     // Update majorant with last segment
     segment.incx = 1;
     segment.slope = segment.incy = signal[n-1] + lam;
+#ifdef _MSC_VER
+#pragma warning(suppress: 4244)
+#endif
     concavemajorantadd(majorant, dirsegment, saux, iaux);
     // Update minorant with last segment
     segment.incx = 1;
     segment.slope = segment.incy = signal[n-1] - lam;
+#ifdef _MSC_VER
+#pragma warning(suppress: 4244)
+#endif
     convexminorantadd(minorant, dirsegment, saux, iaux);
 
     // At this point, because the endpoint of the tube is the same
